@@ -1,0 +1,1964 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 2: Calidad del Software y UML. Conceptos de Mantenibilidad, Escalabilidad, Disponibilidad y Rendimiento. Diagramas estructurales y de comportamiento en UML.">
+  <title>Calidad del Software y UML | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset (Shared Style System)
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Yellow */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Background Ambient Gradients */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px; /* compensating border width */
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* ==========================================
+       Hero / Header Section
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .class-meta {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .class-meta span.separator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text-bright) 30%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    /* ==========================================
+       Grid / Card Styles (Objectives, Modules)
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      margin-bottom: 20px;
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .info-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-bright);
+    }
+
+    .info-card p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+      margin-bottom: 15px;
+    }
+
+    .info-card-action {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+      text-align: center;
+      width: 100%;
+    }
+
+    .info-card-action:hover {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--color-accent);
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+
+    /* ==========================================
+       Interactive Diagrams Visualizer
+       ========================================== */
+    .diagram-panel {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 30px;
+      margin-top: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .diagram-header-tabs {
+      display: flex;
+      overflow-x: auto;
+      border-bottom: 1px solid var(--border-light);
+      margin-bottom: 24px;
+    }
+
+    .diag-tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 14px 20px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .diag-tab-btn:hover {
+      color: var(--text-bright);
+    }
+
+    .diag-tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.03);
+    }
+
+    .diag-panel-content {
+      display: none;
+      animation: diagFade 0.3s ease forwards;
+    }
+
+    .diag-panel-content.active {
+      display: block;
+    }
+
+    @keyframes diagFade {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .diag-viewport {
+      background: #020617;
+      border: 1px solid rgba(255,255,255,0.03);
+      border-radius: 12px;
+      padding: 30px;
+      min-height: 400px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: auto;
+    }
+
+    .diag-sidebar-info {
+      background: rgba(255,255,255,0.01);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+      min-height: 70px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      transition: all 0.3s ease;
+    }
+
+    /* SVG Interactive Class Diagram Styles */
+    .svg-class-box {
+      cursor: pointer;
+      transition: filter 0.3s ease;
+    }
+    .svg-class-box:hover {
+      filter: drop-shadow(0px 0px 8px rgba(59, 130, 246, 0.5));
+    }
+    .svg-class-box.selected {
+      filter: drop-shadow(0px 0px 8px rgba(139, 92, 246, 0.65));
+      stroke: var(--color-secondary) !important;
+    }
+
+    .svg-relationship-line {
+      cursor: pointer;
+      transition: stroke-width 0.2s ease, stroke 0.2s ease;
+    }
+    .svg-relationship-line:hover {
+      stroke: var(--color-accent) !important;
+      stroke-width: 3 !important;
+    }
+
+    /* ==========================================
+       Interactive Sequence Diagram
+       ========================================== */
+    .seq-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .seq-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border-light);
+      background: rgba(255,255,255,0.02);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .seq-btn:hover {
+      background: rgba(255,255,255,0.08);
+    }
+
+    .seq-btn.primary {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+    .seq-btn.primary:hover {
+      opacity: 0.9;
+    }
+
+    /* Lifelines */
+    .sequence-diagram-viewport {
+      background: #020617;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 40px;
+      min-height: 480px;
+      position: relative;
+    }
+
+    .seq-lifelines {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 800px;
+      margin: auto;
+      position: relative;
+    }
+
+    .seq-lifeline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      position: relative;
+      width: 120px;
+    }
+
+    .seq-actor-box {
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--text-bright);
+      text-align: center;
+      width: 100%;
+      z-index: 2;
+    }
+
+    .seq-line {
+      width: 2px;
+      height: 320px;
+      background: repeating-linear-gradient(to bottom, var(--border-light), var(--border-light) 6px, transparent 6px, transparent 12px);
+      position: absolute;
+      top: 40px;
+      left: 59px;
+      z-index: 1;
+    }
+
+    /* Message lines overlaying absolute */
+    .seq-messages-overlay {
+      position: absolute;
+      top: 80px;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+    }
+
+    .seq-msg {
+      position: absolute;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s ease;
+    }
+
+    .seq-msg.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .seq-msg::before {
+      content: '';
+      position: absolute;
+      height: 2px;
+      background-color: var(--color-accent);
+      top: 50%;
+      z-index: 2;
+    }
+
+    .seq-msg::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      top: calc(50% - 4px);
+      z-index: 3;
+    }
+
+    /* Specific Step Arrow Coordinates mapping columns relative */
+    /* Lifeline coordinates roughly: C1: 60px, C2: 300px, C3: 540px, C4: 780px (if max-width 800) */
+    .msg-step-1 { top: 20px; left: 13%; width: 33%; }
+    .msg-step-1::before { left: 0; right: 0; }
+    .msg-step-1::after { border-left: 7px solid var(--color-accent); right: 0; }
+
+    .msg-step-2 { top: 70px; left: 45%; width: 30%; }
+    .msg-step-2::before { left: 0; right: 0; }
+    .msg-step-2::after { border-left: 7px solid var(--color-accent); right: 0; }
+
+    .msg-step-3 { top: 120px; left: 74%; width: 20%; }
+    .msg-step-3::before { left: 0; right: 0; }
+    .msg-step-3::after { border-left: 7px solid var(--color-accent); right: 0; }
+
+    .msg-step-4 { top: 170px; left: 74%; width: 20%; color: var(--color-warning); }
+    .msg-step-4::before { left: 0; right: 0; background-color: var(--color-warning); }
+    .msg-step-4::after { border-right: 7px solid var(--color-warning); left: 0; }
+
+    .msg-step-5 { top: 220px; left: 74%; width: 20%; }
+    .msg-step-5::before { left: 0; right: 0; }
+    .msg-step-5::after { border-left: 7px solid var(--color-accent); right: 0; }
+
+    .msg-step-6 { top: 270px; left: 13%; width: 33%; color: var(--color-success); }
+    .msg-step-6::before { left: 0; right: 0; background-color: var(--color-success); }
+    .msg-step-6::after { border-right: 7px solid var(--color-success); left: 0; }
+
+    /* ==========================================
+       UML Relationships grid
+       ========================================== */
+    .uml-rel-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .uml-rel-card {
+      background: rgba(255,255,255,0.01);
+      border: 1px solid var(--border-light);
+      padding: 16px;
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .uml-rel-card h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .uml-rel-card h4 svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--color-accent);
+      fill: none;
+    }
+
+    .uml-rel-card p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ==========================================
+       Quiz System
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .quiz-option input[type="radio"]::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      transform: scale(0);
+      transition: transform 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-accent);
+    }
+
+    .quiz-option input[type="radio"]:checked::before {
+      transform: scale(1);
+    }
+
+    .quiz-option.selected {
+      background: rgba(6, 182, 212, 0.05);
+      border-color: rgba(6, 182, 212, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.08) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: #a7f3d0 !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #fca5a5 !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      color: var(--text-bright);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .score-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+    }
+
+    .score-badge.pass {
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .score-badge.fail {
+      color: var(--color-danger);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* ==========================================
+       Footer Section
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    footer p.accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background decorative glows -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Header -->
+  <header class="top-nav">
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <h1>Calidad y UML</h1>
+    <div style="width: 24px;"></div>
+  </header>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Sidebar Navigation Drawer -->
+  <nav class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+        <polyline points="2 17 12 22 22 17"></polyline>
+        <polyline points="2 12 12 17 22 12"></polyline>
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 2</h2>
+        <span>Arquitectura SW</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#inicio" class="active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        Inicio
+      </a></li>
+      <li><a href="#objetivos">
+        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v6l4 2"></path></svg>
+        Objetivos
+      </a></li>
+      <li><a href="#modulo1">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v8M8 12h8"></path></svg>
+        1. Calidad del Software
+      </a></li>
+      <li><a href="#modulo2">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+        2. Introducción a UML
+      </a></li>
+      <li><a href="#modulo3">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg>
+        3. Diagramas Estructurales
+      </a></li>
+      <li><a href="#modulo4">
+        <svg viewBox="0 0 24 24"><path d="M17 3H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4z"></path></svg>
+        4. Diagramas Comportamiento
+      </a></li>
+      <li><a href="#modulo5">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        5. Práctica Académica
+      </a></li>
+      <li><a href="#quiz">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        Autoevaluación
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &copy; 2026
+    </div>
+  </nav>
+
+  <!-- Overlay backdrop for mobile menu -->
+  <div class="backdrop-overlay" id="menu-overlay"></div>
+
+  <!-- Main Content container -->
+  <main class="main-content">
+    
+    <!-- Hero / Header Section -->
+    <header class="hero-section" id="inicio">
+      <div class="class-meta">
+        <span>Clase 2</span>
+        <span class="separator"></span>
+        <span>Diseño y Arquitectura de Software</span>
+      </div>
+      <h1 class="hero-title">Calidad del Software y Modelado UML</h1>
+      <p class="hero-desc">
+        Aprende a formular y medir los pilares de la <span class="highlight">calidad de software</span> no funcional (Mantenibilidad, Escalabilidad, Disponibilidad y Rendimiento) y a representarlos gráficamente a través de diagramas estructurales y dinámicos usando <span class="highlight">UML (Unified Modeling Language)</span>.
+      </p>
+    </header>
+
+    <!-- Objetivos Section -->
+    <section class="topic-section" id="objetivos">
+      <h2 class="section-title">Objetivos de la Clase</h2>
+      <p class="intro-paragraph">
+        Al finalizar esta sesión de aprendizaje, serás capaz de evaluar la calidad arquitectónica y modelar la estructura y comportamiento de sistemas de software con solidez:
+      </p>
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <h3>Evaluar la Calidad</h3>
+          <p>Identificar y formular métricas clave y tácticas de diseño para garantizar Mantenibilidad, Escalabilidad, Disponibilidad y Rendimiento.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+          </div>
+          <h3>Modelar Estructuras</h3>
+          <p>Diseñar Diagramas de Clases, relaciones UML de dependencia, agregación y composición, y empaquetar de forma lógica.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg>
+          </div>
+          <h3>Modelar Comportamiento</h3>
+          <p>Representar interacciones dinámicas de mensajes en el tiempo (Secuencia) y el alcance funcional de actores (Casos de Uso).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 1: Calidad del Software -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Calidad del Software (Atributos no Funcionales)</h2>
+      <p class="intro-paragraph">
+        La calidad del software no se reduce a que el sistema cumpla con sus requerimientos funcionales directos. De acuerdo a la norma <strong>ISO/IEC 25010</strong>, las características no funcionales o arquitectónicas definen cómo se comporta el sistema bajo condiciones operativas reales:
+      </p>
+
+      <div class="cards-grid">
+        <!-- Mantenibilidad -->
+        <div class="info-card" id="card-maint">
+          <div>
+            <h3>Mantenibilidad</h3>
+            <p id="txt-maint">La facilidad con la que un sistema de software puede ser modificado para corregir fallos, mejorar su rendimiento o adaptarlo a un entorno cambiado. Un sistema mantenible tiene alta cohesión y bajo acoplamiento.</p>
+          </div>
+          <button class="info-card-action" onclick="showQualityDetail('maint')">Ver Estrategia Arquitectónica</button>
+        </div>
+
+        <!-- Escalabilidad -->
+        <div class="info-card" id="card-scale">
+          <div>
+            <h3>Escalabilidad</h3>
+            <p id="txt-scale">La capacidad del sistema de manejar una cantidad creciente de trabajo (ej. más peticiones por segundo o más usuarios concurrentes) añadiendo recursos de hardware de forma lineal.</p>
+          </div>
+          <button class="info-card-action" onclick="showQualityDetail('scale')">Ver Estrategia Arquitectónica</button>
+        </div>
+
+        <!-- Disponibilidad -->
+        <div class="info-card" id="card-avail">
+          <div>
+            <h3>Disponibilidad</h3>
+            <p id="txt-avail">El grado en el que un sistema se encuentra en un estado para realizar su función requerida en un momento dado. Se mide en porcentaje de tiempo activo (ej. SLA de 'cinco nueves': 99.999% de uptime).</p>
+          </div>
+          <button class="info-card-action" onclick="showQualityDetail('avail')">Ver Estrategia Arquitectónica</button>
+        </div>
+
+        <!-- Rendimiento -->
+        <div class="info-card" id="card-perf">
+          <div>
+            <h3>Rendimiento</h3>
+            <p id="txt-perf">Relacionado con los tiempos de respuesta (latencia) y la cantidad de transacciones que el sistema puede procesar por unidad de tiempo (throughput) bajo cargas normales o pico.</p>
+          </div>
+          <button class="info-card-action" onclick="showQualityDetail('perf')">Ver Estrategia Arquitectónica</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Introduccion a UML -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Introducción a UML</h2>
+      <p class="intro-paragraph">
+        El <span class="highlight">Lenguaje Unificado de Modelado (UML)</span> es un estándar visual para especificar, visualizar, construir y documentar los artefactos de un sistema de software. UML proporciona una forma común de representar los planos del sistema, facilitando la comunicación entre arquitectos, desarrolladores y stakeholders.
+      </p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Diagramas Estructurales</h4>
+            <p>Representan la organización estática del sistema. Describen qué elementos componen el sistema (clases, interfaces, objetos, componentes) y cómo se relacionan físicamente. Ejemplos: Diagramas de Clases, Componentes y Despliegue.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v6l4 2"></path></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Diagramas de Comportamiento</h4>
+            <p>Representan el aspecto dinámico del sistema. Describen cómo se comporta el software en respuesta a eventos del tiempo y la interacción de los componentes entre sí. Ejemplos: Diagramas de Casos de Uso y Secuencia.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Diagramas Estructurales -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Diagramas Estructurales UML</h2>
+      <p class="intro-paragraph">
+        Los diagramas estructurales definen los bloques lógicos y físicos de la arquitectura del software. Explora las pestañas a continuación para visualizar diagramas estructurales clave y comprender sus relaciones y empaquetamiento:
+      </p>
+
+      <!-- Structural Diagrams Visualizer Panel -->
+      <div class="diagram-panel">
+        <div class="diagram-header-tabs">
+          <button class="diag-tab-btn active" data-target="panel-class">1. Diagrama de Clases & Relaciones</button>
+          <button class="diag-tab-btn" data-target="panel-deploy">2. Diagrama de Componentes y Despliegue</button>
+        </div>
+
+        <!-- Class Diagram Panel -->
+        <div class="diag-panel-content active" id="panel-class">
+          <p style="font-size: 0.85rem; color: var(--color-accent); font-weight: 600; margin-bottom: 20px; text-transform: uppercase;">
+            Diagrama de Clases Interactivo (Haz clic en clases o líneas de relación para ver explicaciones)
+          </p>
+          <div class="diag-viewport">
+            <!-- Inline SVG Class Diagram -->
+            <svg width="600" height="340" viewBox="0 0 600 340" style="background:#020617; border-radius: 8px;">
+              <!-- Class: Usuario -->
+              <g class="svg-class-box" id="class-usuario" onclick="selectUmlElement('class-usuario')">
+                <rect x="220" y="20" width="160" height="80" fill="#0f172a" stroke="#4f46e5" stroke-width="1.5" rx="8" />
+                <text x="300" y="42" font-family="Outfit" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Usuario</text>
+                <line x1="220" y1="52" x2="380" y2="52" stroke="#4f46e5" stroke-dasharray="1" />
+                <text x="230" y="68" font-family="Fira Code" font-size="10" fill="#94a3b8">- nombre: String</text>
+                <line x1="220" y1="76" x2="380" y2="76" stroke="#4f46e5" stroke-dasharray="1" />
+                <text x="230" y="92" font-family="Fira Code" font-size="10" fill="#94a3b8">+ login(): boolean</text>
+              </g>
+
+              <!-- Generalization (Inheritance) arrows pointing to Usuario -->
+              <!-- Line from Estudiante to Usuario -->
+              <path class="svg-relationship-line" id="rel-herencia-est" d="M120 160 L120 130 L300 130 L300 110" stroke="#94a3b8" stroke-width="1.5" fill="none" onclick="selectUmlElement('rel-herencia-est')" />
+              <!-- Arrow head -->
+              <polygon points="300,100 295,110 305,110" fill="#020617" stroke="#94a3b8" stroke-width="1.5" />
+
+              <!-- Line from Profesor to Usuario -->
+              <path class="svg-relationship-line" id="rel-herencia-prof" d="M480 160 L480 130 L300 130" stroke="#94a3b8" stroke-width="1.5" fill="none" onclick="selectUmlElement('rel-herencia-prof')" />
+
+              <!-- Class: Estudiante -->
+              <g class="svg-class-box" id="class-estudiante" onclick="selectUmlElement('class-estudiante')">
+                <rect x="40" y="160" width="160" height="80" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" rx="8" />
+                <text x="120" y="182" font-family="Outfit" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Estudiante</text>
+                <line x1="40" y1="192" x2="200" y2="192" stroke="#3b82f6" stroke-dasharray="1" />
+                <text x="50" y="208" font-family="Fira Code" font-size="10" fill="#94a3b8">- matricula: String</text>
+                <line x1="40" y1="216" x2="200" y2="216" stroke="#3b82f6" stroke-dasharray="1" />
+                <text x="50" y="232" font-family="Fira Code" font-size="10" fill="#94a3b8">+ matricular()</text>
+              </g>
+
+              <!-- Class: Profesor -->
+              <g class="svg-class-box" id="class-profesor" onclick="selectUmlElement('class-profesor')">
+                <rect x="400" y="160" width="160" height="80" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" rx="8" />
+                <text x="480" y="182" font-family="Outfit" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Profesor</text>
+                <line x1="400" y1="192" x2="560" y2="192" stroke="#3b82f6" stroke-dasharray="1" />
+                <text x="410" y="208" font-family="Fira Code" font-size="10" fill="#94a3b8">- numEmpleado: int</text>
+                <line x1="400" y1="216" x2="560" y2="216" stroke="#3b82f6" stroke-dasharray="1" />
+                <text x="410" y="232" font-family="Fira Code" font-size="10" fill="#94a3b8">+ calificar()</text>
+              </g>
+
+              <!-- Association (Profesor teaches Curso) -->
+              <line class="svg-relationship-line" id="rel-asoc-prof-curso" x1="480" y1="240" x2="480" y2="280" stroke="#94a3b8" stroke-width="1.5" onclick="selectUmlElement('rel-asoc-prof-curso')" />
+              <text x="488" y="260" font-family="Outfit" font-size="10" fill="#94a3b8">1..*</text>
+
+              <!-- Class: Curso -->
+              <g class="svg-class-box" id="class-curso" onclick="selectUmlElement('class-curso')">
+                <rect x="220" y="240" width="160" height="80" fill="#0f172a" stroke="#06b6d4" stroke-width="1.5" rx="8" />
+                <text x="300" y="262" font-family="Outfit" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Curso</text>
+                <line x1="220" y1="272" x2="380" y2="272" stroke="#06b6d4" stroke-dasharray="1" />
+                <text x="230" y="288" font-family="Fira Code" font-size="10" fill="#94a3b8">- cupoMax: int</text>
+                <line x1="220" y1="296" x2="380" y2="296" stroke="#06b6d4" stroke-dasharray="1" />
+                <text x="230" y="312" font-family="Fira Code" font-size="10" fill="#94a3b8">+ abrirCupos()</text>
+              </g>
+
+              <!-- Aggregation (Curso aggregates Estudiante) -->
+              <!-- Line from Curso to Estudiante -->
+              <path class="svg-relationship-line" id="rel-agregacion" d="M220 280 L120 280 L120 240" stroke="#94a3b8" stroke-width="1.5" fill="none" onclick="selectUmlElement('rel-agregacion')" />
+              <!-- Diamond symbol (empty) on Curso end -->
+              <polygon points="220,280 212,276 204,280 212,284" fill="#020617" stroke="#94a3b8" stroke-width="1.5" />
+              <text x="126" y="255" font-family="Outfit" font-size="10" fill="#94a3b8">0..*</text>
+            </svg>
+          </div>
+          <div class="diag-sidebar-info" id="diag-info-text-class">
+            Haz clic en cualquiera de las clases o en las líneas de relación (como la flecha de generalización o el rombo de agregación) para examinar su semántica y reglas de modelado.
+          </div>
+
+          <div class="uml-rel-grid">
+            <div class="uml-rel-card">
+              <h4>
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                Asociación Simple
+              </h4>
+              <p>Conexión estructural básica entre clases. Indica una relación de conocimiento bidireccional o unidireccional (ej. Profesor dicta Curso).</p>
+            </div>
+            <div class="uml-rel-card">
+              <h4>
+                <svg viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12"></polygon></svg>
+                Agregación
+              </h4>
+              <p>Relación débil de "Todo-Parte" (rombo vacío). Las partes pueden existir independientemente del todo (ej. un Estudiante existe sin pertenecer al Curso).</p>
+            </div>
+            <div class="uml-rel-card">
+              <h4>
+                <svg viewBox="0 0 24 24"><polygon points="12 2 22 12 12 22 2 12" fill="currentColor"></polygon></svg>
+                Composición
+              </h4>
+              <p>Relación fuerte de "Todo-Parte" (rombo relleno). Las partes mueren o se eliminan si el todo se destruye (ej. el Aula se destruye, el Edificio también).</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Components and Deployment Panel -->
+        <div class="diag-panel-content" id="panel-deploy">
+          <p style="font-size: 0.85rem; color: var(--color-accent); font-weight: 600; margin-bottom: 20px; text-transform: uppercase;">
+            Diagrama de Despliegue y Distribución Física
+          </p>
+          <div class="diag-viewport">
+            <svg width="640" height="340" viewBox="0 0 640 340" style="background:#020617; border-radius: 8px;">
+              <!-- Node 1: Client device -->
+              <g>
+                <polygon points="40,20 180,20 200,40 200,180 60,180 40,160" fill="#0f172a" stroke="#3b82f6" stroke-width="1.5" />
+                <line x1="180" y1="20" x2="180" y2="160" stroke="#3b82f6" />
+                <line x1="180" y1="160" x2="200" y2="180" stroke="#3b82f6" />
+                <line x1="60" y1="180" x2="60" y2="40" stroke="#3b82f6" />
+                <line x1="40" y1="40" x2="60" y2="40" stroke="#3b82f6" />
+                <text x="120" y="50" font-family="Outfit" font-size="12" fill="#ffffff" font-weight="bold" text-anchor="middle">&lt;&lt;device&gt;&gt;</text>
+                <text x="120" y="68" font-family="Outfit" font-size="12" fill="#3b82f6" font-weight="bold" text-anchor="middle">Client Browser</text>
+                
+                <!-- Inner Component -->
+                <rect x="70" y="90" width="100" height="60" fill="rgba(6, 182, 212, 0.05)" stroke="#06b6d4" stroke-width="1.5" rx="4" />
+                <rect x="62" y="100" width="16" height="10" fill="#020617" stroke="#06b6d4" stroke-width="1.5" />
+                <rect x="62" y="125" width="16" height="10" fill="#020617" stroke="#06b6d4" stroke-width="1.5" />
+                <text x="125" y="125" font-family="Outfit" font-size="10" fill="#ffffff" text-anchor="middle">UI (React SPA)</text>
+              </g>
+
+              <!-- Protocol Connection -->
+              <line x1="200" y1="100" x2="340" y2="100" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4" />
+              <text x="270" y="90" font-family="Fira Code" font-size="9" fill="#06b6d4" text-anchor="middle">HTTPS</text>
+
+              <!-- Node 2: App Server -->
+              <g>
+                <polygon points="340,20 480,20 500,40 500,180 360,180 340,160" fill="#0f172a" stroke="#8b5cf6" stroke-width="1.5" />
+                <line x1="480" y1="20" x2="480" y2="160" stroke="#8b5cf6" />
+                <line x1="480" y1="160" x2="500" y2="180" stroke="#8b5cf6" />
+                <line x1="360" y1="180" x2="360" y2="40" stroke="#8b5cf6" />
+                <line x1="340" y1="40" x2="360" y2="40" stroke="#8b5cf6" />
+                <text x="420" y="50" font-family="Outfit" font-size="12" fill="#ffffff" font-weight="bold" text-anchor="middle">&lt;&lt;execution env&gt;&gt;</text>
+                <text x="420" y="68" font-family="Outfit" font-size="12" fill="#8b5cf6" font-weight="bold" text-anchor="middle">Docker Tomcat</text>
+                
+                <!-- Inner Component -->
+                <rect x="370" y="90" width="100" height="60" fill="rgba(139, 92, 246, 0.05)" stroke="#3b82f6" stroke-width="1.5" rx="4" />
+                <rect x="362" y="100" width="16" height="10" fill="#020617" stroke="#3b82f6" stroke-width="1.5" />
+                <rect x="362" y="125" width="16" height="10" fill="#020617" stroke="#3b82f6" stroke-width="1.5" />
+                <text x="425" y="125" font-family="Outfit" font-size="10" fill="#ffffff" text-anchor="middle">REST API (.jar)</text>
+              </g>
+
+              <!-- Node 3: Database Node -->
+              <g>
+                <polygon points="340,220 480,220 500,240 500,320 360,320 340,300" fill="#0f172a" stroke="#10b981" stroke-width="1.5" />
+                <line x1="480" y1="220" x2="480" y2="300" stroke="#10b981" />
+                <line x1="480" y1="300" x2="500" y2="320" stroke="#10b981" />
+                <line x1="360" y1="320" x2="360" y2="240" stroke="#10b981" />
+                <line x1="340" y1="240" x2="360" y2="240" stroke="#10b981" />
+                <text x="420" y="250" font-family="Outfit" font-size="11" fill="#ffffff" font-weight="bold" text-anchor="middle">&lt;&lt;database&gt;&gt;</text>
+                <text x="420" y="268" font-family="Outfit" font-size="11" fill="#10b981" font-weight="bold" text-anchor="middle">PostgreSQL Node</text>
+              </g>
+
+              <!-- Connection App Server to Database -->
+              <line x1="420" y1="180" x2="420" y2="220" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4" />
+              <text x="440" y="205" font-family="Fira Code" font-size="9" fill="#10b981">JDBC</text>
+            </svg>
+          </div>
+          <div class="diag-sidebar-info">
+            <strong>Diagrama de Despliegue:</strong> Muestra la topología de hardware e infraestructura sobre la cual se ejecutará la aplicación de software. Las cajas de tipo "cubo" representan nodos de procesamiento físicos o virtuales (nodos) interconectados por vías de comunicación (ej. HTTPS, TCP/IP, JDBC).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Diagramas de Comportamiento -->
+    <section class="topic-section" id="modulo4">
+      <h2 class="section-title">4. Diagramas de Comportamiento UML</h2>
+      <p class="intro-paragraph">
+        Los diagramas de comportamiento modelan los aspectos dinámicos de los sistemas. Representan los flujos de control, los escenarios funcionales y la interacción de componentes a través del tiempo.
+      </p>
+
+      <div class="cards-grid" style="margin-bottom: 30px;">
+        <div class="info-card">
+          <h3>Casos de Uso</h3>
+          <p>Mapea las fronteras funcionales del sistema. Describe los requerimientos funcionales a través de la interacción de los <strong>Actores</strong> (ej. Estudiante) y las operaciones del sistema (ej. Registrarse).</p>
+        </div>
+        <div class="info-card">
+          <h3>Secuencia</h3>
+          <p>Muestra cómo interactúan múltiples objetos a nivel de llamadas de métodos y mensajes organizados de forma estrictamente <strong>cronológica</strong> de arriba hacia abajo.</p>
+        </div>
+      </div>
+
+      <!-- Interactive Sequence Animator -->
+      <div class="diagram-panel">
+        <h3 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 6px; color: var(--text-bright);">Simulador del Proceso de Matrícula (Secuencia)</h3>
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Utiliza los controles de abajo para reproducir paso a paso la secuencia del mensaje enviado para matricular un curso.</p>
+
+        <div class="seq-controls">
+          <button class="seq-btn primary" id="btn-seq-next" onclick="nextSeqStep()">Siguiente Paso</button>
+          <button class="seq-btn" id="btn-seq-reset" onclick="resetSeq()">Reiniciar</button>
+          <span style="font-size: 0.85rem; color: var(--color-accent); font-weight: 600; display: flex; align-items: center;" id="seq-step-indicator">Paso 0 / 6</span>
+        </div>
+
+        <div class="sequence-diagram-viewport">
+          <div class="seq-lifelines">
+            <!-- Lifeline 1: Estudiante -->
+            <div class="seq-lifeline">
+              <div class="seq-actor-box">Estudiante</div>
+              <div class="seq-line"></div>
+            </div>
+
+            <!-- Lifeline 2: PortalMatricula -->
+            <div class="seq-lifeline">
+              <div class="seq-actor-box">PortalMatricula</div>
+              <div class="seq-line"></div>
+            </div>
+
+            <!-- Lifeline 3: CursoController -->
+            <div class="seq-lifeline">
+              <div class="seq-actor-box">CursoController</div>
+              <div class="seq-line"></div>
+            </div>
+
+            <!-- Lifeline 4: BaseDatos -->
+            <div class="seq-lifeline">
+              <div class="seq-actor-box">BaseDatos</div>
+              <div class="seq-line"></div>
+            </div>
+          </div>
+
+          <!-- Messages Overlay -->
+          <div class="seq-messages-overlay">
+            <div class="seq-msg msg-step-1" id="msg-1">solicitarMatricula(id)</div>
+            <div class="seq-msg msg-step-2" id="msg-2">validarCupo(id)</div>
+            <div class="seq-msg msg-step-3" id="msg-3">obtenerCupos()</div>
+            <div class="seq-msg msg-step-4" id="msg-4">cuposDisponibles</div>
+            <div class="seq-msg msg-step-5" id="msg-5">guardarMatricula()</div>
+            <div class="seq-msg msg-step-6" id="msg-6">confirmarExito()</div>
+          </div>
+        </div>
+
+        <div class="diag-sidebar-info" id="seq-explanation">
+          Haz clic en "Siguiente Paso" para observar la propagación secuencial de mensajes.
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 5: Practica Academic System -->
+    <section class="topic-section" id="modulo5">
+      <h2 class="section-title">5. Práctica: Sistema Académico</h2>
+      <p class="intro-paragraph">
+        Esta sección práctica te guía en el modelado del <strong>Sistema de Gestión de Notas de UNIBE</strong>. El sistema debe permitir a los alumnos visualizar sus registros académicos y a los docentes cargar y modificar las notas finales de sus cursos.
+      </p>
+
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="tab-prac-casos">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle></svg>
+            1. Casos de Uso (Portal)
+          </button>
+          <button class="tab-btn" data-tab="tab-prac-clases">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon></svg>
+            2. Diagrama de Clases (Académico)
+          </button>
+        </div>
+
+        <!-- Cases Tab -->
+        <div class="tab-panel active" id="tab-prac-casos">
+          <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+            El modelado de Casos de Uso separa las operaciones funcionales por Actor (roles de negocio). En nuestro portal académico:
+          </p>
+          <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-light); padding: 20px; border-radius: 12px;">
+            <table class="comp-table" style="width: 100%;">
+              <thead>
+                <tr style="color: var(--color-accent); font-weight: 700; border-bottom: 1px solid var(--border-light)">
+                  <td style="padding: 10px 0;">Actor</td>
+                  <td style="padding: 10px 0;">Caso de Uso Base</td>
+                  <td style="padding: 10px 0;">Relaciones (&lt;&lt;include&gt;&gt; / &lt;&lt;extend&gt;&gt;)</td>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="label">Estudiante</td>
+                  <td class="example">Consultar Calificaciones</td>
+                  <td class="example">&lt;&lt;include&gt;&gt; Iniciar Sesión</td>
+                </tr>
+                <tr>
+                  <td class="label">Docente</td>
+                  <td class="example">Cargar Notas Cursos</td>
+                  <td class="example">&lt;&lt;include&gt;&gt; Iniciar Sesión / &lt;&lt;extend&gt;&gt; Modificar Nota (Opcional)</td>
+                </tr>
+                <tr>
+                  <td class="label">Administrador</td>
+                  <td class="example">Habilitar Periodo Académico</td>
+                  <td class="example">&lt;&lt;include&gt;&gt; Iniciar Sesión</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Clases Tab -->
+        <div class="tab-panel" id="tab-prac-clases">
+          <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+            A nivel de clases, la relación entre `Estudiante`, `Nota` e `Inscripción` se modela mediante herencias de clases y composiciones:
+          </p>
+          <div class="code-container">
+            <pre><code><span class="comment">// Mapeo del dominio Académico</span>
+<span class="keyword">public class</span> <span class="type">Inscripcion</span> {
+    <span class="keyword">private</span> <span class="type">Long</span> id;
+    <span class="keyword">private</span> <span class="type">Estudiante</span> estudiante;
+    <span class="keyword">private</span> <span class="type">Curso</span> curso;
+    
+    <span class="comment">// Composición: La nota no existe fuera del contexto de una Inscripción activa.</span>
+    <span class="keyword">private</span> <span class="type">List</span>&lt;<span class="type">Nota</span>&gt; notasFinales;
+}
+
+<span class="keyword">public class</span> <span class="type">Nota</span> {
+    <span class="keyword">private</span> <span class="type">double</span> valor;
+    <span class="keyword">private</span> <span class="type">String</span> criterioEvaluacion; <span class="comment">// ej. "Examen I", "Trabajo"</span>
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz Autoevaluación -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">Autoevaluación de la Clase</h2>
+      <p class="intro-paragraph">
+        Completa el siguiente quiz interactivo para comprobar tu comprensión sobre Atributos de Calidad y diagramas UML:
+      </p>
+
+      <div class="quiz-container">
+        <!-- Question 1 -->
+        <div class="quiz-question" data-q="1">
+          <h4><span class="q-num">Q1.</span> ¿Qué atributo de calidad de la norma ISO 25010 define la facilidad para probar y modificar el software?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Disponibilidad (Availability)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Mantenibilidad (Maintainability)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Escalabilidad (Scalability)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="d">
+              <span>Rendimiento (Performance)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="quiz-question" data-q="2">
+          <h4><span class="q-num">Q2.</span> En un diagrama de clases UML, ¿cómo se representa una relación de Composición (fuerte todo-parte)?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Con una línea punteada y una flecha abierta.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Con una línea continua y un rombo relleno de color negro.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Con una línea continua y un rombo vacío.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="d">
+              <span>Con una línea continua y una flecha vacía apuntando al padre.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="quiz-question" data-q="3">
+          <h4><span class="q-num">Q3.</span> ¿Cuál es el propósito principal de un Diagrama de Secuencia en UML?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Mostrar la distribución física de los servidores y el hardware de red.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Representar el flujo dinámico de mensajes entre objetos ordenados cronológicamente.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Definir el esquema lógico de las tablas de la base de datos SQL.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="d">
+              <span>Agrupar carpetas y namespaces de código estructurado.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="quiz-question" data-q="4">
+          <h4><span class="q-num">Q4.</span> En un diagrama de Casos de Uso, la relación &lt;&lt;extend&gt;&gt; significa que:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>El caso de uso base obligatoriamente incluye el comportamiento del otro caso de uso.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>El caso de uso base puede incorporar el comportamiento de otro caso de uso de forma condicional/opcional.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>El caso de uso hereda atributos de herencia del actor del sistema.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="d">
+              <span>El caso de uso se conecta físicamente con la base de datos de auditoría.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Quality Attributes Details Toggles
+       ========================================== */
+    const qualityDetails = {
+      maint: {
+        title: "Estrategias de Mantenibilidad",
+        desc: "Se logra implementando código con bajo acoplamiento y alta cohesión (ej. aplicando principios SOLID, patrones de diseño como Repository). Un código limpio reduce la aparición de bugs colaterales cuando se realiza un cambio."
+      },
+      scale: {
+        title: "Estrategias de Escalabilidad",
+        desc: "Escalabilidad Horizontal (añadir más instancias de servidores detrás de un balanceador de carga) vs. Escalabilidad Vertical (aumentar memoria o CPU del servidor único). Se logra eliminando estados locales (state-less API) para poder clonar nodos libremente."
+      },
+      avail: {
+        title: "Estrategias de Disponibilidad",
+        desc: "Se logra mitigando puntos únicos de fallo (SPOF - Single Point of Failure) mediante redundancia física de infraestructura y el uso de patrones de tolerancia a fallos como Circuit Breaker y balanceo de carga con fail-over."
+      },
+      perf: {
+        title: "Estrategias de Rendimiento",
+        desc: "Se optimiza aplicando estrategias de almacenamiento en caché en memoria (ej. Redis), optimizando índices de bases de datos relacionales, reduciendo la transferencia de datos (DTOs eficientes) y usando hilos no bloqueantes (Reactive Programming)."
+      }
+    };
+
+    function showQualityDetail(key) {
+      const data = qualityDetails[key];
+      const card = document.getElementById(`card-${key}`);
+      const textElem = document.getElementById(`txt-${key}`);
+      const btn = card.querySelector('.info-card-action');
+      
+      if (btn.innerText === "Ver Estrategia Arquitectónica") {
+        textElem.innerHTML = `<strong>${data.title}:</strong> ${data.desc}`;
+        btn.innerText = "Ver Resumen General";
+      } else {
+        // Reset to default
+        if (key === 'maint') textElem.innerText = "La facilidad con la que un sistema de software puede ser modificado para corregir fallos, mejorar su rendimiento o adaptarlo a un entorno cambiado. Un sistema mantenible tiene alta cohesión y bajo acoplamiento.";
+        if (key === 'scale') textElem.innerText = "La capacidad del sistema de manejar una cantidad creciente de trabajo (ej. más peticiones por segundo o más usuarios concurrentes) añadiendo recursos de hardware de forma lineal.";
+        if (key === 'avail') textElem.innerText = "El grado en el que un sistema se encuentra en un estado para realizar su función requerida en un momento dado. Se mide en porcentaje de tiempo activo (ej. SLA de 'cinco nueves': 99.999% de uptime).";
+        if (key === 'perf') textElem.innerText = "Relacionado con los tiempos de respuesta (latencia) y la cantidad de transacciones que el sistema puede procesar por unidad de tiempo (throughput) bajo cargas normales o pico.";
+        btn.innerText = "Ver Estrategia Arquitectónica";
+      }
+    }
+
+    /* ==========================================
+       Interactive Diagrams Tab Controls
+       ========================================== */
+    const diagTabButtons = document.querySelectorAll('.diag-tab-btn');
+    const diagPanelContents = document.querySelectorAll('.diag-panel-content');
+
+    diagTabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        diagTabButtons.forEach(b => b.classList.remove('active'));
+        diagPanelContents.forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        const targetId = btn.getAttribute('data-target');
+        document.getElementById(targetId).classList.add('active');
+      });
+    });
+
+    /* ==========================================
+       Interactive Class Diagram Text Update
+       ========================================== */
+    const classUmlInfo = {
+      'class-usuario': {
+        title: "Clase Base: Usuario",
+        desc: "Clase padre que agrupa los atributos comunes (nombre) y el método general 'login()'. Se modela como una superclase para ser heredada por Estudiante y Profesor."
+      },
+      'class-estudiante': {
+        title: "Clase Especializada: Estudiante",
+        desc: "Hereda de Usuario (Generalización). Introduce atributos propios de su rol de estudiante como 'matricula' y la operación 'matricular()'."
+      },
+      'class-profesor': {
+        title: "Clase Especializada: Profesor",
+        desc: "Hereda de Usuario (Generalización). Cuenta con su propio identificador 'numEmpleado' y el método 'calificar()' para asignar notas finales."
+      },
+      'class-curso': {
+        title: "Clase del Dominio: Curso",
+        desc: "Representa una asignatura académica con cupos. Mantiene relaciones de agregación con Estudiantes y asociación con Profesor."
+      },
+      'rel-herencia-est': {
+        title: "Relación: Herencia / Generalización",
+        desc: "Representado por una línea continua que finaliza en una flecha vacía y cerrada apuntando al padre (Usuario). Indica que Estudiante hereda sus atributos y métodos."
+      },
+      'rel-herencia-prof': {
+        title: "Relación: Herencia / Generalización",
+        desc: "Representado por una línea continua que finaliza en una flecha vacía y cerrada apuntando al padre (Usuario). Indica que Profesor hereda sus atributos y métodos."
+      },
+      'rel-asoc-prof-curso': {
+        title: "Relación: Asociación Simple (1..*)",
+        desc: "Línea continua sin puntas. Indica que el Profesor imparte uno o varios cursos (multiplicidad 1..* indica que al menos dicta un curso)."
+      },
+      'rel-agregacion': {
+        title: "Relación: Agregación (0..*)",
+        desc: "Línea continua que finaliza con un rombo vacío en el extremo del Curso (todo). Indica que el Curso contiene Estudiantes (parte), pero los estudiantes existen de forma independiente si el Curso se cierra."
+      }
+    };
+
+    function selectUmlElement(id) {
+      // Remove selected classes
+      document.querySelectorAll('.svg-class-box').forEach(el => el.classList.remove('selected'));
+      document.querySelectorAll('.svg-relationship-line').forEach(el => {
+        el.style.stroke = '#94a3b8';
+        el.style.strokeWidth = '1.5';
+      });
+
+      const element = document.getElementById(id);
+      if (element) {
+        if (element.tagName === 'g') {
+          element.classList.add('selected');
+        } else {
+          element.style.stroke = 'var(--color-accent)';
+          element.style.strokeWidth = '3';
+        }
+      }
+
+      // Update description text
+      const info = classUmlInfo[id];
+      if (info) {
+        document.getElementById('diag-info-text-class').innerHTML = `<strong>${info.title}:</strong> ${info.desc}`;
+      }
+    }
+
+    /* ==========================================
+       Interactive Sequence Diagram Animation
+       ========================================== */
+    let currentSeqStep = 0;
+    const maxSeqSteps = 6;
+    const seqExplanations = [
+      "Haz clic en \"Siguiente Paso\" para observar la propagación secuencial de mensajes.",
+      "<strong>Paso 1:</strong> El Estudiante interactúa con la interfaz web e invoca <code>solicitarMatricula(cursoId)</code> enviando la petición al Portal de Matrículas.",
+      "<strong>Paso 2:</strong> El Portal de Matrículas delega el flujo de negocio al backend invocando la API de validación <code>validarCupo(cursoId)</code> en CursoController.",
+      "<strong>Paso 3:</strong> El controlador del Curso realiza una consulta persistente en la Base de Datos para comprobar el estado de cupos vacantes.",
+      "<strong>Paso 4:</strong> La Base de Datos retorna el número de cupos disponibles de forma síncrona (línea discontinua con flecha abierta).",
+      "<strong>Paso 5:</strong> El controlador valida que hay cupo y realiza la inserción persistente de la matrícula exitosa en la Base de Datos.",
+      "<strong>Paso 6:</strong> Se confirma el éxito de la operación retornando la respuesta confirmada hasta el navegador del Estudiante (Proceso terminado)."
+    ];
+
+    function nextSeqStep() {
+      if (currentSeqStep < maxSeqSteps) {
+        currentSeqStep++;
+        document.getElementById(`msg-${currentSeqStep}`).classList.add('active');
+        document.getElementById('seq-step-indicator').innerText = `Paso ${currentSeqStep} / ${maxSeqSteps}`;
+        document.getElementById('seq-explanation').innerHTML = seqExplanations[currentSeqStep];
+        
+        if (currentSeqStep === maxSeqSteps) {
+          document.getElementById('btn-seq-next').disabled = true;
+          document.getElementById('btn-seq-next').style.opacity = '0.5';
+        }
+      }
+    }
+
+    function resetSeq() {
+      currentSeqStep = 0;
+      for (let i = 1; i <= maxSeqSteps; i++) {
+        document.getElementById(`msg-${i}`).classList.remove('active');
+      }
+      document.getElementById('seq-step-indicator').innerText = `Paso 0 / ${maxSeqSteps}`;
+      document.getElementById('seq-explanation').innerHTML = seqExplanations[0];
+      
+      document.getElementById('btn-seq-next').disabled = false;
+      document.getElementById('btn-seq-next').style.opacity = '1';
+    }
+
+    /* ==========================================
+       Práctica Tab Controls
+       ========================================== */
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        if (!targetTab) return;
+
+        const parentWrapper = btn.closest('.tabs-wrapper');
+        parentWrapper.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        parentWrapper.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(targetTab).classList.add('active');
+      });
+    });
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del quiz antes de verificar.");
+        return;
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          const lbl = r.closest('.quiz-option');
+          lbl.classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has comprendido la relación de UML y Calidad de Software a la perfección.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "Buen intento. Revisa las respuestas incorrectas para reforzar la teoría de composición y secuencias.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Necesitas repasar el material. La composición fuerte y los diagramas estructurales son temas obligatorios.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

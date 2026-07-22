@@ -1,0 +1,2359 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 3: Persistencia de Datos, Modelo Entidad-Relación, Patrón Repository, ORM y JPA/Hibernate para Diseño y Arquitectura de Software. Incluye guía de examen y práctica de diseño.">
+  <title>Persistencia de Datos | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Yellow */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Background Ambient Gradients */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px; /* compensating border width */
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0; /* Prevents grid/flex blowout */
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .class-meta {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .class-meta span.separator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text-bright) 30%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    /* ==========================================
+       Grid / Card Styles (Objectives, Modules)
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      margin-bottom: 20px;
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .info-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-bright);
+    }
+
+    .info-card p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Module 1 Details: Persistence Types
+       ========================================== */
+    .feature-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .feature-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      padding: 20px;
+      border-radius: 12px;
+    }
+
+    .feature-item-icon {
+      color: var(--color-secondary);
+      flex-shrink: 0;
+    }
+
+    .feature-item-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .feature-item-content h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-bright);
+    }
+
+    .feature-item-content p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Module 2: Interactive ERD Diagram
+       ========================================== */
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 30px;
+      margin-top: 24px;
+      position: relative;
+    }
+
+    .diagram-layout {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 80px;
+      width: 100%;
+      max-width: 800px;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .diagram-layout {
+        flex-direction: column;
+        gap: 40px;
+      }
+    }
+
+    .db-table {
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      width: 240px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .db-table:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 15px rgba(59, 130, 246, 0.2);
+    }
+
+    .db-table-header {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-light);
+      font-weight: 600;
+      color: var(--text-bright);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    .db-table-header svg {
+      width: 18px;
+      height: 18px;
+      stroke: var(--color-accent);
+      fill: none;
+    }
+
+    .db-table-columns {
+      padding: 8px 0;
+      list-style: none;
+    }
+
+    .db-table-columns li {
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .db-table-columns li:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .db-table-columns li span.key-indicator {
+      font-weight: 700;
+      color: var(--color-accent);
+      margin-right: 4px;
+    }
+
+    .db-table-columns li span.datatype {
+      color: rgba(255, 255, 255, 0.35);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .relationship-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      position: relative;
+    }
+
+    .relationship-line {
+      width: 80px;
+      height: 2px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .relationship-line {
+        width: 2px;
+        height: 60px;
+        background: linear-gradient(180deg, var(--color-primary), var(--color-secondary));
+      }
+    }
+
+    .relationship-line::before {
+      content: '1';
+      position: absolute;
+      left: -15px;
+      top: -18px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-primary);
+    }
+
+    .relationship-line::after {
+      content: 'N';
+      position: absolute;
+      right: -15px;
+      top: -18px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--color-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .relationship-line::before {
+        left: -12px;
+        top: -12px;
+      }
+      .relationship-line::after {
+        left: -12px;
+        bottom: -15px;
+        top: auto;
+      }
+    }
+
+    .relationship-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 8px;
+      background: rgba(255,255,255,0.05);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid var(--border-light);
+    }
+
+    .diagram-info-panel {
+      width: 100%;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 16px 20px;
+      text-align: center;
+      font-size: 0.9rem;
+      min-height: 70px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      transition: all 0.3s ease;
+    }
+
+    /* ==========================================
+       Module 3: Code Tabs & Snippets
+       ========================================== */
+    .tabs-wrapper {
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .tabs-header {
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 16px 24px;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tab-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .tab-panel {
+      display: none;
+      padding: 24px;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .code-container {
+      position: relative;
+    }
+
+    pre {
+      margin: 0;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    /* Simple Code Syntax Coloring */
+    .keyword { color: #f43f5e; font-weight: 500; } /* red */
+    .type { color: #38bdf8; } /* cyan */
+    .annotation { color: #a855f7; font-weight: 500; } /* purple */
+    .string { color: #10b981; } /* emerald */
+    .comment { color: #64748b; font-style: italic; }
+    .method { color: #f59e0b; } /* amber */
+
+    /* Copy Button */
+    .copy-btn {
+      position: absolute;
+      top: -12px;
+      right: 0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-bright);
+    }
+
+    .copy-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    /* ==========================================
+       Module 4: ORM Mapping Comparison
+       ========================================== */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comp-side {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .comp-side.oop {
+      border-left: 3px solid var(--color-primary);
+    }
+
+    .comp-side.relational {
+      border-left: 3px solid var(--color-secondary);
+    }
+
+    .comp-side h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comp-side.oop h4 { color: var(--color-primary); }
+    .comp-side.relational h4 { color: var(--color-secondary); }
+
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .comp-table td {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+    }
+
+    .comp-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comp-table td.label {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    .comp-table td.example {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      text-align: right;
+    }
+
+    .comp-bridge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .comp-bridge svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    @media (max-width: 768px) {
+      .comp-bridge {
+        transform: rotate(90deg);
+        padding: 10px 0;
+      }
+    }
+
+    /* ==========================================
+       Module 5: Interactive JPA Annotations
+       ========================================== */
+    .annotation-explorer {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 24px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .annotation-explorer {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .annotation-code-panel {
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+      overflow-x: auto;
+    }
+
+    .annotated-line {
+      display: block;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .annotated-line:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .annotated-line.active {
+      background: rgba(139, 92, 246, 0.15);
+      border-left: 2px solid var(--color-secondary);
+      padding-left: 6px;
+    }
+
+    .annotation-details-panel {
+      background: rgba(139, 92, 246, 0.05);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 12px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .annotation-details-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--color-secondary);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .annotation-details-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Module 6: Quiz System
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .quiz-option input[type="radio"]::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      transform: scale(0);
+      transition: transform 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-accent);
+    }
+
+    .quiz-option input[type="radio"]:checked::before {
+      transform: scale(1);
+    }
+
+    .quiz-option.selected {
+      background: rgba(6, 182, 212, 0.05);
+      border-color: rgba(6, 182, 212, 0.3);
+      color: var(--text-bright);
+    }
+
+    /* Correct / Incorrect states on submission */
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.08) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: #a7f3d0 !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #fca5a5 !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      color: var(--text-bright);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .score-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+    }
+
+    .score-badge.pass {
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .score-badge.fail {
+      color: var(--color-danger);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* ==========================================
+       Footer Section
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    footer p.accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Responsive Rules & Mobile Sidebar Drawer
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 24px;
+        padding-top: 80px; /* offset top navigation */
+      }
+
+      .progress-bar-container {
+        left: 0;
+      }
+
+      .top-nav {
+        display: flex;
+      }
+
+      .hero-section {
+        padding: 30px 20px;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+    }
+
+    .backdrop-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    .backdrop-overlay.open {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background decorative glows -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Header -->
+  <header class="top-nav">
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <h1>Persistencia de Datos</h1>
+    <div style="width: 24px;"></div> <!-- Spacer for centering -->
+  </header>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Sidebar Navigation Drawer -->
+  <nav class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 7v10c0 2.21 4 4 9 4s9-1.79 9-4V7M4 7c0 2.21 4 4 9 4s9-1.79 9-4M4 7c0-2.21 4-4 9-4s9 1.79 9 4m-18 5c0 2.21 4 4 9 4s9-1.79 9-4"></path>
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 3</h2>
+        <span>Arquitectura SW</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#inicio" class="active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        Inicio
+      </a></li>
+      <li><a href="#objetivos">
+        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v6l4 2"></path></svg>
+        Objetivos
+      </a></li>
+      <li><a href="#modulo1">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+        1. Persistencia y DB
+      </a></li>
+      <li><a href="#modulo2">
+        <svg viewBox="0 0 24 24"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3zM6 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3z"></path></svg>
+        2. Modelo ER
+      </a></li>
+      <li><a href="#modulo3">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        3. Repository y Acceso
+      </a></li>
+      <li><a href="#modulo4">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        4. ORM
+      </a></li>
+      <li><a href="#modulo5">
+        <svg viewBox="0 0 24 24"><path d="M16.5 9.4 7.55 4.24a1.79 1.79 0 0 0-2.5 1.55v12.42a1.79 1.79 0 0 0 2.5 1.55l8.95-5.17a1.79 1.79 0 0 0 0-3.18z"></path></svg>
+        5. JPA / Hibernate
+      </a></li>
+      <li><a href="#practica">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        Práctica de Capa
+      </a></li>
+      <li><a href="#parcial">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+        Guía Examen Parcial
+      </a></li>
+      <li><a href="#quiz">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        Autoevaluación
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &copy; 2026
+    </div>
+  </nav>
+
+  <!-- Overlay backdrop for mobile menu -->
+  <div class="backdrop-overlay" id="menu-overlay"></div>
+
+  <!-- Main Content container -->
+  <main class="main-content">
+    
+    <!-- Hero / Header Section -->
+    <header class="hero-section" id="inicio">
+      <div class="class-meta">
+        <span>Clase 3</span>
+        <span class="separator"></span>
+        <span>Diseño y Arquitectura de Software</span>
+      </div>
+      <h1 class="hero-title">Persistencia de Datos y Acceso a Datos</h1>
+      <p class="hero-desc">
+        Aprende los fundamentos conceptuales de la persistencia de datos relacionales, el modelado entidad-relación y cómo desacoplar la base de datos de tu dominio de negocio utilizando patrones modernos como <span class="highlight">Repository</span> y herramientas <span class="highlight">ORM</span> con <span class="highlight">JPA e Hibernate</span>.
+      </p>
+    </header>
+
+    <!-- Objetivos Section -->
+    <section class="topic-section" id="objetivos">
+      <h2 class="section-title">Objetivos de Aprendizaje</h2>
+      <p class="intro-paragraph">
+        Al finalizar esta sesión de estudio, serás capaz de modelar bases de datos consistentes y estructurar capas de persistencia escalables en aplicaciones empresariales aplicando los siguientes pilares:
+      </p>
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          </div>
+          <h3>Comprender</h3>
+          <p>Explicar el ciclo de vida de la persistencia de datos y las características de las bases de datos de nivel empresarial.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+          </div>
+          <h3>Modelar</h3>
+          <p>Diseñar un Modelo Entidad-Relación estructuralmente óptimo mapeando llaves primarias, foráneas y multiplicidades.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3a2.1 2.1 0 0 1 2-2h14v18H6.5a2.5 2.5 0 0 0-2.5 2.5z"></path></svg>
+          </div>
+          <h3>Aplicar</h3>
+          <p>Implementar el patrón Repository y estructurar capas de diseño de acceso a datos desacopladas de la infraestructura SQL.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          </div>
+          <h3>Desarrollar</h3>
+          <p>Dominar la persistencia orientada a objetos (ORM) empleando JPA como estándar e Hibernate como motor implementador.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 1: Persistencia de datos y BD Empresariales -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Persistencia de Datos y Bases de Datos Empresariales</h2>
+      <p class="intro-paragraph">
+        En desarrollo de software, la <span class="highlight">Persistencia de Datos</span> es la propiedad de los datos de sobrevivir más allá de la vida útil del proceso que los creó. Sin persistencia, los datos que residen únicamente en la memoria RAM se perderían por completo cuando la aplicación se apaga o se reinicia.
+      </p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path><path d="M3 12c0 1.66 4 3 9 3s9-1.34 9-3"></path></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Bases de Datos Relacionales (RDBMS)</h4>
+            <p>Almacenan información en tablas formadas por columnas y filas. Garantizan integridad a través de restricciones y propiedades ACID (Atomicidad, Consistencia, Aislamiento y Durabilidad). Ejemplo: PostgreSQL, MySQL.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Bases de Datos NoSQL</h4>
+            <p>Diseñadas para modelos de datos no relacionales, ideales para gran volumen de información no estructurada o de rápido crecimiento. Incluyen bases de datos documentales, clave-valor, y grafos. Ejemplo: MongoDB, Redis.</p>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <h3 style="font-size: 1.3rem; margin-bottom: 15px; color: var(--text-bright);">Introducción a Bases de Datos Empresariales</h3>
+        <p class="intro-paragraph" style="margin-bottom: 20px;">
+          En entornos corporativos (enterprise), las bases de datos deben operar bajo requerimientos de <span class="highlight">alta concurrencia</span>, <span class="highlight">escalabilidad horizontal/vertical</span> y <span class="highlight">tolerancia a fallos</span>. Las bases de datos empresariales utilizan estrategias avanzadas para garantizar la disponibilidad del negocio:
+        </p>
+        
+        <div class="cards-grid">
+          <div class="info-card">
+            <h3>Connection Pooling (HikariCP)</h3>
+            <p>Abrir y cerrar conexiones físicas a la BD es sumamente costoso. Un Pool mantiene una colección de conexiones abiertas y activas para reutilizarlas de inmediato en peticiones entrantes, optimizando la latencia del sistema.</p>
+          </div>
+          <div class="info-card">
+            <h3>Transacciones ACID Estrictas</h3>
+            <p>Aseguran la consistencia de los datos financieros u operativos. Las operaciones ocurren por completo (Atomicidad), respetan reglas del negocio (Consistencia), no interfieren entre sí (Aislamiento) y persisten ante caídas (Durabilidad).</p>
+          </div>
+          <div class="info-card">
+            <h3>Alta Disponibilidad & Réplicas</h3>
+            <p>Arquitecturas de replicación (Master-Slave o Multi-Master) permiten delegar operaciones pesadas de lectura a nodos esclavos secundarios, manteniendo el nodo maestro exclusivamente para escrituras.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Modelo Entidad-Relacion -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Modelo Entidad-Relación</h2>
+      <p class="intro-paragraph">
+        El <span class="highlight">Modelo Entidad-Relación (E-R)</span> es una herramienta conceptual que nos permite modelar la estructura lógica de los datos de un sistema. Define las entidades fundamentales, sus atributos individuales y las asociaciones lógicas entre ellas.
+      </p>
+
+      <!-- Interactive CSS ERD Diagram -->
+      <div class="diagram-container">
+        <p style="font-size: 0.85rem; color: var(--color-accent); font-weight: 600; text-transform: uppercase;">Diagrama E-R Interactivo: Relación 1 a Muchos (1:N)</p>
+        
+        <div class="diagram-layout">
+          <!-- Table: Usuario -->
+          <div class="db-table" id="erd-table-user">
+            <div class="db-table-header">
+              Usuario
+              <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <ul class="db-table-columns">
+              <li data-desc="Clave primaria única de tipo entero autoincremental para cada usuario registrado.">
+                <span><span class="key-indicator">PK</span> id</span>
+                <span class="datatype">BIGINT</span>
+              </li>
+              <li data-desc="El nombre completo del usuario. Atributo VARCHAR obligatorio.">
+                <span>nombre</span>
+                <span class="datatype">VARCHAR(100)</span>
+              </li>
+              <li data-desc="Correo electrónico único del usuario. Se utiliza para el inicio de sesión del sistema.">
+                <span>email</span>
+                <span class="datatype">VARCHAR(150)</span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Connector -->
+          <div class="relationship-connector">
+            <div class="relationship-line"></div>
+            <span class="relationship-label">Realiza</span>
+          </div>
+
+          <!-- Table: Pedido -->
+          <div class="db-table" id="erd-table-order">
+            <div class="db-table-header">
+              Pedido
+              <svg viewBox="0 0 24 24"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+            </div>
+            <ul class="db-table-columns">
+              <li data-desc="Clave primaria única e incremental para el pedido de compra.">
+                <span><span class="key-indicator">PK</span> id</span>
+                <span class="datatype">BIGINT</span>
+              </li>
+              <li data-desc="Fecha y hora exactas en las que se creó el pedido de compra.">
+                <span>fecha_creacion</span>
+                <span class="datatype">TIMESTAMP</span>
+              </li>
+              <li data-desc="El valor monetario total facturado en la transacción del pedido.">
+                <span>monto_total</span>
+                <span class="datatype">DECIMAL</span>
+              </li>
+              <li data-desc="Clave foránea (Foreign Key) que vincula el pedido con su respectivo Usuario creador (Relación 1:N).">
+                <span><span class="key-indicator" style="color: var(--color-secondary);">FK</span> usuario_id</span>
+                <span class="datatype">BIGINT</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="diagram-info-panel" id="diagram-tooltip">
+          Pasa el cursor o haz clic en cualquier columna del diagrama para explorar la definición técnica y sus propiedades lógicas.
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Patron Repository y Diseno de Acceso -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Patrón Repository y Diseño de Acceso a Datos</h2>
+      <p class="intro-paragraph">
+        El patrón de diseño <span class="highlight">Repository</span> actúa como un mediador entre el dominio (lógica de negocio) y las capas de acceso a datos. Proporciona una interfaz orientada a colecciones de objetos para que el resto de la aplicación no tenga conocimiento de cómo se guardan o recuperan los datos físicamente.
+      </p>
+
+      <div class="cards-grid" style="margin-bottom: 30px;">
+        <div class="info-card">
+          <h3>Abstracción de Datos</h3>
+          <p>Oculta la tecnología de almacenamiento subyacente (JDBC, JPA, NoSQL, archivos) de la lógica de negocio central de la aplicación.</p>
+        </div>
+        <div class="info-card">
+          <h3>Facilidad de Testing</h3>
+          <p>Permite reemplazar fácilmente la base de datos real con mockups (simulaciones en memoria) para ejecutar pruebas unitarias rápidas.</p>
+        </div>
+        <div class="info-card">
+          <h3>Código Limpio y Reutilizable</h3>
+          <p>Centraliza las consultas a la base de datos eliminando la duplicación de código SQL o consultas JPA en múltiples servicios de negocio.</p>
+        </div>
+      </div>
+
+      <!-- DAO vs Repository Comparison Grid -->
+      <div style="margin-top: 30px; margin-bottom: 30px;">
+        <h3 style="font-size: 1.3rem; margin-bottom: 12px; color: var(--text-bright);">Diseño de Acceso: DAO vs. Repository</h3>
+        <p class="intro-paragraph" style="margin-bottom: 20px;">
+          En el diseño arquitectónico de acceso a datos, es común confundir el patrón tradicional <strong>DAO (Data Access Object)</strong> con el patrón moderno <strong>Repository</strong>. Ambos desacoplan la base de datos, pero operan bajo filosofías diferentes:
+        </p>
+
+        <div class="comparison-grid">
+          <!-- DAO Side -->
+          <div class="comp-side oop">
+            <h4>DAO (Data Access Object)</h4>
+            <table class="comp-table">
+              <tr>
+                <td class="label">Centrado en:</td>
+                <td class="example">Tablas físicas y SQL</td>
+              </tr>
+              <tr>
+                <td class="label">Cardinalidad:</td>
+                <td class="example">1 DAO por Tabla (1:1)</td>
+              </tr>
+              <tr>
+                <td class="label">Lógica:</td>
+                <td class="example">Mapea consultas SQL CRUD nativas</td>
+              </tr>
+              <tr>
+                <td class="label">Nivel de Abstracción:</td>
+                <td class="example">Bajo (Próximo a la BD)</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- Divider label -->
+          <div class="comp-bridge">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M5 12h14"></path></svg>
+            Diferencias
+          </div>
+
+          <!-- Repository Side -->
+          <div class="comp-side relational">
+            <h4>Repository</h4>
+            <table class="comp-table">
+              <tr>
+                <td class="label">Centrado en:</td>
+                <td class="example">Dominio y Objetos de Negocio</td>
+              </tr>
+              <tr>
+                <td class="label">Cardinalidad:</td>
+                <td class="example">1 Repository por Agregado Raíz</td>
+              </tr>
+              <tr>
+                <td class="label">Lógica:</td>
+                <td class="example">Simula una colección en memoria</td>
+              </tr>
+              <tr>
+                <td class="label">Nivel de Abstracción:</td>
+                <td class="example">Alto (Próximo al Dominio)</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabbed Code Block (Interface vs Implementation vs Spring Data) -->
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="tab-interface">
+            <svg viewBox="0 0 24 24"><path d="M16 18l6-6-6-6M8 6l-6 6 6 6"></path></svg>
+            UserRepository.java (Interfaz)
+          </button>
+          <button class="tab-btn" data-tab="tab-implementation">
+            <svg viewBox="0 0 24 24"><path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path><path d="M12 16V12M12 8H12.01"></path></svg>
+            UserRepositoryImpl.java (JDBC Manual)
+          </button>
+          <button class="tab-btn" data-tab="tab-spring">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5"></path></svg>
+            Spring Data JPA (Moderno)
+          </button>
+        </div>
+
+        <!-- Panel 1 -->
+        <div class="tab-panel active" id="tab-interface">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-interface')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-interface"><span class="keyword">package</span> com.unibe.arquitectura.repository;
+
+<span class="keyword">import</span> com.unibe.arquitectura.model.Usuario;
+<span class="keyword">import</span> java.util.List;
+<span class="keyword">import</span> java.util.Optional;
+
+<span class="comment">// Interfaz limpia expuesta al dominio de la aplicación</span>
+<span class="keyword">public interface</span> <span class="type">UserRepository</span> {
+    <span class="type">Usuario</span> <span class="method">save</span>(<span class="type">Usuario</span> usuario);
+    <span class="type">Optional</span>&lt;<span class="type">Usuario</span>&gt; <span class="method">findById</span>(<span class="type">Long</span> id);
+    <span class="type">List</span>&lt;<span class="type">Usuario</span>&gt; <span class="method">findAll</span>();
+    <span class="keyword">void</span> <span class="method">deleteById</span>(<span class="type">Long</span> id);
+    
+    <span class="comment">// Método de negocio específico</span>
+    <span class="type">Optional</span>&lt;<span class="type">Usuario</span>&gt; <span class="method">findByEmail</span>(<span class="type">String</span> email);
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Panel 2 -->
+        <div class="tab-panel" id="tab-implementation">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-implementation')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-implementation"><span class="keyword">package</span> com.unibe.arquitectura.repository.impl;
+
+<span class="keyword">import</span> com.unibe.arquitectura.model.Usuario;
+<span class="keyword">import</span> com.unibe.arquitectura.repository.UserRepository;
+<span class="keyword">import</span> java.sql.*;
+<span class="keyword">import</span> java.util.Optional;
+
+<span class="comment">// Implementación de bajo nivel (oculta los detalles de JDBC SQL)</span>
+<span class="keyword">public class</span> <span class="type">UserRepositoryImpl</span> <span class="keyword">implements</span> <span class="type">UserRepository</span> {
+    <span class="keyword">private final</span> <span class="type">Connection</span> connection;
+
+    <span class="keyword">public</span> <span class="type">UserRepositoryImpl</span>(<span class="type">Connection</span> connection) {
+        <span class="keyword">this</span>.connection = connection;
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="keyword">public</span> <span class="type">Optional</span>&lt;<span class="type">Usuario</span>&gt; <span class="method">findByEmail</span>(<span class="type">String</span> email) {
+        <span class="type">String</span> sql = <span class="string">"SELECT * FROM usuarios WHERE email = ?"</span>;
+        <span class="keyword">try</span> (<span class="type">PreparedStatement</span> stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, email);
+            <span class="keyword">try</span> (<span class="type">ResultSet</span> rs = stmt.executeQuery()) {
+                <span class="keyword">if</span> (rs.next()) {
+                    <span class="type">Usuario</span> user = <span class="keyword">new</span> <span class="type">Usuario</span>(rs.getLong(<span class="string">"id"</span>), rs.getString(<span class="string">"nombre"</span>), rs.getString(<span class="string">"email"</span>));
+                    <span class="keyword">return</span> <span class="type">Optional</span>.of(user);
+                }
+            }
+        } <span class="keyword">catch</span> (<span class="type">SQLException</span> e) {
+            <span class="keyword">throw new</span> <span class="type">RuntimeException</span>(<span class="string">"Error al buscar usuario por email"</span>, e);
+        }
+        <span class="keyword">return</span> <span class="type">Optional</span>.empty();
+    }
+    
+    <span class="comment">// ... Los demás métodos CRUD encapsulan sentencias SQL similares ...</span>
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Panel 3 -->
+        <div class="tab-panel" id="tab-spring">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-spring')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-spring"><span class="keyword">package</span> com.unibe.arquitectura.repository;
+
+<span class="keyword">import</span> com.unibe.arquitectura.model.Usuario;
+<span class="keyword">import</span> org.springframework.data.jpa.repository.JpaRepository;
+<span class="keyword">import</span> org.springframework.stereotype.Repository;
+<span class="keyword">import</span> java.util.Optional;
+
+<span class="comment">// Con Spring Data JPA, la implementación JDBC/JPA se genera dinámicamente.</span>
+<span class="annotation">@Repository</span>
+<span class="keyword">public interface</span> <span class="type">UserRepository</span> <span class="keyword">extends</span> <span class="type">JpaRepository</span>&lt;<span class="type">Usuario</span>, <span class="type">Long</span>&gt; {
+    
+    <span class="comment">// Spring genera la consulta automáticamente basándose en el nombre del método</span>
+    <span class="type">Optional</span>&lt;<span class="type">Usuario</span>&gt; <span class="method">findByEmail</span>(<span class="type">String</span> email);
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: ORM -->
+    <section class="topic-section" id="modulo4">
+      <h2 class="section-title">4. ORM (Object-Relational Mapping)</h2>
+      <p class="intro-paragraph">
+        El mapeo objeto-relacional (<span class="highlight">ORM</span>) es una técnica de programación para convertir datos entre sistemas de bases de datos relacionales y el paradigma de lenguajes orientados a objetos. Resuelve la incompatibilidad técnica conocida como el <span class="highlight">Desfase de Impedancia</span>.
+      </p>
+
+      <div class="comparison-grid">
+        <!-- OOP Paradigm -->
+        <div class="comp-side oop">
+          <h4>Paradigma Orientado a Objetos (Java)</h4>
+          <table class="comp-table">
+            <tr>
+              <td class="label">Clase</td>
+              <td class="example">public class Usuario</td>
+            </tr>
+            <tr>
+              <td class="label">Atributo / Propiedad</td>
+              <td class="example">private String email;</td>
+            </tr>
+            <tr>
+              <td class="label">Objeto (Instancia)</td>
+              <td class="example">new Usuario(1L, "Ana")</td>
+            </tr>
+            <tr>
+              <td class="label">Referencia directa / Colección</td>
+              <td class="example">List&lt;Pedido&gt; pedidos;</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Bridge -->
+        <div class="comp-bridge">
+          <svg viewBox="0 0 24 24"><path d="M17 3H7a4 4 0 0 0-4 4v10a4 4 0 0 0 4 4h10a4 4 0 0 0 4-4V7a4 4 0 0 0-4-4z"></path><path d="M12 8v8M9 11l3 3 3-3"></path></svg>
+          Mapeo (ORM)
+        </div>
+
+        <!-- Relational Paradigm -->
+        <div class="comp-side relational">
+          <h4>Paradigma Relacional (SQL DB)</h4>
+          <table class="comp-table">
+            <tr>
+              <td class="label">Tabla</td>
+              <td class="example">CREATE TABLE usuarios</td>
+            </tr>
+            <tr>
+              <td class="label">Columna</td>
+              <td class="example">email VARCHAR(150)</td>
+            </tr>
+            <tr>
+              <td class="label">Fila / Registro</td>
+              <td class="example">1 | "Ana" | "ana@mail.com"</td>
+            </tr>
+            <tr>
+              <td class="label">Clave Foránea (FK)</td>
+              <td class="example">usuario_id BIGINT</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 5: JPA e Hibernate -->
+    <section class="topic-section" id="modulo5">
+      <h2 class="section-title">5. Introducción a JPA y Hibernate</h2>
+      <p class="intro-paragraph">
+        Es fundamental diferenciar las dos tecnologías: <span class="highlight">JPA (Java Persistence API)</span> es la especificación estándar (un conjunto de interfaces y directrices oficiales de Java SE/EE), mientras que <span class="highlight">Hibernate</span> es la implementación concreta más popular de ese estándar ORM.
+      </p>
+
+      <div class="cards-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 30px;">
+        <div class="info-card" style="border-left: 3px solid var(--color-accent);">
+          <h3>JPA (Especificación)</h3>
+          <p>Define las anotaciones estándar (como <code>@Entity</code>, <code>@Table</code>, <code>@Id</code>) y la interfaz <code>EntityManager</code>. No hace trabajo real, solo establece el "contrato".</p>
+        </div>
+        <div class="info-card" style="border-left: 3px solid var(--color-secondary);">
+          <h3>Hibernate (Proveedor/Motor)</h3>
+          <p>Lee los metadatos de las anotaciones de JPA, abre las conexiones JDBC subyacentes y genera las sentencias SQL nativas para bases de datos relacionales.</p>
+        </div>
+      </div>
+
+      <p class="intro-paragraph" style="margin-bottom: 12px;">
+        <span class="highlight">Explorador de Anotaciones de JPA:</span> Haz clic en las líneas del código de abajo para ver una descripción interactiva del mapeo de la Entidad.
+      </p>
+
+      <!-- Annotation Explorer Component -->
+      <div class="annotation-explorer">
+        <!-- Interactive Code Panel -->
+        <div class="annotation-code-panel">
+          <pre><code><span class="comment">// Mapeo de Entidad Principal</span>
+<span class="annotated-line active" id="line-entity" onclick="selectAnnotation('entity')"><span class="annotation">@Entity</span></span><span class="annotated-line" id="line-table" onclick="selectAnnotation('table')"><span class="annotation">@Table</span>(name = <span class="string">"usuarios"</span>)</span><span class="keyword">public class</span> <span class="type">Usuario</span> {
+
+<span class="comment">    // Identificador único (Clave Primaria)</span>
+<span class="annotated-line" id="line-id" onclick="selectAnnotation('id')">    <span class="annotation">@Id</span></span><span class="annotated-line" id="line-generated" onclick="selectAnnotation('generated')">    <span class="annotation">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.IDENTITY)</span>    <span class="keyword">private</span> <span class="type">Long</span> id;
+
+<span class="comment">    // Atributo mapeado a columna obligatoria</span>
+<span class="annotated-line" id="line-column" onclick="selectAnnotation('column')">    <span class="annotation">@Column</span>(name = <span class="string">"email"</span>, unique = <span class="keyword">true</span>, nullable = <span class="keyword">false</span>)</span>    <span class="keyword">private</span> <span class="type">String</span> email;
+
+<span class="comment">    // Asociación de Uno a Muchos</span>
+<span class="annotated-line" id="line-onetomany" onclick="selectAnnotation('onetomany')">    <span class="annotation">@OneToMany</span>(mappedBy = <span class="string">"usuario"</span>, cascade = <span class="type">CascadeType</span>.ALL)</span>    <span class="keyword">private</span> <span class="type">List</span>&lt;<span class="type">Pedido</span>&gt; pedidos;
+}</code></pre>
+        </div>
+
+        <!-- Description Output Panel -->
+        <div class="annotation-details-panel">
+          <h3 class="annotation-details-title" id="annotation-title">@Entity</h3>
+          <p class="annotation-details-desc" id="annotation-desc">
+            Es la anotación fundamental de JPA a nivel de clase. Le indica al proveedor de persistencia (Hibernate) que esta clase Java es una entidad persistente cuyo ciclo de vida será gestionado por el Entity Manager y representará registros en la base de datos.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Práctica de la clase -->
+    <section class="topic-section" id="practica">
+      <h2 class="section-title">Práctica: Diseño de Capa de Persistencia</h2>
+      <p class="intro-paragraph">
+        Aplica los conceptos estudiados diseñando la capa de persistencia para un <strong>Sistema de Gestión de Biblioteca</strong>. Debes modelar la relación entre estudiantes, libros y préstamos de libros (un estudiante puede realizar varios préstamos de diferentes libros).
+      </p>
+
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="tab-prac-er">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+            1. Modelo Relacional de Tablas
+          </button>
+          <button class="tab-btn" data-tab="tab-prac-jpa">
+            <svg viewBox="0 0 24 24"><path d="M16.5 9.4 7.55 4.24a1.79 1.79 0 0 0-2.5 1.55v12.42a1.79 1.79 0 0 0 2.5 1.55l8.95-5.17a1.79 1.79 0 0 0 0-3.18z"></path></svg>
+            2. Mapeo JPA (Prestamo.java)
+          </button>
+          <button class="tab-btn" data-tab="tab-prac-repo">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            3. PrestamoRepository.java
+          </button>
+        </div>
+
+        <!-- Prac ER -->
+        <div class="tab-panel active" id="tab-prac-er">
+          <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+            Para representar la relación de muchos a muchos histórica entre <span class="highlight">Estudiante</span> y <span class="highlight">Libro</span> con atributos propios (fecha del préstamo y si está activo), se crea la tabla intermedia **prestamos** de la siguiente manera:
+          </p>
+          <div class="diagram-layout" style="gap: 40px;">
+            <div class="db-table" style="width: 210px;">
+              <div class="db-table-header">estudiantes</div>
+              <ul class="db-table-columns">
+                <li><span>PK id</span><span class="datatype">BIGINT</span></li>
+                <li><span>nombre</span><span class="datatype">VARCHAR</span></li>
+              </ul>
+            </div>
+            <div class="relationship-connector">
+              <div class="relationship-line" style="width: 40px;"></div>
+              <span class="relationship-label">1:N</span>
+            </div>
+            <div class="db-table" style="width: 210px;">
+              <div class="db-table-header" style="background: rgba(139, 92, 246, 0.15)">prestamos</div>
+              <ul class="db-table-columns">
+                <li><span>PK id</span><span class="datatype">BIGINT</span></li>
+                <li><span>FK estudiante_id</span><span class="datatype">BIGINT</span></li>
+                <li><span>FK libro_id</span><span class="datatype">BIGINT</span></li>
+                <li><span>fecha_prestamo</span><span class="datatype">DATE</span></li>
+                <li><span>activo</span><span class="datatype">BOOLEAN</span></li>
+              </ul>
+            </div>
+            <div class="relationship-connector">
+              <div class="relationship-line" style="width: 40px;"></div>
+              <span class="relationship-label">N:1</span>
+            </div>
+            <div class="db-table" style="width: 210px;">
+              <div class="db-table-header">libros</div>
+              <ul class="db-table-columns">
+                <li><span>PK id</span><span class="datatype">BIGINT</span></li>
+                <li><span>titulo</span><span class="datatype">VARCHAR</span></li>
+                <li><span>isbn</span><span class="datatype">VARCHAR</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- Prac JPA -->
+        <div class="tab-panel" id="tab-prac-jpa">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-prac-jpa')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-prac-jpa"><span class="annotation">@Entity</span>
+<span class="annotation">@Table</span>(name = <span class="string">"prestamos"</span>)
+<span class="keyword">public class</span> <span class="type">Prestamo</span> {
+    <span class="annotation">@Id</span>
+    <span class="annotation">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.IDENTITY)
+    <span class="keyword">private</span> <span class="type">Long</span> id;
+
+    <span class="annotation">@ManyToOne</span>
+    <span class="annotation">@JoinColumn</span>(name = <span class="string">"estudiante_id"</span>, nullable = <span class="keyword">false</span>)
+    <span class="keyword">private</span> <span class="type">Estudiante</span> estudiante;
+
+    <span class="annotation">@ManyToOne</span>
+    <span class="annotation">@JoinColumn</span>(name = <span class="string">"libro_id"</span>, nullable = <span class="keyword">false</span>)
+    <span class="keyword">private</span> <span class="type">Libro</span> libro;
+
+    <span class="annotation">@Column</span>(name = <span class="string">"fecha_prestamo"</span>)
+    <span class="keyword">private</span> <span class="type">LocalDate</span> fechaPrestamo;
+
+    <span class="keyword">private boolean</span> activo;
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Prac Repo -->
+        <div class="tab-panel" id="tab-prac-repo">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-prac-repo')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-prac-repo"><span class="annotation">@Repository</span>
+<span class="keyword">public interface</span> <span class="type">PrestamoRepository</span> <span class="keyword">extends</span> <span class="type">JpaRepository</span>&lt;<span class="type">Prestamo</span>, <span class="type">Long</span>&gt; {
+    
+    <span class="comment">// Retorna todos los préstamos activos de un estudiante específico usando Derived Queries</span>
+    <span class="type">List</span>&lt;<span class="type">Prestamo</span>&gt; <span class="method">findByEstudianteIdAndActivoTrue</span>(<span class="type">Long</span> estudianteId);
+    
+    <span class="comment">// Query personalizado con JPQL para buscar préstamos por el ISBN del libro</span>
+    <span class="annotation">@Query</span>(<span class="string">"SELECT p FROM Prestamo p WHERE p.libro.isbn = :isbn"</span>)
+    <span class="type">List</span>&lt;<span class="type">Prestamo</span>&gt; <span class="method">findByIsbn</span>(<span class="annotation">@Param</span>(<span class="string">"isbn"</span>) <span class="type">String</span> isbn);
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Guía de Estudio Examen Parcial I -->
+    <section class="topic-section" id="parcial">
+      <h2 class="section-title">Guía de Estudio: Examen Parcial I</h2>
+      <p class="intro-paragraph">
+        El examen parcial de la sesión de los miércoles evalúa los conceptos teóricos y prácticos fundamentales vistos hasta la fecha en la asignatura. A continuación, se presenta un resumen de los temas clave:
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card" style="border-left: 3px solid var(--color-primary);">
+          <h3>1. Fundamentos de Diseño</h3>
+          <p>
+            - <span class="highlight">Abstracción</span>: Aislar elementos del problema enfocándose en lo relevante.<br>
+            - <span class="highlight">Encapsulamiento</span>: Agrupar datos y operaciones, ocultando el estado interno.<br>
+            - <span class="highlight">Acoplamiento</span>: Nivel de interdependencia entre módulos (se busca que sea <strong>Bajo</strong> para facilitar cambios).<br>
+            - <span class="highlight">Cohesión</span>: Medida de qué tan enfocada está una clase en una sola tarea (se busca que sea <strong>Alta</strong>).
+          </p>
+        </div>
+
+        <div class="info-card" style="border-left: 3px solid var(--color-secondary); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h3>
+              <a href="Principios_SOLID_Clase.html" target="_blank" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; hover: color: var(--color-accent);">
+                2. Principios SOLID
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; stroke: var(--color-accent); fill: none; stroke-width: 2.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path></svg>
+              </a>
+            </h3>
+            <p style="margin-bottom: 20px;">
+              - <strong>S</strong>RP: Una clase debe tener una sola razón para cambiar.<br>
+              - <strong>O</strong>CP: Abierto a extensión, cerrado a modificación.<br>
+              - <strong>L</strong>SP: Subclases deben poder sustituir a sus clases base sin alterar el comportamiento.<br>
+              - <strong>I</strong>SP: Interfaces pequeñas y específicas.<br>
+              - <strong>D</strong>IP: Depender de abstracciones, no de detalles.
+            </p>
+          </div>
+          <a href="Principios_SOLID_Clase.html" target="_blank" class="submit-btn" style="text-align: center; text-decoration: none; padding: 10px 16px; font-size: 0.85rem; margin-top: auto; display: inline-block;">Ver Clase Completa de SOLID</a>
+        </div>
+
+        <div class="info-card" style="border-left: 3px solid var(--color-accent);">
+          <h3>3. Calidad de Software</h3>
+          <p>
+            De acuerdo a la norma de calidad internacional <strong>ISO/IEC 25010</strong>, las características clave de calidad del producto de software son:<br>
+            - Adecuación Funcional, Eficiencia de Rendimiento, Compatibilidad, Usabilidad, Fiabilidad, Seguridad, <strong>Mantenibilidad</strong> (analizabilidad, modificabilidad, testeabilidad) y Portabilidad.
+          </p>
+        </div>
+
+        <div class="info-card" style="border-left: 3px solid var(--color-warning); display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <h3>
+              <a href="clase%202%20UML.html" target="_blank" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; hover: color: var(--color-accent);">
+                4. Relaciones UML
+                <svg viewBox="0 0 24 24" style="width: 16px; height: 16px; stroke: var(--color-accent); fill: none; stroke-width: 2.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path></svg>
+              </a>
+            </h3>
+            <p style="margin-bottom: 20px;">
+              Representaciones visuales del Diagrama de Clases:<br>
+              - <strong>Asociación</strong>: Conexión estructural simple (ej. Cliente compra Producto).<br>
+              - <strong>Agregación (Rombo vacío)</strong>: Relación todo-parte débil (ej. Universidad - Profesor).<br>
+              - <strong>Composición (Rombo relleno)</strong>: Relación todo-parte fuerte (ej. Libro - Páginas).
+            </p>
+          </div>
+          <a href="clase%202%20UML.html" target="_blank" class="submit-btn" style="text-align: center; text-decoration: none; padding: 10px 16px; font-size: 0.85rem; margin-top: auto; display: inline-block;">Ver Clase Completa de UML</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 6: Quiz Autoevaluación -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">Autoevaluación de la Clase</h2>
+      <p class="intro-paragraph">
+        Completa el siguiente quiz interactivo para verificar tu asimilación de conceptos clave sobre persistencia y arquitectura.
+      </p>
+
+      <div class="quiz-container">
+        <!-- Question 1 -->
+        <div class="quiz-question" data-q="1">
+          <h4><span class="q-num">Q1.</span> ¿Cuál es el propósito principal del patrón Repository?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Definir la estructura física de la base de datos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Encapsular la lógica de acceso a datos y desacoplarla de la lógica de negocio.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Ejecutar consultas directamente en el servidor web.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="d">
+              <span>Crear la interfaz gráfica del usuario.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="quiz-question" data-q="2">
+          <h4><span class="q-num">Q2.</span> En el contexto de JPA/Hibernate, ¿para qué sirve la anotación @Id?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Para identificar el nombre de la tabla.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Para establecer una relación de muchos a uno.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Para designar el atributo que representa la clave primaria.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="d">
+              <span>Para definir una columna única no nula.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="quiz-question" data-q="3">
+          <h4><span class="q-num">Q3.</span> ¿Qué problema resuelve principalmente un ORM (Object-Relational Mapping)?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>La latencia de la red entre el cliente y el servidor.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>El desfase de impedancia (diferencia de paradigma entre objetos y tablas relacionales).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>La encriptación de contraseñas en la base de datos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="d">
+              <span>La compilación del código fuente de Java.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="quiz-question" data-q="4">
+          <h4><span class="q-num">Q4.</span> En el modelado UML, ¿cuál es la diferencia clave entre agregación y composición?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>La agregación representa herencia y la composición representa implementación de interfaces.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>No existe ninguna diferencia conceptual, ambas relaciones se grafican con el mismo símbolo vacío.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>En la composición la existencia del objeto dependiente (parte) está ligada estrictamente a la del objeto contenedor (todo); en la agregación el objeto parte puede existir de forma independiente.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="d">
+              <span>La composición solo se aplica en bases de datos relacionales y la agregación en NoSQL.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    // Close mobile menu when a link is clicked
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive ERD Diagram Tooltips
+       ========================================== */
+    const columns = document.querySelectorAll('.db-table-columns li');
+    const tooltip = document.getElementById('diagram-tooltip');
+
+    columns.forEach(col => {
+      col.addEventListener('mouseenter', (e) => {
+        const text = e.currentTarget.getAttribute('data-desc');
+        if (text) {
+          tooltip.innerHTML = text;
+          tooltip.style.borderColor = 'var(--color-accent)';
+          tooltip.style.background = 'rgba(6, 182, 212, 0.05)';
+        }
+      });
+
+      col.addEventListener('mouseleave', () => {
+        tooltip.innerHTML = "Pasa el cursor o haz clic en cualquier columna del diagrama para explorar la definición técnica y sus propiedades lógicas.";
+        tooltip.style.borderColor = 'var(--border-light)';
+        tooltip.style.background = 'rgba(255, 255, 255, 0.02)';
+      });
+
+      col.addEventListener('click', (e) => {
+        const text = e.currentTarget.getAttribute('data-desc');
+        if (text) {
+          tooltip.innerHTML = text;
+          tooltip.style.borderColor = 'var(--color-primary)';
+        }
+      });
+    });
+
+    /* ==========================================
+       Interactive Code Tabs (Repository Pattern & Practice)
+       ========================================== */
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    const tabPanels = document.querySelectorAll('.tab-panel');
+
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        if (!targetTab) return;
+
+        // Scope changes within parent tab container to support multiple tab components
+        const parentWrapper = btn.closest('.tabs-wrapper');
+        parentWrapper.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        parentWrapper.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(targetTab).classList.add('active');
+      });
+    });
+
+    /* Copy Code Function */
+    function copyCode(elementId) {
+      const codeElement = document.getElementById(elementId);
+      const textToCopy = codeElement.innerText;
+      
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const btn = codeElement.closest('.code-container').querySelector('.copy-btn');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="stroke: var(--color-success)"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiado!`;
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 2000);
+      }).catch(err => {
+        console.error('Error al copiar el texto: ', err);
+      });
+    }
+
+    /* ==========================================
+       Interactive JPA Annotations Explorer
+       ========================================== */
+    const annotationsInfo = {
+      entity: {
+        title: "@Entity",
+        desc: "Define que la clase es una Entidad persistente de base de datos. Le indica al proveedor de JPA (Hibernate) que debe crear o mapear una estructura de tabla correspondiente y que el Entity Manager administrará sus instancias."
+      },
+      table: {
+        title: "@Table(name = \"usuarios\")",
+        desc: "Especifica el nombre exacto de la tabla física en la base de datos a la cual se mapea la entidad. Si se omite, JPA asumirá que la tabla se llama igual que la clase (en este caso, 'Usuario' en lugar de 'usuarios')."
+      },
+      id: {
+        title: "@Id",
+        desc: "Designa el atributo de la clase que actúa como la Clave Primaria (Primary Key) de la entidad. Cada entidad persistente mapeada obligatoriamente requiere definir un atributo identificado con esta anotación."
+      },
+      generated: {
+        title: "@GeneratedValue",
+        desc: "Define la estrategia de generación de la clave primaria. El uso de 'GenerationType.IDENTITY' le delega la responsabilidad al motor de la base de datos para asignar números secuenciales autoincrementales (ej. columna SERIAL en Postgres o AUTO_INCREMENT en MySQL)."
+      },
+      column: {
+        title: "@Column(name = \"email\", unique = true...)",
+        desc: "Permite configurar propiedades de la columna de base de datos asociada al atributo. Aquí definimos un nombre personalizado ('email'), establecemos que la dirección de correo sea única en toda la tabla y que no se permitan valores nulos (NOT NULL)."
+      },
+      onetomany: {
+        title: "@OneToMany(mappedBy = \"usuario\"...)",
+        desc: "Define una relación de cardinalidad 'Uno a Muchos' en la clase padre. La propiedad 'mappedBy' indica que la relación está controlada por el campo 'usuario' en la clase hija (Pedido). 'CascadeType.ALL' propaga las operaciones de guardado y eliminación en cascada."
+      }
+    };
+
+    function selectAnnotation(key) {
+      document.querySelectorAll('.annotated-line').forEach(line => {
+        line.classList.remove('active');
+      });
+
+      const selectedLine = document.getElementById(`line-${key}`);
+      if (selectedLine) selectedLine.classList.add('active');
+
+      const info = annotationsInfo[key];
+      if (info) {
+        document.getElementById('annotation-title').innerText = info.title;
+        document.getElementById('annotation-desc').innerText = info.desc;
+      }
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'c',
+      q3: 'b',
+      q4: 'c'
+    };
+
+    // Styling selection logic on click
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del quiz antes de verificar.");
+        return;
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          const lbl = r.closest('.quiz-option');
+          lbl.classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has comprendido todos los temas de la clase y de la guía de estudio.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "Buen intento. Revisa las respuestas incorrectas para reforzar tus conocimientos para el examen.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Necesitas repasar el material. Intenta volver a leer sobre UML y el patrón repository.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

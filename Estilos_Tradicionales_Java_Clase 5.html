@@ -1,0 +1,1936 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Ejemplos Prácticos en Java para Estilos Arquitectónicos Tradicionales: Monolítico, Cliente-Servidor y Capas. Incluye diagramas de árboles de proyecto y código fuente de ejemplo.">
+  <title>Ejemplos Java y Árboles de Proyecto | Estilos Tradicionales</title>
+  
+  <!-- Google Fonts: Outfit and Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Yellow */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Gradients */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .class-meta {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .class-meta span.separator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text-bright) 30%, #c084fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 30px;
+      background: linear-gradient(to bottom, var(--color-secondary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    /* ==========================================
+       File Tree Style
+       ========================================== */
+    .file-tree-container {
+      background: #0b111e;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .file-tree-container::before {
+      content: 'Estructura de Carpetas';
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .tree-root {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tree-node {
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .tree-node::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 10px;
+      width: 1px;
+      border-left: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-node::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 12px;
+      width: 12px;
+      height: 1px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-node.last::before {
+      bottom: auto;
+      height: 12px;
+    }
+
+    .tree-icon {
+      margin-right: 6px;
+      display: inline-block;
+      user-select: none;
+    }
+
+    .folder-name {
+      color: #38bdf8; /* light blue */
+      font-weight: 600;
+    }
+
+    .file-name {
+      color: #e2e8f0;
+    }
+
+    .file-name.main {
+      color: #f59e0b; /* highlight main class */
+      font-weight: 600;
+    }
+
+    .file-comment {
+      color: #64748b;
+      margin-left: 15px;
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    /* ==========================================
+       Code Block Styles
+       ========================================== */
+    .tabs-wrapper {
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .tabs-header {
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 16px 24px;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .tab-panel {
+      display: none;
+      padding: 24px;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .code-container {
+      position: relative;
+    }
+
+    pre {
+      margin: 0;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    /* Code Syntax Coloring */
+    .keyword { color: #f43f5e; font-weight: 500; }
+    .type { color: #38bdf8; }
+    .annotation { color: #a855f7; font-weight: 500; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+    .method { color: #f59e0b; }
+
+    /* Copy Button */
+    .copy-btn {
+      position: absolute;
+      top: -12px;
+      right: 0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-bright);
+    }
+
+    .copy-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    /* Back Link Button */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-accent);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      transition: transform 0.2s ease;
+    }
+
+    .back-btn:hover {
+      transform: translateX(-3px);
+      color: var(--text-bright);
+    }
+
+    .back-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.5;
+    }
+
+    /* ==========================================
+       Quiz / Autoevaluación
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .quiz-option input[type="radio"]::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      transform: scale(0);
+      transition: transform 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-accent);
+    }
+
+    .quiz-option input[type="radio"]:checked::before {
+      transform: scale(1);
+    }
+
+    .quiz-option.selected {
+      background: rgba(6, 182, 212, 0.05);
+      border-color: rgba(6, 182, 212, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.08) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: #a7f3d0 !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #fca5a5 !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      color: var(--text-bright);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .score-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+    }
+
+    .score-badge.pass {
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .score-badge.fail {
+      color: var(--color-danger);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* ==========================================
+       Responsive Rules & Mobile Sidebar Drawer
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 24px;
+        padding-top: 80px;
+      }
+
+      .progress-bar-container {
+        left: 0;
+      }
+
+      .top-nav {
+        display: flex;
+      }
+
+      .hero-section {
+        padding: 30px 20px;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+    }
+
+    .backdrop-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    .backdrop-overlay.open {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Header -->
+  <header class="top-nav">
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <h1>Ejemplos Estilos Tradicionales</h1>
+    <div style="width: 24px;"></div>
+  </header>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path>
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 5</h2>
+        <span>Arquitectura SW</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#inicio" class="active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        Volver a Clase 5
+      </a></li>
+      <li><a href="#monolito">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+        1. Monolito
+      </a></li>
+      <li><a href="#cliente-servidor">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"></path></svg>
+        2. Cliente-Servidor
+      </a></li>
+      <li><a href="#en-capas">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg>
+        3. En Capas (Layered)
+      </a></li>
+      <li><a href="#otros-estilos">
+        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path></svg>
+        4. Otros Estilos
+      </a></li>
+      <li><a href="#quiz">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        Autoevaluación
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &copy; 2026
+    </div>
+  </nav>
+
+  <div class="backdrop-overlay" id="menu-overlay"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <a href="Estructuras_Arquitectonicas_Clase 5.html" class="back-btn" id="inicio">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Regresar a Estructuras Arquitectónicas
+    </a>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+      <div class="class-meta">
+        <span>Guía Práctica</span>
+        <span class="separator"></span>
+        <span>Código y Estructura</span>
+      </div>
+      <h1 class="hero-title">Código Java y Estructuras de Carpetas</h1>
+      <p class="hero-desc">
+        Aterriza los conceptos teóricos de la clase. Analiza a profundidad cómo se organizan físicamente los directorios de archivos (árboles de proyecto) y cómo se implementa el código fuente Java en la práctica para la arquitectura monolítica, cliente-servidor y en capas.
+      </p>
+    </header>
+
+    <!-- 1. Monolito -->
+    <section class="topic-section" id="monolito">
+      <h2 class="section-title">1. Arquitectura Monolítica</h2>
+      <p class="intro-paragraph">
+        En un monolito, **todo el sistema vive dentro del mismo proyecto y proceso**. Se compila y empaqueta en un único artefacto (como un archivo <code>.jar</code> o <code>.war</code>). Los componentes internos interactúan llamándose directamente en memoria mediante código Java ordinario (llamadas a métodos en la pila de ejecución local), compartiendo la base de datos física.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios del Proyecto</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">tienda-monolito</span> <span class="file-comment">// Raíz del proyecto Maven</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span> <span class="file-comment">// Archivo de dependencias único</span></li>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">src</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">main</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">java</span>
+                        <ul>
+                          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">com</span>
+                            <ul>
+                              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">tienda</span>
+                                <ul>
+                                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">MonolithicApplication.java</span> <span class="file-comment">// Clase de entrada única</span></li>
+                                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">usuarios</span> <span class="file-comment">// Módulo de Usuarios (todo en el mismo directorio)</span>
+                                    <ul>
+                                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">UserController.java</span></li>
+                                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">UserService.java</span></li>
+                                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">User.java</span></li>
+                                    </ul>
+                                  </li>
+                                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">pedidos</span> <span class="file-comment">// Módulo de Pedidos (en el mismo espacio de compilación)</span>
+                                    <ul>
+                                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">OrderController.java</span></li>
+                                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">OrderService.java</span> <span class="file-comment">// Llama a UserService directamente en RAM</span></li>
+                                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">Order.java</span></li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </li>
+                      <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">resources</span>
+                        <ul>
+                          <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">application.properties</span> <span class="file-comment">// Configuración global</span></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Código Java: Comunicación Interna Directa</h3>
+      <p class="intro-paragraph" style="font-size: 0.95rem;">
+        Al estar en el mismo proceso, un servicio puede inyectar y llamar directamente a otro mediante simples referencias a objetos. No existe la latencia de red.
+      </p>
+
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="monolith-main">MonolithicApplication.java</button>
+          <button class="tab-btn" data-tab="monolith-service">OrderService.java</button>
+        </div>
+
+        <div class="tab-panel active" id="monolith-main">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-m-main')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-m-main"><span class="keyword">package</span> com.tienda;
+
+<span class="keyword">import</span> org.springframework.boot.SpringApplication;
+<span class="keyword">import</span> org.springframework.boot.autoconfigure.SpringBootApplication;
+
+<span class="comment">// Levanta toda la infraestructura, controladores de usuarios y pedidos en un solo proceso JVM</span>
+<span class="annotation">@SpringBootApplication</span>
+<span class="keyword">public class</span> <span class="type">MonolithicApplication</span> {
+    <span class="keyword">public static void</span> <span class="method">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">SpringApplication</span>.run(<span class="type">MonolithicApplication</span>.class, args);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="tab-panel" id="monolith-service">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-m-service')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-m-service"><span class="keyword">package</span> com.tienda.pedidos;
+
+<span class="keyword">import</span> com.tienda.usuarios.UserService; <span class="comment">// Importación de clase directa local</span>
+<span class="keyword">import</span> org.springframework.stereotype.Service;
+
+<span class="annotation">@Service</span>
+<span class="keyword">public class</span> <span class="type">OrderService</span> {
+    <span class="keyword">private final</span> <span class="type">UserService</span> userService; <span class="comment">// Inyección directa de dependencia en memoria</span>
+
+    <span class="keyword">public</span> <span class="type">OrderService</span>(<span class="type">UserService</span> userService) {
+        <span class="keyword">this</span>.userService = userService;
+    }
+
+    <span class="keyword">public</span> <span class="type">Order</span> <span class="method">crearPedido</span>(<span class="type">Long</span> usuarioId, <span class="type">Double</span> monto) {
+        <span class="comment">// Llamamos al método directamente en la RAM. Rápido y sin red.</span>
+        <span class="keyword">if</span> (!userService.existeUsuario(usuarioId)) {
+            <span class="keyword">throw new</span> <span class="type">IllegalArgumentException</span>(<span class="string">"El usuario no existe"</span>);
+        }
+        <span class="keyword">return new</span> <span class="type">Order</span>(usuarioId, monto, <span class="string">"CREADO"</span>);
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Cliente-Servidor -->
+    <section class="topic-section" id="cliente-servidor">
+      <h2 class="section-title">2. Estilo Cliente-Servidor</h2>
+      <p class="intro-paragraph">
+        En este estilo, el sistema se divide en **dos proyectos o módulos físicos independientes**: uno que aloja la interfaz de usuario o solicita datos (Cliente) y otro que expone recursos y procesa peticiones de negocio (Servidor). El cliente se comunica con el servidor a través de un protocolo de red (por ejemplo, HTTP haciendo llamadas REST).
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios del Proyecto</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">tienda-cliente-servidor</span> <span class="file-comment">// Carpeta raíz contenedora</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">servidor-api</span> <span class="file-comment">// PROYECTO 1: Backend que expone REST</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/tienda/server</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">ServerApp.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">ProductApiController.java</span> <span class="file-comment">// Expone datos en formato JSON</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">cliente-desktop</span> <span class="file-comment">// PROYECTO 2: Interfaz Swing que corre en la PC del usuario</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/tienda/client</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">ClientApp.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">ProductListFrame.java</span> <span class="file-comment">// Interfaz gráfica UI</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">HttpApiService.java</span> <span class="file-comment">// Realiza las peticiones de red al Servidor</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Código Java: Interacción a través de Red</h3>
+      <p class="intro-paragraph" style="font-size: 0.95rem;">
+        Observa cómo el Servidor expone un puerto local (ej. 8080) con formato JSON, y el Cliente utiliza el protocolo HTTP para solicitar y parsear remotamente la información de los productos.
+      </p>
+
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="cs-server">ProductApiController.java (Servidor)</button>
+          <button class="tab-btn" data-tab="cs-client">HttpApiService.java (Cliente)</button>
+        </div>
+
+        <!-- Server side -->
+        <div class="tab-panel active" id="cs-server">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-cs-server')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-cs-server"><span class="keyword">package</span> com.tienda.server;
+
+<span class="keyword">import</span> org.springframework.web.bind.annotation.GetMapping;
+<span class="keyword">import</span> org.springframework.web.bind.annotation.RestController;
+<span class="keyword">import</span> java.util.List;
+
+<span class="annotation">@RestController</span>
+<span class="keyword">public class</span> <span class="type">ProductApiController</span> {
+
+    <span class="comment">// El servidor expone el recurso a través de un endpoint HTTP público</span>
+    <span class="annotation">@GetMapping</span>(<span class="string">"/api/productos"</span>)
+    <span class="keyword">public</span> <span class="type">List</span>&lt;<span class="type">String</span>&gt; <span class="method">obtenerProductos</span>() {
+        <span class="comment">// Devuelve la lista en texto. Spring Boot la serializa automáticamente a JSON.</span>
+        <span class="keyword">return</span> <span class="type">List</span>.of(<span class="string">"Laptop Dell"</span>, <span class="string">"Mouse Inalámbrico"</span>, <span class="string">"Teclado Mecánico"</span>);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Client side -->
+        <div class="tab-panel" id="cs-client">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-cs-client')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-cs-client"><span class="keyword">package</span> com.tienda.client;
+
+<span class="keyword">import</span> java.net.URI;
+<span class="keyword">import</span> java.net.http.HttpClient;
+<span class="keyword">import</span> java.net.http.HttpRequest;
+<span class="keyword">import</span> java.net.http.HttpResponse;
+
+<span class="keyword">public class</span> <span class="type">HttpApiService</span> {
+    <span class="keyword">private final</span> <span class="type">HttpClient</span> httpClient;
+
+    <span class="keyword">public</span> <span class="type">HttpApiService</span>() {
+        <span class="keyword">this</span>.httpClient = <span class="type">HttpClient</span>.newHttpClient();
+    }
+
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">obtenerProductosDelServidor</span>() <span class="keyword">throws</span> <span class="type">Exception</span> {
+        <span class="comment">// El cliente configura la URL del nodo físico del servidor</span>
+        <span class="type">HttpRequest</span> request = <span class="type">HttpRequest</span>.newBuilder()
+                .uri(new <span class="type">URI</span>(<span class="string">"http://localhost:8080/api/productos"</span>))
+                .GET()
+                .build();
+
+        <span class="comment">// Realiza la petición de red bloqueante (I/O)</span>
+        <span class="type">HttpResponse</span>&lt;<span class="type">String</span>&gt; response = httpClient.send(request, <span class="type">HttpResponse</span>.BodyHandlers.ofString());
+        
+        <span class="comment">// Retorna el JSON crudo del catálogo recibido</span>
+        <span class="keyword">return</span> response.body();
+    }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. En Capas -->
+    <section class="topic-section" id="en-capas">
+      <h2 class="section-title">3. Arquitectura en Capas (Layered)</h2>
+      <p class="intro-paragraph">
+        En la arquitectura en capas, el código de la aplicación se divide horizontalmente por **responsabilidades técnicas**. Cada capa tiene un rol específico y se comunica únicamente con la capa inmediatamente inferior para asegurar el desacoplamiento. Las tres capas clásicas de diseño son: **Presentación (UI/Controller)**, **Dominio/Negocio (Service)** e **Infraestructura (Repository/DAO)**.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios del Proyecto</h3>
+      <p class="intro-paragraph" style="font-size: 0.95rem;">
+        A diferencia del monolito clásico por dominios, las carpetas se dividen explícitamente por el rol técnico de la capa en la que residen:
+      </p>
+
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">tienda-arquitectura-capas</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/tienda/layered</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">LayeredApplication.java</span></li>
+                  
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">controller</span> <span class="file-comment">// CAPA 1: Presentación / Controlador de APIs</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">ProductController.java</span></li>
+                    </ul>
+                  </li>
+                  
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">service</span> <span class="file-comment">// CAPA 2: Lógica de negocio (Reglas comerciales)</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">ProductService.java</span></li>
+                    </ul>
+                  </li>
+                  
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">repository</span> <span class="file-comment">// CAPA 3: Acceso a datos (SQL/Bases de datos)</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">ProductRepository.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">ProductRepositoryImpl.java</span></li>
+                    </ul>
+                  </li>
+
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">model</span> <span class="file-comment">// Entidades compartidas por las capas</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">Product.class</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Código Java: Flujo de Arriba hacia Abajo</h3>
+      <p class="intro-paragraph" style="font-size: 0.95rem;">
+        Compara las tres clases correspondientes. La petición fluye estrictamente en un sentido descendente: **Controller ➔ Service ➔ Repository**.
+      </p>
+
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="capa-controller">ProductController.java (Capa 1)</button>
+          <button class="tab-btn" data-tab="capa-service">ProductService.java (Capa 2)</button>
+          <button class="tab-btn" data-tab="capa-repo">ProductRepository.java (Capa 3)</button>
+        </div>
+
+        <!-- Capa 1 -->
+        <div class="tab-panel active" id="capa-controller">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-c-controller')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-c-controller"><span class="keyword">package</span> com.tienda.layered.controller;
+
+<span class="keyword">import</span> com.tienda.layered.model.Product;
+<span class="keyword">import</span> com.tienda.layered.service.ProductService; <span class="comment">// Conecta con la capa inferior</span>
+<span class="keyword">import</span> org.springframework.web.bind.annotation.*;
+<span class="keyword">import</span> java.util.List;
+
+<span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>(<span class="string">"/productos"</span>)
+<span class="keyword">public class</span> <span class="type">ProductController</span> {
+    <span class="keyword">private final</span> <span class="type">ProductService</span> productService;
+
+    <span class="comment">// Se inyecta la capa de negocio inmediatamente inferior</span>
+    <span class="keyword">public</span> <span class="type">ProductController</span>(<span class="type">ProductService</span> productService) {
+        <span class="keyword">this</span>.productService = productService;
+    }
+
+    <span class="annotation">@GetMapping</span>
+    <span class="keyword">public</span> <span class="type">List</span>&lt;<span class="type">Product</span>&gt; <span class="method">listar</span>() {
+        <span class="keyword">return</span> productService.obtenerCatalogoConDescuento();
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Capa 2 -->
+        <div class="tab-panel" id="capa-service">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-c-service')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-c-service"><span class="keyword">package</span> com.tienda.layered.service;
+
+<span class="keyword">import</span> com.tienda.layered.model.Product;
+<span class="keyword">import</span> com.tienda.layered.repository.ProductRepository; <span class="comment">// Conecta con la capa inferior</span>
+<span class="keyword">import</span> org.springframework.stereotype.Service;
+<span class="keyword">import</span> java.util.List;
+
+<span class="annotation">@Service</span>
+<span class="keyword">public class</span> <span class="type">ProductService</span> {
+    <span class="keyword">private final</span> <span class="type">ProductRepository</span> productRepository;
+
+    <span class="comment">// Inyecta el repositorio de acceso a infraestructura</span>
+    <span class="keyword">public</span> <span class="type">ProductService</span>(<span class="type">ProductRepository</span> productRepository) {
+        <span class="keyword">this</span>.productRepository = productRepository;
+    }
+
+    <span class="keyword">public</span> <span class="type">List</span>&lt;<span class="type">Product</span>&gt; <span class="method">obtenerCatalogoConDescuento</span>() {
+        <span class="type">List</span>&lt;<span class="type">Product</span>&gt; lista = productRepository.findAll();
+        <span class="comment">// Regla de negocio: Aplicar un 10% de descuento corporativo</span>
+        lista.forEach(p -> p.setPrecio(p.getPrecio() * 0.9));
+        <span class="keyword">return</span> lista;
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Capa 3 -->
+        <div class="tab-panel" id="capa-repo">
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-c-repo')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-c-repo"><span class="keyword">package</span> com.tienda.layered.repository;
+
+<span class="keyword">import</span> com.tienda.layered.model.Product;
+<span class="keyword">import</span> java.util.List;
+
+<span class="comment">// Interfaz que abstrae la base de datos (desacopla el motor físico de base de datos)</span>
+<span class="keyword">public interface</span> <span class="type">ProductRepository</span> {
+    <span class="type">List</span>&lt;<span class="type">Product</span>&gt; <span class="method">findAll</span>();
+}
+
+<span class="comment">/*
+  * Nota de diseño: La implementación física de esta interfaz (ProductRepositoryImpl)
+  * será la encargada de abrir la conexión SQL mediante JDBC o JPA. La capa de Service
+  * nunca sabrá si estamos usando Postgres, Oracle o una lista simulada en memoria.
+  */</span></code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Otros Estilos Tradicionales -->
+    <section class="topic-section" id="otros-estilos">
+      <h2 class="section-title">4. Otros Estilos Arquitectónicos Tradicionales</h2>
+      <p class="intro-paragraph">
+        Existen otros estilos arquitectónicos tradicionales que resuelven problemas específicos de procesamiento, extensibilidad y coordinación de conocimiento distribuidos en el desarrollo de software.
+      </p>
+
+      <!-- Sub-estilo 4.1: Filtros y Tuberías -->
+      <div style="margin-bottom: 40px;">
+        <h3 style="font-size: 1.4rem; color: var(--color-accent); margin-bottom: 12px;">4.1 Filtros y Tuberías (Pipes and Filters)</h3>
+        <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+          El flujo de datos se procesa secuencialmente a través de componentes independientes (**filtros**) conectados por canales de comunicación (**tuberías**). Muy común en procesamiento de datos (ej. pipelines de datos, transformaciones de texto, compiladores y comandos de consola).
+        </p>
+
+        <h4 style="font-size: 1.15rem; margin-bottom: 8px; color: var(--text-bright);">Árbol de Directorios</h4>
+        <div class="file-tree-container">
+          <ul class="tree-root">
+            <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">tienda-pipes-filters</span>
+              <ul>
+                <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/tienda/pipeline</span>
+                  <ul>
+                    <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">PipelineApp.java</span> <span class="file-comment">// Orquestador y ejecución del flujo</span></li>
+                    <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">Filter.java</span> <span class="file-comment">// Interfaz genérica del Filtro</span></li>
+                    <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">TextCleaningFilter.java</span> <span class="file-comment">// Filtro 1: Remueve caracteres extraños</span></li>
+                    <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">EncryptingFilter.java</span> <span class="file-comment">// Filtro 2: Encripta la cadena final</span></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <h4 style="font-size: 1.15rem; margin-bottom: 8px; color: var(--text-bright);">Código Java</h4>
+        <div class="tabs-wrapper">
+          <div class="tabs-header">
+            <button class="tab-btn active" data-tab="pipe-filter">Filter.java & PipelineApp.java</button>
+            <button class="tab-btn" data-tab="pipe-impl">Filtros Concretos</button>
+          </div>
+          
+          <div class="tab-panel active" id="pipe-filter">
+            <div class="code-container">
+              <button class="copy-btn" onclick="copyCode('code-pipe-main')">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <pre><code id="code-pipe-main"><span class="keyword">package</span> com.tienda.pipeline;
+
+<span class="keyword">import</span> java.util.ArrayList;
+<span class="keyword">import</span> java.util.List;
+
+<span class="comment">// Contrato para los filtros individuales</span>
+<span class="keyword">interface</span> <span class="type">Filter</span>&lt;<span class="type">T</span>&gt; {
+    <span class="type">T</span> <span class="method">execute</span>(<span class="type">T</span> input);
+}
+
+<span class="comment">// Orquestador (Pipeline / Tubería) que encadena la ejecución</span>
+<span class="keyword">public class</span> <span class="type">PipelineApp</span> {
+    <span class="keyword">private final</span> <span class="type">List</span>&lt;<span class="type">Filter</span>&lt;<span class="type">String</span>&gt;&gt; filters = <span class="keyword">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+
+    <span class="keyword">public void</span> <span class="method">registerFilter</span>(<span class="type">Filter</span>&lt;<span class="type">String</span>&gt; filter) {
+        filters.add(filter);
+    }
+
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">process</span>(<span class="type">String</span> input) {
+        <span class="type">String</span> temp = input;
+        <span class="keyword">for</span> (<span class="type">Filter</span>&lt;<span class="type">String</span>&gt; filter : filters) {
+            temp = filter.execute(temp); <span class="comment">// El output del filtro actual es el input del siguiente</span>
+        }
+        <span class="keyword">return</span> temp;
+    }
+
+    <span class="keyword">public static void</span> <span class="method">main</span>(<span class="type">String</span>[] args) {
+        <span class="type">PipelineApp</span> pipeline = <span class="keyword">new</span> <span class="type">PipelineApp</span>();
+        pipeline.registerFilter(<span class="keyword">new</span> <span class="type">TextCleaningFilter</span>());
+        pipeline.registerFilter(<span class="keyword">new</span> <span class="type">EncryptingFilter</span>());
+
+        <span class="type">String</span> resultado = pipeline.process(<span class="string">"¡Hola @Mundo!"</span>);
+        <span class="type">System</span>.out.println(resultado);
+    }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="pipe-impl">
+            <div class="code-container">
+              <button class="copy-btn" onclick="copyCode('code-pipe-impl')">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <pre><code id="code-pipe-impl"><span class="keyword">package</span> com.tienda.pipeline;
+
+<span class="comment">// Filtro 1: Remueve caracteres no alfanuméricos</span>
+<span class="keyword">class</span> <span class="type">TextCleaningFilter</span> <span class="keyword">implements</span> <span class="type">Filter</span>&lt;<span class="type">String</span>&gt; {
+    <span class="annotation">@Override</span>
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">execute</span>(<span class="type">String</span> input) {
+        <span class="keyword">return</span> input.replaceAll(<span class="string">"[^a-zA-Z0-9 ]"</span>, <span class="string">""</span>);
+    }
+}
+
+<span class="comment">// Filtro 2: Encriptación básica César</span>
+<span class="keyword">class</span> <span class="type">EncryptingFilter</span> <span class="keyword">implements</span> <span class="type">Filter</span>&lt;<span class="type">String</span>&gt; {
+    <span class="annotation">@Override</span>
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">execute</span>(<span class="type">String</span> input) {
+        <span class="type">StringBuilder</span> sb = <span class="keyword">new</span> <span class="type">StringBuilder</span>();
+        <span class="keyword">for</span> (<span class="keyword">char</span> c : input.toCharArray()) {
+            sb.append((<span class="keyword">char</span>) (c + 1)); <span class="comment">// Desplazamiento simple</span>
+        }
+        <span class="keyword">return</span> sb.toString();
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-estilo 4.2: Microkernel -->
+      <div style="margin-bottom: 40px;">
+        <h3 style="font-size: 1.4rem; color: var(--color-secondary); margin-bottom: 12px;">4.2 Microkernel (Arquitectura de Plug-ins)</h3>
+        <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+          Consiste en un sistema núcleo básico (**kernel**) que expone las operaciones mínimas esenciales de ejecución y permite extender su funcionalidad agregando módulos independientes (**plug-ins**) sin modificar la base central. Ejemplos muy comunes son navegadores web, IDEs (VS Code) y reproductores multimedia.
+        </p>
+
+        <h4 style="font-size: 1.15rem; margin-bottom: 8px; color: var(--text-bright);">Árbol de Directorios</h4>
+        <div class="file-tree-container">
+          <ul class="tree-root">
+            <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">tienda-microkernel</span>
+              <ul>
+                <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/tienda/microkernel</span>
+                  <ul>
+                    <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">core</span> <span class="file-comment">// Núcleo del sistema</span>
+                      <ul>
+                        <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">KernelApp.java</span></li>
+                        <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">PaymentPlugin.java</span> <span class="file-comment">// Contrato base para plugins</span></li>
+                      </ul>
+                    </li>
+                    <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">plugins</span> <span class="file-comment">// Extensiones modulares independientes</span>
+                      <ul>
+                        <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">PaypalPlugin.java</span></li>
+                        <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">StripePlugin.java</span></li>
+                      </ul>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <h4 style="font-size: 1.15rem; margin-bottom: 8px; color: var(--text-bright);">Código Java</h4>
+        <div class="tabs-wrapper">
+          <div class="tabs-header">
+            <button class="tab-btn active" data-tab="kernel-core">KernelApp.java & PaymentPlugin.java</button>
+            <button class="tab-btn" data-tab="kernel-plugins">Plugins Concretos</button>
+          </div>
+          
+          <div class="tab-panel active" id="kernel-core">
+            <div class="code-container">
+              <button class="copy-btn" onclick="copyCode('code-kernel-main')">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <pre><code id="code-kernel-main"><span class="keyword">package</span> com.tienda.microkernel.core;
+
+<span class="keyword">import</span> java.util.HashMap;
+<span class="keyword">import</span> java.util.Map;
+
+<span class="comment">// Interfaz de Plugin que define el contrato de extensión</span>
+<span class="keyword">interface</span> <span class="type">PaymentPlugin</span> {
+    <span class="keyword">void</span> <span class="method">processPayment</span>(<span class="type">double</span> amount);
+    <span class="type">String</span> <span class="method">getPluginName</span>();
+}
+
+<span class="comment">// Microkernel básico que registra y ejecuta las extensiones sin saber qué hacen</span>
+<span class="keyword">public class</span> <span class="type">KernelApp</span> {
+    <span class="keyword">private final</span> <span class="type">Map</span>&lt;<span class="type">String</span>, <span class="type">PaymentPlugin</span>&gt; registry = <span class="keyword">new</span> <span class="type">HashMap</span>&lt;&gt;();
+
+    <span class="keyword">public void</span> <span class="method">registerPlugin</span>(<span class="type">PaymentPlugin</span> plugin) {
+        registry.put(plugin.getPluginName(), plugin);
+    }
+
+    <span class="keyword">public void</span> <span class="method">executePayment</span>(<span class="type">String</span> provider, <span class="type">double</span> amount) {
+        <span class="type">PaymentPlugin</span> plugin = registry.get(provider);
+        <span class="keyword">if</span> (plugin == <span class="keyword">null</span>) {
+            <span class="type">System</span>.out.println(<span class="string">"Error: Plugin no soportado."</span>);
+        } <span class="keyword">else</span> {
+            plugin.processPayment(amount); // Ejecución delegada al módulo
+        }
+    }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="kernel-plugins">
+            <div class="code-container">
+              <button class="copy-btn" onclick="copyCode('code-kernel-plugins')">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <pre><code id="code-kernel-plugins"><span class="keyword">package</span> com.tienda.microkernel.plugins;
+
+<span class="keyword">import</span> com.tienda.microkernel.core.PaymentPlugin;
+
+<span class="comment">// Plugin de PayPal implementado fuera del Core</span>
+<span class="keyword">public class</span> <span class="type">PaypalPlugin</span> <span class="keyword">implements</span> <span class="type">PaymentPlugin</span> {
+    <span class="annotation">@Override</span>
+    <span class="keyword">public void</span> <span class="method">processPayment</span>(<span class="type">double</span> amount) {
+        <span class="type">System</span>.out.println(<span class="string">"Procesando $"</span> + amount + <span class="string">" a través del API de PayPal"</span>);
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">getPluginName</span>() {
+        <span class="keyword">return</span> <span class="string">"PAYPAL"</span>;
+    }
+}
+
+<span class="comment">// Plugin de Stripe implementado fuera del Core</span>
+<span class="keyword">public class</span> <span class="type">StripePlugin</span> <span class="keyword">implements</span> <span class="type">PaymentPlugin</span> {
+    <span class="annotation">@Override</span>
+    <span class="keyword">public void</span> <span class="method">processPayment</span>(<span class="type">double</span> amount) {
+        <span class="type">System</span>.out.println(<span class="string">"Procesando $"</span> + amount + <span class="string">" a través del SDK de Stripe"</span>);
+    }
+
+    <span class="annotation">@Override</span>
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">getPluginName</span>() {
+        <span class="keyword">return</span> <span class="string">"STRIPE"</span>;
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-estilo 4.3: Pizarra -->
+      <div style="margin-bottom: 20px;">
+        <h3 style="font-size: 1.4rem; color: var(--color-warning); margin-bottom: 12px;">4.3 Pizarra (Blackboard)</h3>
+        <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+          Múltiples subsistemas independientes (**expertos o fuentes de conocimiento**) cooperan compartiendo una base de datos centralizada común (**la pizarra**) para resolver problemas complejos de IA tradicional o reconocimiento de patrones, donde ninguna regla lógica predefinida por sí sola puede dar la solución absoluta.
+        </p>
+
+        <h4 style="font-size: 1.15rem; margin-bottom: 8px; color: var(--text-bright);">Árbol de Directorios</h4>
+        <div class="file-tree-container">
+          <ul class="tree-root">
+            <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">tienda-blackboard</span>
+              <ul>
+                <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/tienda/blackboard</span>
+                  <ul>
+                    <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">Blackboard.java</span> <span class="file-comment">// Almacén central de conocimiento</span></li>
+                    <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">Controller.java</span> <span class="file-comment">// Coordina las llamadas a los expertos</span></li>
+                    <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">KnowledgeSource.java</span> <span class="file-comment">// Contrato base para los expertos</span></li>
+                    <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">TaxExpert.java</span> <span class="file-comment">// Experto 1: Calcula el IVA de la compra</span></li>
+                    <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">DiscountExpert.java</span> <span class="file-comment">// Experto 2: Aplica descuentos por festividades</span></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+
+        <h4 style="font-size: 1.15rem; margin-bottom: 8px; color: var(--text-bright);">Código Java</h4>
+        <div class="tabs-wrapper">
+          <div class="tabs-header">
+            <button class="tab-btn active" data-tab="bb-core">Blackboard.java & Controller.java</button>
+            <button class="tab-btn" data-tab="bb-experts">Expertos (KnowledgeSources)</button>
+          </div>
+          
+          <div class="tab-panel active" id="bb-core">
+            <div class="code-container">
+              <button class="copy-btn" onclick="copyCode('code-bb-main')">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <pre><code id="code-bb-main"><span class="keyword">package</span> com.tienda.blackboard;
+
+<span class="keyword">import</span> java.util.ArrayList;
+<span class="keyword">import</span> java.util.List;
+
+<span class="comment">// Pizarra: almacena el estado actual del cálculo</span>
+<span class="keyword">public class</span> <span class="type">Blackboard</span> {
+    <span class="keyword">public double</span> basePrice;
+    <span class="keyword">public double</span> taxAmount;
+    <span class="keyword">public double</span> discountAmount;
+    <span class="keyword">public double</span> totalPrice;
+}
+
+<span class="comment">// Controlador: ejecuta a los expertos secuencialmente o en base a la pizarra</span>
+<span class="keyword">class</span> <span class="type">Controller</span> {
+    <span class="keyword">private final</span> <span class="type">List</span>&lt;<span class="type">KnowledgeSource</span>&gt; experts = <span class="keyword">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+
+    <span class="keyword">public void</span> <span class="method">addExpert</span>(<span class="type">KnowledgeSource</span> expert) {
+        experts.add(expert);
+    }
+
+    <span class="keyword">public void</span> <span class="method">solve</span>(<span class="type">Blackboard</span> blackboard) {
+        <span class="keyword">for</span> (<span class="type">KnowledgeSource</span> expert : experts) {
+            expert.updateBlackboard(blackboard); <span class="comment">// Los expertos leen y actualizan el estado compartido</span>
+        }
+        blackboard.totalPrice = blackboard.basePrice + blackboard.taxAmount - blackboard.discountAmount;
+    }
+}</code></pre>
+            </div>
+          </div>
+
+          <div class="tab-panel" id="bb-experts">
+            <div class="code-container">
+              <button class="copy-btn" onclick="copyCode('code-bb-experts')">
+                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copiar
+              </button>
+              <pre><code id="code-bb-experts"><span class="keyword">package</span> com.tienda.blackboard;
+
+<span class="comment">// Interfaz para los expertos</span>
+<span class="keyword">interface</span> <span class="type">KnowledgeSource</span> {
+    <span class="keyword">void</span> <span class="method">updateBlackboard</span>(<span class="type">Blackboard</span> blackboard);
+}
+
+<span class="comment">// Experto 1: Calcula impuesto (IVA 19%)</span>
+<span class="keyword">class</span> <span class="type">TaxExpert</span> <span class="keyword">implements</span> <span class="type">KnowledgeSource</span> {
+    <span class="annotation">@Override</span>
+    <span class="keyword">public void</span> <span class="method">updateBlackboard</span>(<span class="type">Blackboard</span> blackboard) {
+        blackboard.taxAmount = blackboard.basePrice * 0.19;
+    }
+}
+
+<span class="comment">// Experto 2: Aplica un descuento fijo de $10 si la compra supera los $100</span>
+<span class="keyword">class</span> <span class="type">DiscountExpert</span> <span class="keyword">implements</span> <span class="type">KnowledgeSource</span> {
+    <span class="annotation">@Override</span>
+    <span class="keyword">public void</span> <span class="method">updateBlackboard</span>(<span class="type">Blackboard</span> blackboard) {
+        <span class="keyword">if</span> (blackboard.basePrice > 100) {
+            blackboard.discountAmount = 10.0;
+        }
+    }
+}</code></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">Autoevaluación de Estructuras</h2>
+      <p class="intro-paragraph">
+        Responde el siguiente cuestionario para evaluar tu comprensión sobre la organización física de archivos en los diferentes estilos arquitectónicos tradicionales.
+      </p>
+
+      <div class="quiz-container">
+        <!-- Q1 -->
+        <div class="quiz-question" data-q="1">
+          <h4><span class="q-num">Q1.</span> Si ves un árbol de directorios de Java con los paquetes separados en "controller", "service" y "repository" en la raíz del proyecto, ¿qué tipo de organización arquitectónica se está utilizando?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Organización por Dominio de Negocio (Monolito modularizado)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Organización horizontal por Capas técnicas (Layered)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Arquitectura basada en Microservicios distribuidos</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="d">
+              <span>Arquitectura Cliente-Servidor con compilación única</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-question" data-q="2">
+          <h4><span class="q-num">Q2.</span> ¿Cuál es la principal característica del flujo de comunicación entre clases en la Arquitectura en Capas?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Cualquier clase puede comunicarse directamente con la base de datos de manera arbitraria para mejorar la velocidad.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>El flujo de peticiones se da de manera descendente unidireccional (Presentación ➔ Negocio ➔ Persistencia).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>La capa de persistencia se encarga de instanciar y controlar los endpoints de presentación web.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="d">
+              <span>La comunicación se realiza obligatoriamente mediante peticiones REST de red entre capas internas.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-question" data-q="3">
+          <h4><span class="q-num">Q3.</span> En una arquitectura Cliente-Servidor física, ¿por qué es necesario que el proyecto de cliente no tenga imports directos de las clases de servicio del servidor?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Porque corren en entornos y procesos físicos totalmente separados y deben comunicarse exclusivamente por un protocolo de red (ej. HTTP REST).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Porque Java prohíbe el uso de imports entre archivos dentro de la misma computadora.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Porque la base de datos es la única autorizada a instanciar las interfaces de usuario.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="d">
+              <span>Para evitar que el cliente de escritorio consuma espacio en la memoria RAM del servidor web.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/3</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Code Tabs
+       ========================================== */
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        if (!targetTab) return;
+
+        const parentWrapper = btn.closest('.tabs-wrapper');
+        parentWrapper.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        parentWrapper.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(targetTab).classList.add('active');
+      });
+    });
+
+    /* Copy Code Function */
+    function copyCode(elementId) {
+      const codeElement = document.getElementById(elementId);
+      const textToCopy = codeElement.innerText;
+      
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const btn = codeElement.closest('.code-container').querySelector('.copy-btn');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="stroke: var(--color-success)"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiado!`;
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 2000);
+      }).catch(err => {
+        console.error('Error al copiar el texto: ', err);
+      });
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'a'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 3;
+      let allAnswered = true;
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del quiz antes de verificar.");
+        return;
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          const lbl = r.closest('.quiz-option');
+          lbl.classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has comprendido la estructura física y lógica de estas arquitecturas.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 1) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "Buen intento. Revisa la pregunta errada para fijar mejor el concepto.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Necesitas repasar cómo fluyen las dependencias y la separación física del cliente y servidor.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

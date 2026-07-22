@@ -1,0 +1,2340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 5: Estructuras y Estilos Arquitectónicos, Concepto de Arquitectura de Software, Stakeholders, Modelo de Vistas 4+1, Monolítico, Cliente-Servidor, Capas, SOA y Microservicios.">
+  <title>Estructuras y Estilos Arquitectónicos | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Yellow */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Background Ambient Gradients */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px; /* compensating border width */
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.15) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .class-meta {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .class-meta span.separator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 2.75rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text-bright) 30%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    /* ==========================================
+       Grid / Card Styles (Objectives, Modules)
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(59, 130, 246, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      margin-bottom: 20px;
+    }
+
+    .card-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .info-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--text-bright);
+    }
+
+    .info-card p {
+      font-size: 0.95rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Feature List Style
+       ========================================== */
+    .feature-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    @media (max-width: 768px) {
+      .feature-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 16px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      padding: 20px;
+      border-radius: 12px;
+      transition: border-color var(--transition-speed) ease;
+    }
+
+    .feature-item:hover {
+      border-color: rgba(6, 182, 212, 0.3);
+    }
+
+    .feature-item-icon {
+      color: var(--color-accent);
+      flex-shrink: 0;
+    }
+
+    .feature-item-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+
+    .feature-item-content h4 {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text-bright);
+    }
+
+    .feature-item-content p {
+      font-size: 0.9rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Interactive 4+1 View Model Styles
+       ========================================== */
+    .viewmodel-container {
+      background: rgba(15, 23, 42, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      margin-top: 24px;
+    }
+
+    .viewmodel-layout {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, auto);
+      gap: 20px;
+      justify-items: center;
+      align-items: center;
+      position: relative;
+    }
+
+    @media (max-width: 768px) {
+      .viewmodel-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+      }
+    }
+
+    .viewmodel-card {
+      background: #0f172a;
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 220px;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .viewmodel-card:hover, .viewmodel-card.active {
+      border-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .viewmodel-card h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 8px;
+    }
+
+    .viewmodel-card span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Grid positions for cross model */
+    .vm-logical { grid-column: 1; grid-row: 1; }
+    .vm-development { grid-column: 3; grid-row: 1; }
+    .vm-scenarios { grid-column: 2; grid-row: 2; border-color: var(--color-secondary); }
+    .vm-scenarios:hover, .viewmodel-card.vm-scenarios.active {
+      border-color: var(--color-secondary);
+      background: rgba(139, 92, 246, 0.05);
+      box-shadow: 0 0 15px rgba(139, 92, 246, 0.25);
+    }
+    .vm-process { grid-column: 1; grid-row: 3; }
+    .vm-physical { grid-column: 3; grid-row: 3; }
+
+    @media (max-width: 768px) {
+      .vm-logical, .vm-development, .vm-scenarios, .vm-process, .vm-physical {
+        grid-column: 1;
+        grid-row: auto;
+        max-width: 100%;
+      }
+    }
+
+    .viewmodel-info-panel {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .viewmodel-info-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .viewmodel-info-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Interactive Style Explorer (Modulo 4)
+       ========================================== */
+    .style-explorer {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 30px;
+      margin-top: 24px;
+      background: rgba(15, 23, 42, 0.3);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 30px;
+    }
+
+    @media (max-width: 900px) {
+      .style-explorer {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .style-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .style-selector-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .style-selector-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .style-selector-btn.active {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    .style-selector-btn.active svg {
+      transform: translateX(4px);
+    }
+
+    .style-selector-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      transition: transform 0.2s ease;
+    }
+
+    .style-details-card {
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+
+    .style-details-header {
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 15px;
+    }
+
+    .style-details-header h3 {
+      font-size: 1.4rem;
+      color: var(--text-bright);
+      margin-bottom: 6px;
+    }
+
+    .style-details-header span {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .style-details-desc {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .style-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .style-pros-cons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pros-list, .cons-list {
+      background: rgba(255,255,255,0.01);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .pros-list h5 {
+      color: var(--color-success);
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .cons-list h5 {
+      color: var(--color-danger);
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .pros-list ul, .cons-list ul {
+      list-style: none;
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .pros-list ul li::before {
+      content: '✓';
+      color: var(--color-success);
+      margin-right: 8px;
+      font-weight: bold;
+    }
+
+    .cons-list ul li::before {
+      content: '✗';
+      color: var(--color-danger);
+      margin-right: 8px;
+      font-weight: bold;
+    }
+
+    /* ==========================================
+       Comparison Grid (SOA vs Microservices)
+       ========================================== */
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .comparison-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .comp-side {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .comp-side.soa {
+      border-left: 3px solid var(--color-primary);
+    }
+
+    .comp-side.microservices {
+      border-left: 3px solid var(--color-secondary);
+    }
+
+    .comp-side h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .comp-side.soa h4 { color: var(--color-primary); }
+    .comp-side.microservices h4 { color: var(--color-secondary); }
+
+    .comp-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .comp-table td {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.9rem;
+    }
+
+    .comp-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comp-table td.label {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    .comp-table td.example {
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      text-align: right;
+    }
+
+    .comp-bridge {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--color-accent);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .comp-bridge svg {
+      width: 28px;
+      height: 28px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    @media (max-width: 768px) {
+      .comp-bridge {
+        transform: rotate(90deg);
+        padding: 10px 0;
+      }
+    }
+
+    /* ==========================================
+       Code Tabs & Snippets
+       ========================================== */
+    .tabs-wrapper {
+      background: #0f172a;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .tabs-header {
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      padding: 16px 24px;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+
+    .tab-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .tab-panel {
+      display: none;
+      padding: 24px;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    .code-container {
+      position: relative;
+    }
+
+    pre {
+      margin: 0;
+      overflow-x: auto;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+    }
+
+    /* Code Highlighting classes */
+    .keyword { color: #f43f5e; font-weight: 500; }
+    .type { color: #38bdf8; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+    .method { color: #f59e0b; }
+    .property { color: #a855f7; }
+
+    /* Copy Button */
+    .copy-btn {
+      position: absolute;
+      top: -12px;
+      right: 0;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      color: var(--text-muted);
+      padding: 6px 12px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-bright);
+    }
+
+    .copy-btn svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+    }
+
+    /* ==========================================
+       Quiz System
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .quiz-option input[type="radio"]::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      transform: scale(0);
+      transition: transform 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-accent);
+    }
+
+    .quiz-option input[type="radio"]:checked::before {
+      transform: scale(1);
+    }
+
+    .quiz-option.selected {
+      background: rgba(6, 182, 212, 0.05);
+      border-color: rgba(6, 182, 212, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.08) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: #a7f3d0 !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #fca5a5 !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      color: var(--text-bright);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .score-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+    }
+
+    .score-badge.pass {
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .score-badge.fail {
+      color: var(--color-danger);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* ==========================================
+       Footer Section
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    footer p.accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Responsive Rules & Mobile Sidebar Drawer
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 24px;
+        padding-top: 80px; /* offset top navigation */
+      }
+
+      .progress-bar-container {
+        left: 0;
+      }
+
+      .top-nav {
+        display: flex;
+      }
+
+      .hero-section {
+        padding: 30px 20px;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+    }
+
+    .backdrop-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    .backdrop-overlay.open {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Background decorative glows -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Header -->
+  <header class="top-nav">
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <h1>Estructuras Arquitectónicas</h1>
+    <div style="width: 24px;"></div>
+  </header>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Sidebar Navigation Drawer -->
+  <nav class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v5"></path>
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 5</h2>
+        <span>Arquitectura SW</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#inicio" class="active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        Inicio
+      </a></li>
+      <li><a href="#objetivos">
+        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 6v6l4 2"></path></svg>
+        Objetivos
+      </a></li>
+      <li><a href="#modulo1">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"></path></svg>
+        1. Concepto y Stakeholders
+      </a></li>
+      <li><a href="#modulo2">
+        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+        2. Puntos de Vista (4+1)
+      </a></li>
+      <li><a href="#modulo3">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        3. Documentación y Vistas
+      </a></li>
+      <li><a href="#modulo4">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+        4. Estilos Tradicionales
+      </a></li>
+      <li><a href="#modulo5">
+        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10M2 12h20"></path></svg>
+        5. SOA y Microservicios
+      </a></li>
+      <li><a href="#practica">
+        <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+        Práctica Comparativa
+      </a></li>
+      <li><a href="#quiz">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        Autoevaluación
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &copy; 2026
+    </div>
+  </nav>
+
+  <!-- Overlay backdrop for mobile menu -->
+  <div class="backdrop-overlay" id="menu-overlay"></div>
+
+  <!-- Main Content container -->
+  <main class="main-content">
+    
+    <!-- Hero / Header Section -->
+    <header class="hero-section" id="inicio">
+      <div class="class-meta">
+        <span>Clase 5</span>
+        <span class="separator"></span>
+        <span>Estructura y Arquitectura del Software</span>
+      </div>
+      <h1 class="hero-title">Estructuras y Estilos Arquitectónicos</h1>
+      <p class="hero-desc">
+        Comprende las decisiones fundamentales que dan forma al esqueleto de los sistemas de software. Aprende a documentar y analizar la arquitectura mediante puntos de vista y el modelo de vistas 4+1, y explora a profundidad la evolución de los estilos arquitectónicos desde el Monolito tradicional hasta los Microservicios modernos.
+      </p>
+    </header>
+
+    <!-- Objetivos Section -->
+    <section class="topic-section" id="objetivos">
+      <h2 class="section-title">Objetivos de Aprendizaje</h2>
+      <p class="intro-paragraph">
+        Al finalizar esta sesión de estudio, serás capaz de conceptualizar y diseñar la estructura a alto nivel de sistemas de software complejos, logrando:
+      </p>
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+          </div>
+          <h3>Conceptualizar</h3>
+          <p>Explicar el concepto de arquitectura de software y su impacto en la calidad sistémica y los stakeholders.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+          </div>
+          <h3>Visualizar (4+1)</h3>
+          <p>Mapear e interpretar un sistema de software a través de múltiples vistas arquitectónicas (lógica, desarrollo, procesos y física).</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+          </div>
+          <h3>Clasificar Estilos</h3>
+          <p>Analizar y comparar las estructuras tradicionales: Monolítica, Cliente-Servidor, Microservicios y Arquitectura en Capas.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon">
+            <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path></svg>
+          </div>
+          <h3>Diseñar Servicios</h3>
+          <p>Dominar y contrastar las arquitecturas distribuidas basadas en servicios como SOA y los Microservicios modernos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 1: Concepto de Arquitectura y Stakeholders -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Arquitectura de Software y Stakeholders</h2>
+      <p class="intro-paragraph">
+        La <span class="highlight">Arquitectura de Software</span> representa el conjunto de decisiones de diseño fundamentales acerca de la estructura y el comportamiento de un sistema. No consiste simplemente en escribir código; es la estructura organizacional global que determina cómo interactúan los componentes, cómo se distribuyen las responsabilidades y cómo se satisfacen los requerimientos no funcionales (atributos de calidad como escalabilidad, seguridad y mantenibilidad).
+      </p>
+
+      <div class="info-card" style="margin-bottom: 30px; border-left: 3px solid var(--color-accent);">
+        <h3 style="font-size: 1.15rem;">Definición formal (ISO/IEC/IEEE 42010):</h3>
+        <p style="font-style: italic; font-size: 1.05rem; line-height: 1.6; margin-top: 8px;">
+          "La arquitectura de un sistema es la organización fundamental de sus componentes, sus relaciones entre sí y con el entorno, y los principios que guían su diseño y evolución."
+        </p>
+      </div>
+
+      <h3 style="font-size: 1.3rem; margin-bottom: 15px; color: var(--text-bright);">Los Stakeholders (Partes Interesadas)</h3>
+      <p class="intro-paragraph" style="margin-bottom: 20px;">
+        Un sistema de software no se construye en el vacío. Existe un conjunto de personas u organizaciones que tienen un interés directo en el éxito, comportamiento o mantenimiento del software. El arquitecto de software debe balancear sus intereses conflictivos:
+      </p>
+
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Usuarios Finales</h4>
+            <p>Les interesa la usabilidad, rapidez del sistema, disponibilidad de las funciones y que el software resuelva sus necesidades cotidianas de forma fluida.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Clientes / Patrocinadores (Negocio)</h4>
+            <p>Se enfocan en el costo de desarrollo, el tiempo de entrega (Time to Market), el retorno de inversión (ROI) y la viabilidad comercial a largo plazo.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Desarrolladores (Equipo Técnico)</h4>
+            <p>Buscan una arquitectura clara, fácil de compilar, modularizada, bien documentada y que minimice el acoplamiento para poder programar sin pisarse el código.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Administradores de Operaciones (DevOps/SRE)</h4>
+            <p>Priorizan la facilidad de despliegue, la observabilidad (logs y métricas), la tolerancia a fallos y la capacidad de escalar el sistema bajo demanda.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Puntos de Vista Arquitectonicos (4+1 Model) -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Puntos de Vista Arquitectónicos: Modelo 4+1 Vistas</h2>
+      <p class="intro-paragraph">
+        Describir un sistema complejo desde una única perspectiva es imposible. Un desarrollador necesita ver diagramas de clases, mientras que un ingeniero de DevOps necesita ver servidores y redes. El estándar de facto para resolver esto es el <strong>Modelo de Vistas 4+1</strong> propuesto por Philippe Kruchten.
+      </p>
+
+      <p class="intro-paragraph" style="margin-bottom: 15px;">
+        <span class="highlight">Modelo Interactivo:</span> Haz clic en cualquiera de las vistas de la arquitectura en el diagrama para ver su descripción detallada, objetivos y stakeholders principales asociados.
+      </p>
+
+      <!-- Interactive 4+1 view model component -->
+      <div class="viewmodel-container">
+        <div class="viewmodel-layout">
+          <!-- Logical View -->
+          <div class="viewmodel-card vm-logical active" onclick="selectView('logical')">
+            <h4>Vista Lógica</h4>
+            <span>Estructura de Diseño</span>
+          </div>
+
+          <!-- Development View -->
+          <div class="viewmodel-card vm-development" onclick="selectView('development')">
+            <h4>Vista de Desarrollo</h4>
+            <span>Implementación / Código</span>
+          </div>
+
+          <!-- Scenarios View -->
+          <div class="viewmodel-card vm-scenarios" onclick="selectView('scenarios')">
+            <h4>Escenarios (Casos Uso)</h4>
+            <span>El "+1" / Validación</span>
+          </div>
+
+          <!-- Process View -->
+          <div class="viewmodel-card vm-process" onclick="selectView('process')">
+            <h4>Vista de Procesos</h4>
+            <span>Comportamiento / Red</span>
+          </div>
+
+          <!-- Physical View -->
+          <div class="viewmodel-card vm-physical" onclick="selectView('physical')">
+            <h4>Vista Física</h4>
+            <span>Despliegue / Hardware</span>
+          </div>
+        </div>
+
+        <!-- Info Panel Output -->
+        <div class="viewmodel-info-panel" id="viewmodel-info-box">
+          <h3 class="viewmodel-info-title" id="viewmodel-title">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+            Vista Lógica (Logical View)
+          </h3>
+          <p class="viewmodel-info-desc" id="viewmodel-desc">
+            Describe el modelo de diseño objeto-orientado del sistema. Se enfoca en las abstracciones, clases, interfaces y paquetes que estructuran la lógica de negocio. Muestra la descomposición funcional del software.<br>
+            <strong>Diagramas comunes:</strong> Diagrama de Clases, Diagrama de Paquetes, Diagrama de Secuencia.<br>
+            <strong>Stakeholders principales:</strong> Usuarios finales, Diseñadores de software, Desarrolladores.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Documentacion y Vistas Logicas / Fisicas -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Documentación Arquitectónica: Vistas Lógicas vs. Físicas</h2>
+      <p class="intro-paragraph">
+        La documentación arquitectónica comunica las decisiones clave a los stakeholders. Sin documentación actualizada, los sistemas caen en la <strong>degradación arquitectónica</strong> (donde el código implementado se desvía drásticamente del diseño planeado). Dentro de los puntos de vista esenciales, destaca el contraste entre el mundo de las abstracciones lógicas y el mundo real de la infraestructura física.
+      </p>
+
+      <div class="comparison-grid">
+        <!-- Logical View details -->
+        <div class="comp-side soa">
+          <h4>Vista Lógica (Abstracción)</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+            Responde a la pregunta: <em>¿Cómo se organiza conceptualmente el diseño del software?</em>
+          </p>
+          <table class="comp-table">
+            <tr>
+              <td class="label">Elementos de diseño:</td>
+              <td class="example">Clases, Interfaces, Interfaces de API, Capas de Negocio</td>
+            </tr>
+            <tr>
+              <td class="label">UML relevante:</td>
+              <td class="example">Diagramas de Clases, Objetos, Interacción</td>
+            </tr>
+            <tr>
+              <td class="label">Unidades lógicas:</td>
+              <td class="example">Módulos de Dominio (ej. Facturación, Inventario)</td>
+            </tr>
+            <tr>
+              <td class="label">Independencia:</td>
+              <td class="example">Teóricamente independiente del hardware de ejecución</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Bridge -->
+        <div class="comp-bridge">
+          <svg viewBox="0 0 24 24" stroke-width="2"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4M10 8V5M14 8V5"></path></svg>
+          Mapeo
+        </div>
+
+        <!-- Physical View details -->
+        <div class="comp-side microservices">
+          <h4>Vista Física (Infraestructura)</h4>
+          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+            Responde a la pregunta: <em>¿Cómo y dónde se ejecuta concretamente el software?</em>
+          </p>
+          <table class="comp-table">
+            <tr>
+              <td class="label">Elementos reales:</td>
+              <td class="example">Servidores (VM), Contenedores Docker, Balanceadores, Redes</td>
+            </tr>
+            <tr>
+              <td class="label">UML relevante:</td>
+              <td class="example">Diagramas de Despliegue (Deployment Diagrams)</td>
+            </tr>
+            <tr>
+              <td class="label">Unidades físicas:</td>
+              <td class="example">Nodos de ejecución física y virtual</td>
+            </tr>
+            <tr>
+              <td class="label">Configuración:</td>
+              <td class="example">IPs, Puertos, Cortafuegos (Firewalls), Latencias físicas</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px;">
+        <h3 style="font-size: 1.3rem; margin-bottom: 15px; color: var(--text-bright);">Estándares de Documentación: ISO 42010 y C4 Model</h3>
+        <p class="intro-paragraph" style="margin-bottom: 20px;">
+          Actualmente, además del clásico modelo 4+1, existen estándares modernos para documentar la arquitectura de manera progresiva. El más popular en la industria ágil es el <strong>Modelo C4</strong>, el cual organiza la documentación como un mapa interactivo de zoom:
+        </p>
+        <div class="cards-grid">
+          <div class="info-card">
+            <span style="font-size: 0.8rem; color: var(--color-accent); font-weight: 700;">Nivel 1</span>
+            <h3 style="margin-top: 5px;">Contexto</h3>
+            <p>Muestra el sistema en el plano general: cómo interactúa con los usuarios humanos y con otros sistemas de software externos.</p>
+          </div>
+          <div class="info-card">
+            <span style="font-size: 0.8rem; color: var(--color-accent); font-weight: 700;">Nivel 2</span>
+            <h3 style="margin-top: 5px;">Contenedores</h3>
+            <p>Desglosa el sistema en sus aplicaciones web, móviles, bases de datos y microservicios ejecutables independientes.</p>
+          </div>
+          <div class="info-card">
+            <span style="font-size: 0.8rem; color: var(--color-accent); font-weight: 700;">Nivel 3</span>
+            <h3 style="margin-top: 5px;">Componentes</h3>
+            <p>Muestra las principales clases, interfaces o controladores internos que conforman cada uno de los contenedores.</p>
+          </div>
+          <div class="info-card">
+            <span style="font-size: 0.8rem; color: var(--color-accent); font-weight: 700;">Nivel 4</span>
+            <h3 style="margin-top: 5px;">Código</h3>
+            <p>Mapea las clases individuales, detalles de implementación del dominio y patrones de diseño orientados a objetos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Estilos Arquitectonicos Tradicionales -->
+    <section class="topic-section" id="modulo4">
+      <h2 class="section-title">4. Estilos Arquitectónicos Tradicionales</h2>
+      <p class="intro-paragraph">
+        Un <span class="highlight">Estilo Arquitectónico</span> es un patrón recurrente de organización estructural para familias de sistemas de software. Define un vocabulario de componentes y conectores, junto con un conjunto de restricciones sobre cómo pueden combinarse. A continuación, explora los estilos tradicionales haciendo clic en las opciones del selector:
+      </p>
+
+      <!-- Style Explorer Component -->
+      <div class="style-explorer">
+        <!-- Buttons Column -->
+        <div class="style-buttons">
+          <button class="style-selector-btn active" id="btn-monolith" onclick="showStyle('monolith')">
+            Arquitectura Monolítica
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button class="style-selector-btn" id="btn-clientserver" onclick="showStyle('clientserver')">
+            Cliente-Servidor
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+          <button class="style-selector-btn" id="btn-layered" onclick="showStyle('layered')">
+            Arquitectura en Capas
+            <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        </div>
+
+        <!-- Details Card -->
+        <div class="style-details-card" id="style-details-box">
+          <div class="style-details-header">
+            <h3 id="style-title">Arquitectura Monolítica</h3>
+            <span id="style-subtitle">Unidad Única de Despliegue</span>
+          </div>
+          <p class="style-details-desc" id="style-desc">
+            En la arquitectura monolítica, todos los módulos funcionales del sistema (interfaz de usuario, lógica de negocio y acceso a datos) se compilan, empaquetan e implementan como una sola unidad de ejecución (un único archivo .war, .jar, o .exe). Comparten el ciclo de vida y la misma memoria en ejecución.
+          </p>
+          
+          <div class="style-pros-cons">
+            <div class="pros-list">
+              <h5>Ventajas (Pros)</h5>
+              <ul id="style-pros">
+                <li>Desarrollo inicial muy rápido y simple para prototipos.</li>
+                <li>Facilidad de pruebas unitarias e integradas locales.</li>
+                <li>Despliegue inicial trivial (copiar y ejecutar un solo archivo).</li>
+              </ul>
+            </div>
+            <div class="cons-list">
+              <h5>Desventajas (Cons)</h5>
+              <ul id="style-cons">
+                <li>Escalabilidad ineficiente (debes replicar todo el monolito).</li>
+                <li>Alto acoplamiento: un bug menor puede tumbar toda la aplicación.</li>
+                <li>Dificultad de actualización tecnológica por dependencia de stack único.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botón de acceso a Ejemplos Java y Árbol de Proyecto -->
+      <div style="margin-top: 30px; text-align: center;">
+        <a href="Estilos_Tradicionales_Java_Clase 5.html" class="submit-btn" style="text-align: center; text-decoration: none; padding: 14px 28px; display: inline-flex; align-items: center; gap: 8px;">
+          Ver Ejemplos de Código Java y Árboles de Proyecto
+          <svg viewBox="0 0 24 24" style="width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 2; margin-left: 4px;"><path d="M18 13v6a2 2 0 0 1-2-2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3"></path></svg>
+        </a>
+      </div>
+    </section>
+
+    <!-- Modulo 5: SOA y Microservicios -->
+    <section class="topic-section" id="modulo5">
+      <h2 class="section-title">5. Arquitecturas Orientadas a Servicios: SOA vs. Microservicios</h2>
+      <p class="intro-paragraph">
+        A medida que los sistemas empresariales crecieron, los monolitos se volvieron inmanejables. Surgió la necesidad de descentralizar y distribuir la computación en servicios reutilizables. Este camino evolutivo dio origen a dos filosofías: <strong>SOA (Service-Oriented Architecture)</strong> y los <strong>Microservicios</strong>.
+      </p>
+
+      <div class="feature-list" style="margin-bottom: 40px;">
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>SOA (Service-Oriented Architecture)</h4>
+            <p>Estilo enfocado en integrar aplicaciones heterogéneas y sistemas heredados (legacy) en toda la empresa. Utiliza un <strong>Bus de Servicios Empresariales (ESB)</strong> centralizado que orquesta la comunicación usando protocolos complejos y pesados como SOAP, XML y WSDL.</p>
+          </div>
+        </div>
+
+        <div class="feature-item">
+          <div class="feature-item-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+          </div>
+          <div class="feature-item-content">
+            <h4>Microservicios</h4>
+            <p>Evolución nativa de la nube. Descompone el sistema en servicios de grano fino, autónomos, desplegables independientemente, que resuelven una única capacidad de negocio (Single Responsibility) y se comunican con protocolos ligeros (REST, gRPC, JSON).</p>
+          </div>
+        </div>
+      </div>
+
+      <h3 style="font-size: 1.3rem; margin-bottom: 15px; color: var(--text-bright);">Comparación Técnica Directa</h3>
+      <p class="intro-paragraph" style="margin-bottom: 20px;">
+        Aunque ambos se basan en servicios, sus filosofías organizacionales e infraestructurales son drásticamente opuestas:
+      </p>
+
+      <div class="comparison-grid">
+        <!-- SOA column -->
+        <div class="comp-side soa">
+          <h4>SOA (Arquitectura Orientada a Servicios)</h4>
+          <table class="comp-table">
+            <tr>
+              <td class="label">Propósito clave:</td>
+              <td class="example">Interoperabilidad e integración corporativa</td>
+            </tr>
+            <tr>
+              <td class="label">Comunicación central:</td>
+              <td class="example">ESB (Enterprise Service Bus) inteligente</td>
+            </tr>
+            <tr>
+              <td class="label">Grano del servicio:</td>
+              <td class="example">Grano grueso (Coarse-grained)</td>
+            </tr>
+            <tr>
+              <td class="label">Base de Datos:</td>
+              <td class="example">Base de datos compartida tradicional</td>
+            </tr>
+            <tr>
+              <td class="label">Protocolos:</td>
+              <td class="example">SOAP, WSDL, XML (Pesados)</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Bridge -->
+        <div class="comp-bridge">
+          <svg viewBox="0 0 24 24"><path d="M12 2v20M5 12h14"></path></svg>
+          VS
+        </div>
+
+        <!-- Microservices column -->
+        <div class="comp-side microservices">
+          <h4>Microservicios</h4>
+          <table class="comp-table">
+            <tr>
+              <td class="label">Propósito clave:</td>
+              <td class="example">Despliegue rápido, agilidad y escalamiento</td>
+            </tr>
+            <tr>
+              <td class="label">Comunicación central:</td>
+              <td class="example">Mensajería ligera (REST, gRPC, Kafka)</td>
+            </tr>
+            <tr>
+              <td class="label">Grano del servicio:</td>
+              <td class="example">Grano fino (Fine-grained)</td>
+            </tr>
+            <tr>
+              <td class="label">Base de Datos:</td>
+              <td class="example">Base de datos por servicio (Autónoma)</td>
+            </tr>
+            <tr>
+              <td class="label">Protocolos:</td>
+              <td class="example">HTTP, JSON, gRPC, Protobuf (Ligeros)</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Práctica: Comparación de Arquitecturas Reales -->
+    <section class="topic-section" id="practica">
+      <h2 class="section-title">Práctica: Comparación de Arquitecturas Reales (E-Commerce)</h2>
+      <p class="intro-paragraph">
+        Para consolidar el aprendizaje, analizaremos un caso de estudio real: la evolución arquitectónica de una plataforma de comercio electrónico (E-Commerce) a medida que escala su base de usuarios. Veremos la transición técnica desde una arquitectura monolítica en capas hasta microservicios distribuidos.
+      </p>
+
+      <div class="tabs-wrapper">
+        <div class="tabs-header">
+          <button class="tab-btn active" data-tab="tab-monolith-code">
+            <svg viewBox="0 0 24 24"><path d="M16.5 9.4 7.55 4.24a1.79 1.79 0 0 0-2.5 1.55v12.42a1.79 1.79 0 0 0 2.5 1.55l8.95-5.17a1.79 1.79 0 0 0 0-3.18z"></path></svg>
+            1. Enfoque Monolítico en Capas
+          </button>
+          <button class="tab-btn" data-tab="tab-micro-yaml">
+            <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+            2. Despliegue de Microservicios (YAML)
+          </button>
+          <button class="tab-btn" data-tab="tab-arch-comparison">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            3. Tabla Comparativa de Atributos
+          </button>
+        </div>
+
+        <!-- Tab 1: Monolith code -->
+        <div class="tab-panel active" id="tab-monolith-code">
+          <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+            En la fase inicial (Monolítica), todas las capacidades de negocio (Usuarios, Productos, Pedidos) residen en el mismo proyecto Java, organizadas jerárquicamente por capas de código (Controller, Service, Repository). La base de datos es única y compartida:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-monolith')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-monolith"><span class="comment">// Estructura típica de paquetes en un Monolito en Capas (Single App)</span>
+<span class="keyword">package</span> com.ecommerce.monolith;
+
+<span class="comment">// Todos los dominios conviven dentro del mismo espacio de memoria</span>
+<span class="keyword">import</span> com.ecommerce.monolith.user.controller.UserController;
+<span class="keyword">import</span> com.ecommerce.monolith.product.controller.ProductController;
+<span class="keyword">import</span> com.ecommerce.monolith.order.controller.OrderController;
+
+<span class="annotation">@SpringBootApplication</span>
+<span class="keyword">public class</span> <span class="type">ECommerceApplication</span> {
+    <span class="keyword">public static void</span> <span class="method">main</span>(<span class="type">String</span>[] args) {
+        <span class="comment">// Se levanta un único servidor web embebido (Tomcat) para toda la tienda</span>
+        <span class="type">SpringApplication</span>.run(<span class="type">ECommerceApplication</span>.class, args);
+    }
+}
+
+<span class="comment">/* 
+  * Acoplamiento a nivel de Base de Datos:
+  * Si la base de datos PostgreSQL compartida colapsa por una consulta pesada 
+  * en el módulo de recomendaciones, todo el sistema de compras (Orders) deja de funcionar.
+  */</span></code></pre>
+          </div>
+        </div>
+
+        <!-- Tab 2: Microservices YAML -->
+        <div class="tab-panel" id="tab-micro-yaml">
+          <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+            Al migrar a microservicios, el sistema se divide en servicios desplegables por separado. Cada servicio corre en su propio contenedor (Docker) y gestiona de forma autónoma su propio almacenamiento de datos persistentes:
+          </p>
+          <div class="code-container">
+            <button class="copy-btn" onclick="copyCode('code-yaml')">
+              <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              Copiar
+            </button>
+            <pre><code id="code-yaml"><span class="property">version</span>: <span class="string">"3.8"</span>
+<span class="property">services</span>:
+  <span class="property">api-gateway</span>:
+    <span class="property">image</span>: ecommerce/api-gateway:latest
+    <span class="property">ports</span>:
+      - <span class="string">"8080:8080"</span> # Punto de entrada unificado para clientes web/móvil
+
+  <span class="property">user-service</span>:
+    <span class="property">image</span>: ecommerce/user-service:latest
+    <span class="property">environment</span>:
+      - <span class="string">DB_URL=jdbc:postgresql://user-db:5432/users</span>
+
+  <span class="property">catalog-service</span>:
+    <span class="property">image</span>: ecommerce/catalog-service:latest
+    <span class="property">environment</span>:
+      - <span class="string">DB_URL=mongodb://catalog-db:27017/products</span> # MongoDb ideal para catálogo flexible
+
+  <span class="property">order-service</span>:
+    <span class="property">image</span>: ecommerce/order-service:latest
+    <span class="property">environment</span>:
+      - <span class="string">DB_URL=jdbc:postgresql://order-db:5432/orders</span></code></pre>
+          </div>
+        </div>
+
+        <!-- Tab 3: Comparison table -->
+        <div class="tab-panel" id="tab-arch-comparison">
+          <p class="intro-paragraph" style="font-size: 0.95rem; margin-bottom: 15px;">
+            Resumen comparativo de atributos de calidad evaluados en el rediseño arquitectónico del E-Commerce:
+          </p>
+          <table class="comp-table" style="width: 100%; border: 1px solid var(--border-light); border-radius: 8px;">
+            <thead>
+              <tr style="background: rgba(255,255,255,0.03);">
+                <th style="padding: 12px; text-align: left; color: var(--text-bright);">Atributo de Calidad</th>
+                <th style="padding: 12px; text-align: left; color: var(--color-primary);">Monolito en Capas</th>
+                <th style="padding: 12px; text-align: left; color: var(--color-secondary);">Microservicios Distribuidos</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="label" style="padding: 12px;">Despliegue</td>
+                <td style="padding: 12px; color: var(--text-muted);">Sencillo (Un solo bloque / archivo)</td>
+                <td style="padding: 12px; color: var(--text-muted);">Complejo (Múltiples contenedores, Kubernetes)</td>
+              </tr>
+              <tr>
+                <td class="label" style="padding: 12px;">Escalabilidad</td>
+                <td style="padding: 12px; color: var(--text-muted);">En bloque (Ineficiente en consumo)</td>
+                <td style="padding: 12px; color: var(--text-muted);">Granular e independiente por servicio</td>
+              </tr>
+              <tr>
+                <td class="label" style="padding: 12px;">Tolerancia a fallos</td>
+                <td style="padding: 12px; color: var(--text-muted);">Baja (Fallo en un módulo afecta todo)</td>
+                <td style="padding: 12px; color: var(--text-muted);">Alta (Aislamiento de fallos en cascada)</td>
+              </tr>
+              <tr>
+                <td class="label" style="padding: 12px;">Consistencia de Datos</td>
+                <td style="padding: 12px; color: var(--text-muted);">Inmediata (Transacciones ACID en BD única)</td>
+                <td style="padding: 12px; color: var(--text-muted);">Eventual (Sincronización por eventos / Kafka)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 6: Quiz Autoevaluación -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">Autoevaluación de la Clase</h2>
+      <p class="intro-paragraph">
+        Responde a las siguientes preguntas basadas en los temas teóricos expuestos en clase para validar tu preparación.
+      </p>
+
+      <div class="quiz-container">
+        <!-- Question 1 -->
+        <div class="quiz-question" data-q="1">
+          <h4><span class="q-num">Q1.</span> ¿Cuál es la diferencia primordial entre SOA y Microservicios en cuanto a la integración de servicios?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>SOA utiliza protocolos HTTP ligeros, mientras que los Microservicios dependen únicamente de SOAP/XML.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>SOA centraliza la integración y orquestación mediante un Bus de Servicios Empresariales (ESB) inteligente, mientras que los Microservicios abogan por endpoints inteligentes y tuberías mudas.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Microservicios requiere obligatoriamente una única base de datos global compartida, mientras que SOA exige base de datos por servicio.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="d">
+              <span>SOA no es escalable y los Microservicios solo se despliegan en servidores físicos dedicados sin virtualización.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 2 -->
+        <div class="quiz-question" data-q="2">
+          <h4><span class="q-num">Q2.</span> En el modelo de vistas 4+1, ¿a qué vista le interesa primordialmente documentar la concurrencia, los hilos de ejecución, el rendimiento y la tolerancia a fallos?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Vista Lógica</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Vista de Desarrollo</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Vista de Procesos</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="d">
+              <span>Vista Física</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 3 -->
+        <div class="quiz-question" data-q="3">
+          <h4><span class="q-num">Q3.</span> ¿Qué estilo arquitectónico organiza el sistema de software en jerarquías donde cada nivel provee servicios al nivel superior y consume servicios del nivel inferior inmediato?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Arquitectura en Capas (Layered)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Microservicios</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Cliente-Servidor</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="d">
+              <span>SOA</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Question 4 -->
+        <div class="quiz-question" data-q="4">
+          <h4><span class="q-num">Q4.</span> En el contexto de los stakeholders arquitectónicos, ¿quién se preocupa principalmente por atributos de calidad interna como la modificabilidad, testeabilidad y facilidad de compilación del código fuente?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>El usuario final de la aplicación</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>El equipo de desarrollo de software (Developers)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>El patrocinador financiero o cliente comercial</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="d">
+              <span>El auditor de seguridad de redes físicas</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    // Close mobile menu when a link is clicked
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Code Tabs
+       ========================================== */
+    const tabButtons = document.querySelectorAll('.tab-btn');
+    tabButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const targetTab = btn.getAttribute('data-tab');
+        if (!targetTab) return;
+
+        const parentWrapper = btn.closest('.tabs-wrapper');
+        parentWrapper.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        parentWrapper.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+
+        btn.classList.add('active');
+        document.getElementById(targetTab).classList.add('active');
+      });
+    });
+
+    /* Copy Code Function */
+    function copyCode(elementId) {
+      const codeElement = document.getElementById(elementId);
+      const textToCopy = codeElement.innerText;
+      
+      navigator.clipboard.writeText(textToCopy).then(() => {
+        const btn = codeElement.closest('.code-container').querySelector('.copy-btn');
+        const originalText = btn.innerHTML;
+        
+        btn.innerHTML = `<svg viewBox="0 0 24 24" style="stroke: var(--color-success)"><polyline points="20 6 9 17 4 12"></polyline></svg> ¡Copiado!`;
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 2000);
+      }).catch(err => {
+        console.error('Error al copiar el texto: ', err);
+      });
+    }
+
+    /* ==========================================
+       Interactive 4+1 View Model Details
+       ========================================== */
+    const viewmodelInfo = {
+      logical: {
+        title: `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+          Vista Lógica (Logical View)
+        `,
+        desc: "Describe el modelo de diseño objeto-orientado del sistema. Se enfoca en las abstracciones, clases, interfaces y paquetes que estructuran la lógica de negocio. Muestra la descomposición funcional del software.<br><strong>Diagramas comunes:</strong> Diagrama de Clases, Diagrama de Paquetes, Diagrama de Secuencia.<br><strong>Stakeholders principales:</strong> Usuarios finales, Diseñadores de software, Desarrolladores."
+      },
+      development: {
+        title: `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+          Vista de Desarrollo (Development View)
+        `,
+        desc: "También conocida como Vista de Implementación. Muestra cómo se organiza físicamente el código fuente en módulos de software, librerías, dependencias externas, subproyectos y binarios. Describe el entorno de programación real.<br><strong>Diagramas comunes:</strong> Diagrama de Componentes, Estructura de paquetes de compilación.<br><strong>Stakeholders principales:</strong> Desarrolladores, Gestores de configuración, Jefes de proyecto."
+      },
+      scenarios: {
+        title: `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 8v4l3 3"></path></svg>
+          Vista de Escenarios (Use Case View - El +1)
+        `,
+        desc: "Es el motor que valida la arquitectura. Representa los casos de uso críticos o flujos de usuario principales. Permite validar que las demás 4 vistas interactúan de forma armónica para satisfacer las demandas funcionales del negocio.<br><strong>Diagramas comunes:</strong> Diagrama de Casos de Uso, Historias de Usuario críticas.<br><strong>Stakeholders principales:</strong> Todos (Clientes, Usuarios, Diseñadores, Desarrolladores)."
+      },
+      process: {
+        title: `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+          Vista de Procesos (Process View)
+        `,
+        desc: "Aborda el comportamiento del sistema en tiempo de ejecución. Trata aspectos de concurrencia, sincronización, hilos de ejecución (threads), flujos de mensajes y el rendimiento de las operaciones en red. Resuelve la tolerancia a fallos.<br><strong>Diagramas comunes:</strong> Diagrama de Actividad, Diagramas de Interacción de procesos.<br><strong>Stakeholders principales:</strong> Integradores de sistemas, Ingenieros de rendimiento."
+      },
+      physical: {
+        title: `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6.01" y2="6"></line><line x1="6" y1="18" x2="6.01" y2="18"></line></svg>
+          Vista Física (Physical View)
+        `,
+        desc: "Describe cómo se mapean los componentes de software sobre los nodos de hardware reales (servidores, nubes, contenedores, redes). Muestra la topología física, cableado, latencias de red y la distribución geográfica del software.<br><strong>Diagramas comunes:</strong> Diagrama de Despliegue (Deployment Diagram).<br><strong>Stakeholders principales:</strong> Ingenieros de DevOps, Administradores de Redes y Sistemas (SRE)."
+      }
+    };
+
+    function selectView(key) {
+      document.querySelectorAll('.viewmodel-card').forEach(card => {
+        card.classList.remove('active');
+      });
+
+      const clickedCard = document.querySelector(`.vm-${key}`);
+      if (clickedCard) clickedCard.classList.add('active');
+
+      const info = viewmodelInfo[key];
+      if (info) {
+        document.getElementById('viewmodel-title').innerHTML = info.title;
+        document.getElementById('viewmodel-desc').innerHTML = info.desc;
+      }
+    }
+
+    /* ==========================================
+       Interactive Style Explorer (Modulo 4)
+       ========================================== */
+    const stylesInfo = {
+      monolith: {
+        title: "Arquitectura Monolítica",
+        subtitle: "Unidad Única de Despliegue",
+        desc: "En la arquitectura monolítica, todos los módulos funcionales del sistema (interfaz de usuario, lógica de negocio y acceso a datos) se compilan, empaquetan e implementan como una sola unidad de ejecución (un único archivo .war, .jar, o .exe). Comparten el ciclo de vida y la misma memoria en ejecución.",
+        pros: [
+          "Desarrollo inicial muy rápido y simple para prototipos.",
+          "Facilidad de pruebas unitarias e integradas locales.",
+          "Despliegue inicial trivial (copiar y ejecutar un solo archivo)."
+        ],
+        cons: [
+          "Escalabilidad ineficiente (debes replicar todo el monolito).",
+          "Alto acoplamiento: un bug menor puede tumbar toda la aplicación.",
+          "Dificultad de actualización tecnológica por dependencia de stack único."
+        ]
+      },
+      clientserver: {
+        title: "Cliente-Servidor (Client-Server)",
+        subtitle: "División de Trabajo en Red",
+        desc: "Establece una separación de responsabilidades entre el cliente (que solicita servicios o presenta la interfaz gráfica) y el servidor (que procesa la lógica central, valida reglas y almacena los datos de forma centralizada). La comunicación se da a través de protocolos estructurados en red.",
+        pros: [
+          "Centralización de datos y seguridad en el nodo del servidor.",
+          "Los clientes pueden ser ligeros (browsers), simplificando su distribución.",
+          "Menor consumo de recursos de computación local en los clientes."
+        ],
+        cons: [
+          "El servidor puede convertirse en un cuello de botella y punto único de fallo (SPOF).",
+          "Dependencia absoluta de la conectividad y disponibilidad de la red.",
+          "Problemas de latencia ante grandes volúmenes de solicitudes remotas."
+        ]
+      },
+      layered: {
+        title: "Arquitectura en Capas (Layered)",
+        subtitle: "Organización Jerárquica de Responsabilidades",
+        desc: "Organiza el código fuente en capas horizontales superpuestas, donde cada capa tiene un rol específico (ej. Presentación, Lógica de Negocio, Acceso a Datos). Rige la regla de que una capa solo interactúa con la capa inmediatamente inferior para mantener un acoplamiento limpio.",
+        pros: [
+          "Alta cohesión y separación clara de responsabilidades (SoC).",
+          "Facilidad de mantenimiento (puedes modificar una capa sin alterar el resto).",
+          "Reutilización de componentes a través de capas bien definidas."
+        ],
+        cons: [
+          "Efecto Cascada / Sándwich: solicitudes que cruzan capas sin hacer nada.",
+          "Mayor latencia por el flujo secuencial interno de objetos entre capas.",
+          "Suele acoplarse a despliegues monolíticos, limitando la escalabilidad."
+        ]
+      }
+    };
+
+    function showStyle(key) {
+      document.querySelectorAll('.style-selector-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+
+      document.getElementById(`btn-${key}`).classList.add('active');
+
+      const info = stylesInfo[key];
+      if (info) {
+        document.getElementById('style-title').innerText = info.title;
+        document.getElementById('style-subtitle').innerText = info.subtitle;
+        document.getElementById('style-desc').innerText = info.desc;
+
+        // Render pros
+        const prosUl = document.getElementById('style-pros');
+        prosUl.innerHTML = '';
+        info.pros.forEach(pro => {
+          const li = document.createElement('li');
+          li.innerText = pro;
+          prosUl.appendChild(li);
+        });
+
+        // Render cons
+        const consUl = document.getElementById('style-cons');
+        consUl.innerHTML = '';
+        info.cons.forEach(con => {
+          const li = document.createElement('li');
+          li.innerText = con;
+          consUl.appendChild(li);
+        });
+      }
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'c',
+      q3: 'a',
+      q4: 'b'
+    };
+
+    // Styling selection logic on click
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del quiz antes de verificar.");
+        return;
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          const lbl = r.closest('.quiz-option');
+          lbl.classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado todos los conceptos de estructuras y estilos arquitectónicos.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "Buen intento. Revisa los puntos débiles para consolidar tu conocimiento sobre vistas y estilos.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Recomendamos repasar las diferencias entre SOA y Microservicios, así como el modelo 4+1.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>
