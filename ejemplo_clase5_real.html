@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Estructuras de carpetas y justificación arquitectónica para un Sistema Académico (SGA) en 5 arquitecturas: Monolito, Capas, Cliente-Servidor, SOA y Microservicios.">
+  <title>Sistema Académico: Estructuras y Arquitecturas | Clase 5</title>
+  
+  <!-- Google Fonts: Outfit and Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(6, 182, 212, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Yellow */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(6, 182, 212, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-accent);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Mobile Header */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* ==========================================
+       Hero Section
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .class-meta {
+      font-size: 0.85rem;
+      color: var(--color-accent);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .class-meta span.separator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text-bright) 30%, #9dd9f3 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    /* Back Link Button */
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-accent);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 20px;
+      font-size: 0.95rem;
+      transition: transform 0.2s ease;
+    }
+
+    .back-btn:hover {
+      transform: translateX(-3px);
+      color: var(--text-bright);
+    }
+
+    .back-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.5;
+    }
+
+    /* ==========================================
+       General Section / Content
+       ========================================== */
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 30px;
+      background: linear-gradient(to bottom, var(--color-accent), var(--color-secondary));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    /* ==========================================
+       File Tree Style
+       ========================================== */
+    .file-tree-container {
+      background: #0b111e;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .file-tree-container::before {
+      content: 'Estructura de Carpetas';
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--color-accent);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .tree-root {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tree-node {
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .tree-node::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 10px;
+      width: 1px;
+      border-left: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-node::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 12px;
+      width: 12px;
+      height: 1px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-node.last::before {
+      bottom: auto;
+      height: 12px;
+    }
+
+    .tree-icon {
+      margin-right: 6px;
+      display: inline-block;
+      user-select: none;
+    }
+
+    .folder-name {
+      color: #38bdf8; /* light blue */
+      font-weight: 600;
+    }
+
+    .file-name {
+      color: #e2e8f0;
+    }
+
+    .file-name.main {
+      color: #f59e0b; /* highlight main class */
+      font-weight: 600;
+    }
+
+    .file-comment {
+      color: #64748b;
+      margin-left: 15px;
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    /* Justification block */
+    .justification-card {
+      background: var(--bg-card);
+      border-left: 4px solid var(--color-accent);
+      padding: 24px;
+      border-radius: 0 12px 12px 0;
+      margin-bottom: 30px;
+    }
+
+    .justification-card h4 {
+      font-size: 1.15rem;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .justification-card ul {
+      list-style: none;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .justification-card ul li strong {
+      color: var(--text-bright);
+    }
+
+    /* ==========================================
+       Quiz System
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .quiz-option input[type="radio"]::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-accent);
+      transform: scale(0);
+      transition: transform 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-accent);
+    }
+
+    .quiz-option input[type="radio"]:checked::before {
+      transform: scale(1);
+    }
+
+    .quiz-option.selected {
+      background: rgba(6, 182, 212, 0.05);
+      border-color: rgba(6, 182, 212, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.08) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: #a7f3d0 !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #fca5a5 !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-accent), var(--color-secondary));
+      border: none;
+      color: var(--text-bright);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .score-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+    }
+
+    .score-badge.pass {
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .score-badge.fail {
+      color: var(--color-danger);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    /* ==========================================
+       Responsive & Mobile Sidebar
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 24px;
+        padding-top: 80px;
+      }
+
+      .progress-bar-container {
+        left: 0;
+      }
+
+      .top-nav {
+        display: flex;
+      }
+
+      .hero-section {
+        padding: 30px 20px;
+      }
+
+      .hero-title {
+        font-size: 2rem;
+      }
+    }
+
+    .backdrop-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    .backdrop-overlay.open {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Header -->
+  <header class="top-nav">
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <h1>Sistema Académico SGA</h1>
+    <div style="width: 24px;"></div>
+  </header>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Sidebar Navigation Drawer -->
+  <nav class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 5</h2>
+        <span>Sistema Académico</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="Estructuras_Arquitectonicas_Clase 5.html" class="active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        Volver a Clase 5
+      </a></li>
+      <li><a href="#monolito">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+        1. Monolito
+      </a></li>
+      <li><a href="#capas">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg>
+        2. En Capas (Layered)
+      </a></li>
+      <li><a href="#cliente-servidor">
+        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M9 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"></path></svg>
+        3. Cliente-Servidor
+      </a></li>
+      <li><a href="#soa">
+        <svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>
+        4. SOA (Servicios SOAP)
+      </a></li>
+      <li><a href="#microservicios">
+        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10M2 12h20"></path></svg>
+        5. Microservicios
+      </a></li>
+      <li><a href="#quiz">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        Autoevaluación
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &copy; 2026
+    </div>
+  </nav>
+
+  <div class="backdrop-overlay" id="menu-overlay"></div>
+
+  <!-- Main Content container -->
+  <main class="main-content">
+    
+    <a href="Estructuras_Arquitectonicas_Clase 5.html" class="back-btn" id="inicio">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Regresar a Estructuras Arquitectónicas
+    </a>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+      <div class="class-meta">
+        <span>Diseño de Sistemas</span>
+        <span class="separator"></span>
+        <span>Dominio Académico</span>
+      </div>
+      <h1 class="hero-title">Sistema de Gestión Académica (SGA): 5 Estructuras</h1>
+      <p class="hero-desc">
+        Aprende cómo estructurar las carpetas y archivos de un Sistema de Gestión Académica (SGA) —que incluye Matriculación, Calificaciones, Horarios e Impuestos/Pagos— modelado bajo los cinco estilos arquitectónicos principales estudiados en clase.
+      </p>
+    </header>
+
+    <!-- 1. Monolito -->
+    <section class="topic-section" id="monolito">
+      <h2 class="section-title">1. Arquitectura Monolítica</h2>
+      <p class="intro-paragraph">
+        En un monolito académico, todos los módulos de negocio (Matriculación, Calificaciones, Pagos) coexisten dentro del mismo espacio de nombres y se compilan en un único paquete físico. Comparten la misma memoria de ejecución de la JVM y una base de datos relacional centralizada.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios del Monolito Académico</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-monolith</span> <span class="file-comment">// Proyecto único Maven</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span> <span class="file-comment">// Dependencias globales del sistema</span></li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/unibe/academic</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">AcademicMonolithApplication.java</span> <span class="file-comment">// Entrada única</span></li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">matriculas</span> <span class="file-comment">// Módulo de Matriculación</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaController.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaService.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">Matricula.java</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">calificaciones</span> <span class="file-comment">// Módulo de Calificaciones</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">NotaController.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">NotaService.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">Nota.java</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">pagos</span> <span class="file-comment">// Módulo de Pagos y Pensiones</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">PagoController.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">PagoService.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">Factura.java</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card">
+        <h4>Justificación Técnica del Monolito:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Ideal para universidades pequeñas en fases iniciales de desarrollo o institutos con flujos de carga controlados.</li>
+          <li><strong>Ventajas:</strong> Transaccionalidad inmediata y consistente (ACID). Un pago y una matrícula se procesan en la misma transacción SQL sin riesgo de desincronización física. Pruebas y despliegues muy simples.</li>
+          <li><strong>Desventajas:</strong> Punto único de fallo (SPOF). Si colapsa el módulo de matriculación durante el día de registro de asignaturas, se cae todo el servidor, impidiendo a los profesores subir notas o a los alumnos pagar sus pensiones.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. Capas -->
+    <section class="topic-section" id="capas">
+      <h2 class="section-title">2. Arquitectura en Capas (Layered)</h2>
+      <p class="intro-paragraph">
+        En este enfoque, el sistema académico se organiza de manera horizontal por sus responsabilidades técnicas en lugar de dominios de negocio. Las dependencias fluyen estrictamente hacia abajo: la capa de Presentación consume la de Servicios, y esta consume la de Repositorios.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios de la Arquitectura en Capas</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-layered</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/unibe/academic/layered</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">AcademicLayeredApplication.java</span></li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">controller</span> <span class="file-comment">// CAPA 1: Presentación / Controladores API</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaController.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">NotaController.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">PagoController.java</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">service</span> <span class="file-comment">// CAPA 2: Lógica de Negocio y Reglas Académicas</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaService.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">NotaService.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">PagoService.java</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">repository</span> <span class="file-comment">// CAPA 3: Infraestructura y Acceso a Base de Datos (JPA)</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaRepository.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">NotaRepository.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">PagoRepository.java</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">model</span> <span class="file-comment">// Capa transversal de Entidades del Dominio</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">Matricula.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">Nota.java</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">Factura.java</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card" style="border-left-color: var(--color-secondary);">
+        <h4>Justificación Técnica del Diseño en Capas:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Recomendable para sistemas medianos que valoran el desacoplamiento técnico y la facilidad de mantenimiento a largo plazo.</li>
+          <li><strong>Ventajas:</strong> Separación de Incumbencias (SoC). Si la universidad decide migrar su base de datos física de PostgreSQL a Oracle DB, solo se ve afectada la capa de `repository`, manteniendo intactas las capas de negocio y de controladores.</li>
+          <li><strong>Desventajas:</strong> Sobrecarga de código y latencia. Operaciones de lectura simples (como consultar la nota de un alumno) deben cruzar obligatoriamente todas las capas secuencialmente sin aportar valor lógico real (efecto sándwich).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. Cliente-Servidor -->
+    <section class="topic-section" id="cliente-servidor">
+      <h2 class="section-title">3. Estilo Cliente-Servidor</h2>
+      <p class="intro-paragraph">
+        Separa la ejecución física del sistema. El Servidor expone un API REST y valida las reglas comerciales, mientras que el Cliente corre localmente en el computador o dispositivo móvil del estudiante/profesor, solicitando datos remotos mediante HTTP.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Carpetas del Sistema Cliente-Servidor</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-client-server</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-backend-server</span> <span class="file-comment">// PROYECTO 1: Backend API</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/unibe/academic/server</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">AcademicServerApplication.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaApiController.java</span> <span class="file-comment">// Retorna JSON</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">NotaApiController.java</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">academic-desktop-client</span> <span class="file-comment">// PROYECTO 2: UI en Swing o JavaFX</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/java/com/unibe/academic/client</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">AcademicClientApplication.java</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">PortalEstudianteFrame.java</span> <span class="file-comment">// Interfaz Gráfica</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">AcademicHttpClient.java</span> <span class="file-comment">// Consume REST del servidor</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card" style="border-left-color: var(--color-success);">
+        <h4>Justificación Técnica de Cliente-Servidor:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Entornos donde se requiere ofrecer múltiples canales de acceso (como un portal Web de alumnos, una aplicación móvil Android/iOS de profesores y terminales pesadas para secretaría).</li>
+          <li><strong>Ventajas:</strong> Centralización de reglas críticas y seguridad en el Servidor. Los clientes son independientes y no tienen contacto directo con la base de datos, lo que incrementa la seguridad de la red.</li>
+          <li><strong>Desventajas:</strong> El Servidor centralizado representa un cuello de botella y un Punto Único de Fallo. Si el servidor se apaga, ninguna aplicación cliente puede iniciar sesión o realizar consultas locales.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4. SOA -->
+    <section class="topic-section" id="soa">
+      <h2 class="section-title">4. SOA (Service-Oriented Architecture)</h2>
+      <p class="intro-paragraph">
+        SOA es el estilo de integración empresarial por excelencia. Conecta el software académico con sistemas externos y sistemas legados heredados (ej. sistema financiero COBOL, sistema de control de accesos por torniquetes, etc.) utilizando un **Bus de Servicios Empresariales (ESB)** que transforma formatos mediante contratos de red rígidos (SOAP / XML / WSDL).
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios del Entorno SOA</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-soa-enterprise</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-esb-router</span> <span class="file-comment">// Módulo de integración ESB (ej. Apache Camel o Mule)</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">esb-config.xml</span> <span class="file-comment">// Enrutamiento y transformación XSLT (XML a JSON)</span></li>
+                </ul>
+              </li>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">soap-matriculas-service</span> <span class="file-comment">// Servicio SOAP de Matrículas</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/resources/wsdl</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">matriculas.wsdl</span> <span class="file-comment">// Contrato estricto XML</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">legacy-finance-adapter</span> <span class="file-comment">// Conector al sistema contable heredado de la universidad</span>
+                <ul>
+                  <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">COBOLConnector.java</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card" style="border-left-color: var(--color-warning);">
+        <h4>Justificación Técnica de SOA:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Universidades tradicionales de gran tamaño que ya cuentan con sistemas financieros legados, servicios de directorio activo corporativos y plataformas LMS externas, y necesitan integrarlos sin tener que rehacerlos.</li>
+          <li><strong>Ventajas:</strong> Alta reusabilidad de sistemas legados de alto costo. Interoperabilidad multiplataforma garantizada gracias a los estándares corporativos rígidos WSDL/SOAP.</li>
+          <li><strong>Desventajas:</strong> El ESB centralizado se vuelve un cuello de botella de rendimiento y organizacional (cualquier cambio requiere reconfigurar el bus). El formato XML/SOAP es sumamente pesado de procesar y complejo de desarrollar.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 5. Microservicios -->
+    <section class="topic-section" id="microservicios">
+      <h2 class="section-title">5. Arquitectura de Microservicios</h2>
+      <p class="intro-paragraph">
+        Descompone el SGA en servicios autónomos desplegables independientemente. Cada microservicio administra su propio almacenamiento físico (Database per Service) y se comunican asíncronamente mediante colas de eventos (RabbitMQ / Kafka) o peticiones HTTP JSON / gRPC ligeras.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Carpetas de Microservicios Académicos</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-microservices</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">academic-api-gateway</span> <span class="file-comment">// Puerta de entrada perimetral (JWT Validation & Load Balancing)</span>
+                <ul>
+                  <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">application.yml</span></li>
+                </ul>
+              </li>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">enrollment-service</span> <span class="file-comment">// Servicio de Matriculación</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/resources</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">application.yml</span> <span class="file-comment">// Conecta a Redis Cache para inscripción rápida</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">grades-service</span> <span class="file-comment">// Servicio de Calificaciones e Historial</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/resources</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">application.yml</span> <span class="file-comment">// Conecta a MongoDB (Catálogo de Cursos e historial)</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">billing-service</span> <span class="file-comment">// Servicio de Facturación y Cobro</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">pom.xml</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src/main/resources</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">application.yml</span> <span class="file-comment">// Conecta a PostgreSQL (Transaccional ACID)</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card" style="border-left-color: var(--color-primary);">
+        <h4>Justificación Técnica de Microservicios:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Recomendado para universidades masivas con decenas de miles de alumnos y alta demanda transaccional temporal en matriculación de asignaturas.</li>
+          <li><strong>Ventajas:</strong> **Resiliencia extrema e independencia de escala**. El microservicio de `enrollment-service` puede escalarse a 20 instancias en Kubernetes durante la semana de matrículas utilizando una base de datos distribuida optimizada, mientras que el resto de los módulos operan de forma estable sin consumir memoria ni colapsar.</li>
+          <li><strong>Desventajas:</strong> Alta complejidad de diseño. Dificultad para mantener transacciones atómicas de forma nativa entre bases de datos separadas (ej. anular una matrícula si falla el cobro bancario exige aplicar patrones de Saga distributiva). Requiere una infraestructura Cloud compleja y costosa.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">Autoevaluación: Decisiones Arquitectónicas SGA</h2>
+      <p class="intro-paragraph">
+        Resuelve las siguientes preguntas para consolidar tu criterio técnico al diseñar la arquitectura de un Sistema de Gestión Académica.
+      </p>
+
+      <div class="quiz-container">
+        <!-- Q1 -->
+        <div class="quiz-question" data-q="1">
+          <h4><span class="q-num">Q1.</span> Si la directiva de la Universidad exige que las matrículas y los cobros de pensión ocurran bajo transacciones atómicas estrictas (ACID), ¿cuál de las siguientes arquitecturas simplifica al máximo este requerimiento?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Arquitectura de Microservicios distribuidos (Base de Datos por Servicio).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Arquitectura Monolítica compartiendo una única base de datos relacional transaccional.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Arquitectura SOA basada en un bus ESB y contratos SOAP XML.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-question" data-q="2">
+          <h4><span class="q-num">Q2.</span> Durante la semana de registro de asignaturas, el módulo de Matrículas colapsa debido a la sobrecarga de solicitudes. Si el SGA está implementado como un Monolito, ¿qué consecuencia tiene esto para el resto del sistema?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Los módulos de Notas y Pagos siguen funcionando normalmente y a alta velocidad debido al aislamiento de hilos de la JVM.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Todo el sistema colapsa o se ralentiza críticamente, impidiendo a los profesores subir notas o registrar cobros, al compartir los mismos recursos y el mismo pool de conexiones a la base de datos única.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>El API Gateway del cliente redirige de forma automática e inmediata las llamadas de notas a un servidor esclavo local.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-question" data-q="3">
+          <h4><span class="q-num">Q3.</span> ¿Cuál es la razón técnica principal para proponer una arquitectura SOA en una universidad tradicional que ya cuenta con sistemas de software en funcionamiento?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>La necesidad de compilar todo el código fuente en un archivo .jar ligero.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Integrar y reutilizar sistemas legados heterogéneos (como un viejo software de contabilidad) conectándolos a través de un bus centralizado de mensajes (ESB) sin tener que rehacerlos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Lograr que el despliegue del software en servidores compartidos baratos sea extremadamente simple.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/3</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 3;
+      let allAnswered = true;
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del quiz antes de verificar.");
+        return;
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          const lbl = r.closest('.quiz-option');
+          lbl.classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Comprendes los trade-offs arquitectónicos aplicados a un SGA.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 1) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "Buen intento. Revisa la retroalimentación para afinar tus decisiones de diseño.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te sugerimos repasar las ventajas y desventajas de cada arquitectura académica.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

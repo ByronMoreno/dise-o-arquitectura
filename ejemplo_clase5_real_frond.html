@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Estructuras de carpetas y justificación arquitectónica para el Frontend de un Sistema Académico (SGA) en 4 arquitecturas: Monolito SPA, Micro-frontends, Frontend en Capas (Clean) y SSR/Next.js.">
+  <title>Frontend Académico: Estructuras y Arquitecturas | Clase 5</title>
+  
+  <!-- Google Fonts: Outfit and Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(16, 185, 129, 0.15); /* Emerald tint for frontend */
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #10b981; /* Emerald */
+      --color-primary-rgb: 16, 185, 129;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-primary);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Mobile Header */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    /* ==========================================
+       Hero Section
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .class-meta {
+      font-size: 0.85rem;
+      color: var(--color-primary);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .class-meta span.separator {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background-color: var(--color-primary);
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, var(--text-bright) 30%, #a7f3d0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      line-height: 1.6;
+    }
+
+    /* Back Link Buttons */
+    .back-btn-container {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--color-primary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: transform 0.2s ease;
+    }
+
+    .back-btn:hover {
+      transform: translateX(-3px);
+      color: var(--text-bright);
+    }
+
+    .back-btn svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2.5;
+    }
+
+    /* ==========================================
+       General Section / Content
+       ========================================== */
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 30px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-secondary));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 500;
+    }
+
+    /* ==========================================
+       File Tree Style
+       ========================================== */
+    .file-tree-container {
+      background: #0b111e;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+      font-family: var(--font-mono);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: #cbd5e1;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .file-tree-container::before {
+      content: 'Estructura de Carpetas (JS/TS)';
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--color-primary);
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    .tree-root {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .tree-node {
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .tree-node::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 0;
+      bottom: 10px;
+      width: 1px;
+      border-left: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-node::after {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 12px;
+      width: 12px;
+      height: 1px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    .tree-node.last::before {
+      bottom: auto;
+      height: 12px;
+    }
+
+    .tree-icon {
+      margin-right: 6px;
+      display: inline-block;
+      user-select: none;
+    }
+
+    .folder-name {
+      color: #38bdf8; /* light blue */
+      font-weight: 600;
+    }
+
+    .file-name {
+      color: #e2e8f0;
+    }
+
+    .file-name.main {
+      color: #f59e0b; /* highlight main config */
+      font-weight: 600;
+    }
+
+    .file-comment {
+      color: #64748b;
+      margin-left: 15px;
+      font-style: italic;
+      font-size: 0.85rem;
+    }
+
+    /* Justification block */
+    .justification-card {
+      background: var(--bg-card);
+      border-left: 4px solid var(--color-primary);
+      padding: 24px;
+      border-radius: 0 12px 12px 0;
+      margin-bottom: 30px;
+    }
+
+    .justification-card h4 {
+      font-size: 1.15rem;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .justification-card ul {
+      list-style: none;
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .justification-card ul li strong {
+      color: var(--text-bright);
+    }
+
+    /* ==========================================
+       Quiz System
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    .quiz-option input[type="radio"]::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      transform: scale(0);
+      transition: transform 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::before {
+      transform: scale(1);
+    }
+
+    .quiz-option.selected {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.08) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: #a7f3d0 !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.08) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: #fca5a5 !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      color: var(--text-bright);
+      padding: 14px 28px;
+      border-radius: 10px;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+
+    .submit-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+    }
+
+    .submit-btn:active {
+      transform: translateY(1px);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .score-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-family: var(--font-mono);
+      font-size: 1.2rem;
+    }
+
+    .score-badge.pass {
+      color: var(--color-success);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .score-badge.fail {
+      color: var(--color-danger);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Header -->
+  <header class="top-nav">
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path d="M4 6h16M4 12h16M4 18h16"></path>
+      </svg>
+    </button>
+    <h1>Frontend Académico SGA</h1>
+    <div style="width: 24px;"></div>
+  </header>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Sidebar Drawer -->
+  <nav class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20M4 19.5V3a2.1 2.1 0 0 1 2-2h14v18H6.5a2.5 2.5 0 0 0-2.5 2.5z"></path>
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 5</h2>
+        <span>Frontend SGA</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="Estructuras_Arquitectonicas_Clase 5.html" class="active">
+        <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+        Volver a Clase 5
+      </a></li>
+      <li><a href="#monolito">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg>
+        1. SPA Monolítica
+      </a></li>
+      <li><a href="#microfrontends">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        2. Micro-frontends
+      </a></li>
+      <li><a href="#capas">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline></svg>
+        3. Capas / Clean
+      </a></li>
+      <li><a href="#ssr">
+        <svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10zM12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10M12 2a15.3 15.3 0 0 0-4 10 15.3 15.3 0 0 0 4 10M2 12h20"></path></svg>
+        4. SSR (Next.js)
+      </a></li>
+      <li><a href="#quiz">
+        <svg viewBox="0 0 24 24"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+        Autoevaluación
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &copy; 2026
+    </div>
+  </nav>
+
+  <div class="backdrop-overlay" id="menu-overlay"></div>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    
+    <div class="back-btn-container">
+      <a href="Estructuras_Arquitectonicas_Clase 5.html" class="back-btn" id="inicio">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        Clase 5
+      </a>
+      <a href="ejemplo_clase5_real.html" class="back-btn" style="color: var(--color-secondary);">
+        <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+        Ver Estructuras Backend
+      </a>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="hero-section">
+      <div class="class-meta">
+        <span>Diseño de Sistemas</span>
+        <span class="separator"></span>
+        <span>Dominio Frontend</span>
+      </div>
+      <h1 class="hero-title">Frontend SGA: Estructuras y Justificación</h1>
+      <p class="hero-desc">
+        Explora las arquitecturas de software modernas para la capa del cliente (Frontend) aplicadas al Sistema de Gestión Académica (SGA). Analiza las estructuras físicas de carpetas y archivos para **SPA Monolítica, Micro-frontends, Clean Architecture en Frontend y Server-Side Rendering (Next.js)**.
+      </p>
+    </header>
+
+    <!-- 1. SPA Monolítica -->
+    <section class="topic-section" id="monolito">
+      <h2 class="section-title">1. SPA Monolítica (Single Page Application)</h2>
+      <p class="intro-paragraph">
+        En un monolito frontend, todas las interfaces (Matriculación, Notas, Cobros, Calendario) y sus estados lógicos conviven en un solo repositorio y se compilan en un único lote estático de archivos JavaScript y CSS (`bundle.js`).
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios (React Monolith SPA)</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">sga-frontend-monolith</span> <span class="file-comment">// Un solo repositorio</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">package.json</span> <span class="file-comment">// Un set de dependencias global</span></li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">main.tsx</span> <span class="file-comment">// Punto de arranque React</span></li>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">App.tsx</span> <span class="file-comment">// Router central con todas las rutas</span></li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">components</span> <span class="file-comment">// Componentes comunes UI (Botones, Inputs)</span></li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">pages</span> <span class="file-comment">// Módulos organizados conceptualmente</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">matricula</span>
+                        <ul>
+                          <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">InscripcionCursos.tsx</span></li>
+                          <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">HorarioVisualizador.tsx</span></li>
+                        </ul>
+                      </li>
+                      <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">notas</span>
+                        <ul>
+                          <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">BoletaNotas.tsx</span></li>
+                        </ul>
+                      </li>
+                      <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">pagos</span>
+                        <ul>
+                          <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">HistorialPagos.tsx</span></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">store</span> <span class="file-comment">// Estado global único compartido (Redux / Zustand)</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card">
+        <h4>Justificación de SPA Monolítica:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Equipos de desarrollo pequeños, o fases iniciales del portal de estudiantes donde la interfaz es sencilla.</li>
+          <li><strong>Ventajas:</strong> Simplicidad extrema en compilación y despliegue (un solo comando de build genera archivos estáticos fáciles de subir a servicios como Netlify o AWS S3). Compartir componentes UI y el estado de la sesión del alumno (tokens, perfil) es trivial.</li>
+          <li><strong>Desventajas:</strong> El tamaño del archivo final compilado (`bundle.js`) se infla con el tiempo, ralentizando el primer inicio en móviles de estudiantes con conexiones lentas. Además, un error crítico de compilación en el módulo de pagos puede inhabilitar todo el portal de calificaciones.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 2. Micro-frontends -->
+    <section class="topic-section" id="microfrontends">
+      <h2 class="section-title">2. Micro-frontends</h2>
+      <p class="intro-paragraph">
+        Descompone el frontend en pequeñas aplicaciones independientes desplegables y compilables de forma autónoma. Un contenedor (*Shell*) actúa como anfitrión para renderizar y cargar dinámicamente en el navegador cada módulo (Matrícula, Notas) utilizando tecnologías como **Module Federation (Webpack/Vite)** o **Single-spa**.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios (Module Federation)</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">sga-microfrontends</span> <span class="file-comment">// Estructura Monorepo o Multi-repo</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">shell-app</span> <span class="file-comment">// Módulo contenedor / Orquestador</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">webpack.config.js</span> <span class="file-comment">// Configura Module Federation para consumir remotos</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">Header.tsx</span> <span class="file-comment">// Barra superior unificada</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">App.tsx</span> <span class="file-comment">// Carga rutas mediante importaciones dinámicas lazy</span></li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+              <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">matricula-mfe</span> <span class="file-comment">// Micro-app 1 (Inscripciones)</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">package.json</span></li>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">webpack.config.js</span> <span class="file-comment">// Expone el módulo 'MatriculaWidget' al Shell</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src</span></li>
+                </ul>
+              </li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">notas-mfe</span> <span class="file-comment">// Micro-app 2 (Boletas de Notas)</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">package.json</span></li>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">webpack.config.js</span> <span class="file-comment">// Expone el módulo 'NotasWidget' al Shell</span></li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src</span></li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card" style="border-left-color: var(--color-secondary);">
+        <h4>Justificación de Micro-frontends:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Portales universitarios masivos operados por múltiples equipos de desarrollo independientes (ej. equipo de finanzas enfocado en pagos, equipo de secretaría enfocado en admisiones).</li>
+          <li><strong>Ventajas:</strong> Independencia absoluta de despliegue. El equipo de admisiones puede subir cambios de matriculación a producción un viernes a las 11:00 PM sin riesgo de afectar el módulo de calificaciones de los profesores. Permite usar diferentes tecnologías (ej. admisiones en React y notas en Vue).</li>
+          <li><strong>Desventajas:</strong> Complejidad de desarrollo local alta. Compartir estado global (como la sesión del usuario) requiere definir contratos estrictos. Riesgo de sobrecarga de carga inicial si no se configuran librerías compartidas (ej. descargar React varias veces en cada módulo).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 3. Capas / Clean en Frontend -->
+    <section class="topic-section" id="capas">
+      <h2 class="section-title">3. Arquitectura en Capas / Clean Architecture en Frontend</h2>
+      <p class="intro-paragraph">
+        Aplica los principios de desacoplamiento de *Clean Architecture* en el cliente. La lógica del negocio (reglas, validación de créditos, cálculo de promedios) y las APIs se independizan por completo del Framework UI (React/Vue/Angular), permitiendo cambiar de librería visual sin rescribir el núcleo del sistema.
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Carpetas (Clean Architecture Frontend)</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">sga-frontend-clean</span>
+            <ul>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">src</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">data</span> <span class="file-comment">// CAPA 1: Infraestructura (HTTP, LocalStorage)</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaRepositoryImpl.ts</span> <span class="file-comment">// Realiza el fetch HTTP a la API</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">StorageServiceImpl.ts</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">domain</span> <span class="file-comment">// CAPA 2: Lógica pura del negocio (Casos de Uso e interfaces)</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">MatriculaRepository.ts</span> <span class="file-comment">// Interfaz / Contrato</span></li>
+                      <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">InscribirAlumnoUseCase.ts</span> <span class="file-comment">// Regla pura: Valida créditos máximos</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">StudentEntity.ts</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">presentation</span> <span class="file-comment">// CAPA 3: Visual / UI (Acoplado a React/Vue)</span>
+                    <ul>
+                      <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">views</span> <span class="file-comment">// Vistas o Páginas</span>
+                        <ul>
+                          <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">MatriculaScreen.tsx</span></li>
+                        </ul>
+                      </li>
+                      <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">components</span> <span class="file-comment">// Botones, Tablas</span></li>
+                      <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">hooks</span> <span class="file-comment">// Controladores locales que ligan Domain con View</span>
+                        <ul>
+                          <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">useMatricula.ts</span></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card" style="border-left-color: var(--color-accent);">
+        <h4>Justificación de Capas / Clean Frontend:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Portales de software críticos de larga vida útil donde se prevé migrar o actualizar de tecnologías (ej. cambiar de React a Next.js o Svelte) sin perder años de lógica e interfaces de comunicación ya programadas.</li>
+          <li><strong>Ventajas:</strong> Desacoplamiento absoluto. Las pruebas unitarias son muy rápidas de ejecutar ya que no requieren levantar componentes visuales ni mocks del DOM para testear reglas lógicas de cálculo de promedios de notas.</li>
+          <li><strong>Desventajas:</strong> Incrementa la sobrecarga de código de inicio. Requiere escribir múltiples interfaces y adaptadores para mapear objetos de datos simples, lo que puede ralentizar el desarrollo inicial de vistas sencillas.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- 4. SSR / Isomórfico -->
+    <section class="topic-section" id="ssr">
+      <h2 class="section-title">4. Server-Side Rendering (SSR) e Isomórfica</h2>
+      <p class="intro-paragraph">
+        Las aplicaciones isomórficas comparten la ejecución del código en el servidor y en el cliente. Al cargar una página, el Servidor pre-renderiza el HTML completo con los datos académicos correspondientes e inmediatamente lo envía listo para visualizar al navegador (hidratación del cliente).
+      </p>
+
+      <h3 style="font-size: 1.2rem; margin-bottom: 12px; color: var(--text-bright);">Árbol de Directorios (Next.js App Router)</h3>
+      <div class="file-tree-container">
+        <ul class="tree-root">
+          <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">sga-nextjs-app</span>
+            <ul>
+              <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">package.json</span></li>
+              <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">app</span> <span class="file-comment">// Enrutamiento basado en archivos</span>
+                <ul>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name main">layout.tsx</span> <span class="file-comment">// Plantilla de layout global</span></li>
+                  <li class="tree-node"><span class="tree-icon">📄</span> <span class="file-name">page.tsx</span> <span class="file-comment">// Landing principal del portal de la U</span></li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">matricula</span> <span class="file-comment">// Ruta: /matricula</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">page.tsx</span> <span class="file-comment">// Componente de Servidor: consulta la API en el backend directamente</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node"><span class="tree-icon">📂</span> <span class="folder-name">notas</span> <span class="file-comment">// Ruta: /notas</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">page.tsx</span></li>
+                    </ul>
+                  </li>
+                  <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">api</span> <span class="file-comment">// Rutas de Backend ligeras integradas en Next.js</span>
+                    <ul>
+                      <li class="tree-node last"><span class="tree-icon">📂</span> <span class="folder-name">auth</span>
+                        <ul>
+                          <li class="tree-node last"><span class="tree-icon">📄</span> <span class="file-name">route.ts</span></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+
+      <div class="justification-card" style="border-left-color: var(--color-warning);">
+        <h4>Justificación de SSR / Next.js:</h4>
+        <ul>
+          <li><strong>Adecuación:</strong> Portales universitarios públicos con requerimientos altos de SEO (para que buscadores indexen el catálogo de cursos) y necesidad de tiempos de carga inicial ultrarrápidos.</li>
+          <li><strong>Ventajas:</strong> Velocidad de despliegue inicial asombrosa. El servidor pre-carga los datos de notas directamente de la base de datos interna y los envía como HTML renderizado, ahorrando latencias de fetch en el navegador. La seguridad mejora al no exponer URLs del backend al cliente web.</li>
+          <li><strong>Desventajas:</strong> Requiere servidores activos corriendo node.js (mayor costo computacional que hospedar estáticos ordinarios). La depuración de código se vuelve compleja al tener código que se ejecuta en el servidor y código que se ejecuta en el navegador (ej. `window is not defined`).</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">Autoevaluación: Frontend SGA</h2>
+      <p class="intro-paragraph">
+        Verifica tus conocimientos sobre la arquitectura en el cliente con este rápido quiz de preparación.
+      </p>
+
+      <div class="quiz-container">
+        <!-- Q1 -->
+        <div class="quiz-question" data-q="1">
+          <h4><span class="q-num">Q1.</span> Si la universidad decide contratar a un equipo externo para que reescriba el portal de matrículas utilizando una tecnología de vanguardia sin impactar el portal de notas actual, ¿qué arquitectura frontend lo facilita?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Frontend Monolítico (SPA).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Micro-frontends (MFE).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Clean Architecture en SPA.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="quiz-question" data-q="2">
+          <h4><span class="q-num">Q2.</span> ¿Cuál es el principal beneficio de aplicar Clean Architecture en el desarrollo frontend de la universidad?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Reducir el tamaño de las imágenes del catálogo automáticamente.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Desacoplar la lógica pura de negocio de la interfaz gráfica y del framework visual (React/Vue), simplificando la mantenibilidad ante cambios tecnológicos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Lograr que el motor de búsquedas de Google indexe más rápido la boleta de calificaciones de los alumnos.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="quiz-question" data-q="3">
+          <h4><span class="q-num">Q3.</span> Al utilizar Next.js con Server-Side Rendering (SSR), ¿dónde ocurre la consulta inicial del catálogo de asignaturas antes de ser entregado al navegador?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Ocurre en el navegador del estudiante mediante llamadas AJAX pesadas de Javascript.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Ocurre en el lado del servidor de Next.js, el cual pre-renderiza la página web y entrega el HTML completo listo al navegador.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Ocurre en un micro-frontend configurado como anfitrión.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/3</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.3
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 3;
+      let allAnswered = true;
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del quiz antes de verificar.");
+        return;
+      }
+
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          const lbl = r.closest('.quiz-option');
+          lbl.classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Comprendes las decisiones arquitectónicas en el desarrollo frontend.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 1) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "Buen intento. Revisa la retroalimentación para afinar tus decisiones de diseño frontend.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te sugerimos repasar las diferencias de micro-frontends y server-side rendering.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>
