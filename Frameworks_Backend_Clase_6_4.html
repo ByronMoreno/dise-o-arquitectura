@@ -1,0 +1,1552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 6.4: Frameworks Backend (Ampliación). Comparativa a fondo de tecnologías por lenguaje: Java (Spring Boot, Quarkus, Micronaut), C# (ASP.NET Core), Python (Django, Flask, FastAPI), JavaScript (Express, NestJS, Fastify), PHP (Laravel, Symfony), Go (Gin, Fiber) y Rust (Actix, Axum). Ejemplos de endpoints REST y quiz.">
+  <title>Frameworks Backend Ampliados | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Amber */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      color: var(--color-primary);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Cards Grid Layout
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.25rem;
+    }
+
+    .icon-blue { background: rgba(59, 130, 246, 0.1); color: var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.2); }
+    .icon-purple { background: rgba(139, 92, 246, 0.1); color: var(--color-secondary); border: 1px solid rgba(139, 92, 246, 0.2); }
+    .icon-cyan { background: rgba(6, 182, 212, 0.1); color: var(--color-accent); border: 1px solid rgba(6, 182, 212, 0.2); }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .card-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Interactive Language & Framework Matrix
+       ========================================== */
+    .frameworks-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .lang-tabs {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 968px) {
+      .lang-tabs {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 568px) {
+      .lang-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .lang-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .lang-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .lang-tab-btn.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+    }
+
+    .lang-sheet {
+      display: grid;
+      grid-template-columns: 1fr 1.1fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 968px) {
+      .lang-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .lang-details {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .lang-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .lang-model-box {
+      background: rgba(139, 92, 246, 0.05);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.9rem;
+      color: var(--color-secondary);
+      font-weight: 600;
+    }
+
+    .lang-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .framework-pill-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .fw-pill-item {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .fw-pill-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .fw-name {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .fw-tag {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .tag-opinado { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .tag-micro { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
+
+    .fw-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* ==========================================
+       REST Code Comparator (Tabs & Resizable)
+       ========================================== */
+    .code-comparator {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-panel.active {
+      display: block;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(59, 130, 246, 0.06);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    /* ==========================================
+       Footer Style
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 6.4: Frameworks</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 6.4</h2>
+        <span>Backend</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. Filosofías de Backend</a></li>
+      <li><a href="#modulo2">2. Explorador por Lenguaje</a></li>
+      <li><a href="#modulo3">3. Comparativa de Código</a></li>
+      <li><a href="#quiz">4. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+        </svg>
+        <span>Módulo de Programación Avanzado</span>
+      </div>
+      <h1 class="hero-title">Matriz de Frameworks Backend</h1>
+      <p class="hero-subtitle">
+        Amplía tus conocimientos técnicos evaluando y comparando las herramientas backend líderes en la industria para Java, C#, Python, JavaScript/TypeScript, PHP, Go y Rust.
+      </p>
+    </header>
+
+    <!-- Modulo 1: Filosofía y Modelos de Ejecución -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Filosofía de los Frameworks</h2>
+      <p class="intro-paragraph">
+        Los frameworks backend modernos se clasifican no solo por su lenguaje de programación, sino por su nivel de opinión arquitectónica y su modelo de ejecución ante peticiones concurrentes:
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon icon-blue">🎯</div>
+          <h3 class="card-title">Opinados vs. No Opinados</h3>
+          <p class="card-content">
+            Los frameworks <strong>opinados</strong> (ej. Spring Boot, NestJS, Laravel) definen una estructura de carpetas estricta e inyección de dependencias nativa. Los <strong>no opinados / micro-frameworks</strong> (ej. Express, Flask, Gin) brindan libertad total al programador pero requieren que este cree la estructura del proyecto de cero.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-purple">🔄</div>
+          <h3 class="card-title">Modelos de Concurrencia</h3>
+          <p class="card-content">
+            Tecnologías como Java clásico usan el modelo <strong>Thread-per-request</strong> (un hilo nativo de CPU por petición), mientras que NodeJS (NestJS) y Rust usan un <strong>Event-Loop asíncrono y no bloqueante</strong> (E/S asíncrona mediante un pool reducido de hilos), optimizando el consumo de memoria RAM.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Explorador por Lenguaje -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Matriz de Frameworks por Lenguaje</h2>
+      <p class="intro-paragraph">
+        Haz clic en cada pestaña para examinar la suite de frameworks de desarrollo, su modelo de concurrencia y sus casos de uso específicos:
+      </p>
+
+      <div class="frameworks-explorer">
+        <!-- Language selectors -->
+        <div class="lang-tabs">
+          <button class="lang-tab-btn active" onclick="selectLanguage('java')">Java</button>
+          <button class="lang-tab-btn" onclick="selectLanguage('csharp')">C#</button>
+          <button class="lang-tab-btn" onclick="selectLanguage('python')">Python</button>
+          <button class="lang-tab-btn" onclick="selectLanguage('javascript')">JavaScript</button>
+          <button class="lang-tab-btn" onclick="selectLanguage('php')">PHP</button>
+          <button class="lang-tab-btn" onclick="selectLanguage('go')">Go</button>
+          <button class="lang-tab-btn" onclick="selectLanguage('rust')">Rust</button>
+        </div>
+
+        <!-- Language Sheet Panel -->
+        <div class="lang-sheet" id="lang-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="lang-details">
+            <h4 class="lang-title" id="lang-name">Java</h4>
+            <div class="lang-model-box" id="lang-model">Modelo de Concurrencia: Multihilo (Thread-per-request / Virtual Threads)</div>
+            <p class="lang-desc" id="lang-desc">
+              El ecosistema de Java destaca en la computación empresarial masiva por su tipado estático robusto, compilación JIT optimizada y soporte corporativo de largo plazo (LTS).
+            </p>
+          </div>
+
+          <div class="framework-pill-grid" id="fw-list">
+            <!-- Cargado por JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Comparativa de Código -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Comparación de Código REST GET (Saludo)</h2>
+      <p class="intro-paragraph">
+        Compara la sintaxis exacta requerida para exponer un endpoint REST básico en la ruta <code>GET /api/saludo</code> que retorne la estructura JSON <code>{"mensaje": "Hola Mundo"}</code>:
+      </p>
+
+      <!-- Code Comparator Component -->
+      <div class="code-comparator">
+        <div class="code-tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'code-spring')">Spring Boot (Java)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-aspnet')">ASP.NET Core (C#)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-fastapi')">FastAPI (Python)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-nest')">NestJS (TS)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-laravel')">Laravel (PHP)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-gin')">Gin (Go)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-axum')">Axum (Rust)</button>
+        </div>
+
+        <!-- Spring Boot -->
+        <div class="code-panel active" id="code-spring">
+          <pre><code><span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>(<span class="string">"/api"</span>)
+<span class="keyword">public class</span> <span class="type">SaludoController</span> {
+
+    <span class="annotation">@GetMapping</span>(<span class="string">"/saludo"</span>)
+    <span class="keyword">public</span> <span class="type">Map</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt; <span class="method">obtenerSaludo</span>() {
+        <span class="type">Map</span>&lt;<span class="type">String</span>, <span class="type">String</span>&gt; res = <span class="keyword">new</span> <span class="type">HashMap</span>&lt;&gt;();
+        res.<span class="method">put</span>(<span class="string">"mensaje"</span>, <span class="string">"Hola Mundo"</span>);
+        <span class="keyword">return</span> res;
+    }
+}</code></pre>
+        </div>
+
+        <!-- ASP.NET Core -->
+        <div class="code-panel" id="code-aspnet">
+          <pre><code><span class="keyword">var</span> builder = <span class="type">WebApplication</span>.<span class="method">CreateBuilder</span>(args);
+<span class="keyword">var</span> app = builder.<span class="method">Build</span>();
+
+<span class="comment">// Minimal APIs (Introducido en .NET 6)</span>
+app.<span class="method">MapGet</span>(<span class="string">"/api/saludo"</span>, () => <span class="keyword">new</span> { mensaje = <span class="string">"Hola Mundo"</span> });
+
+app.<span class="method">Run</span>();</code></pre>
+        </div>
+
+        <!-- FastAPI -->
+        <div class="code-panel" id="code-fastapi">
+          <pre><code><span class="keyword">from</span> fastapi <span class="keyword">import</span> FastAPI
+
+app = FastAPI()
+
+<span class="annotation">@app.get</span>(<span class="string">"/api/saludo"</span>)
+<span class="keyword">async def</span> <span class="method">obtener_saludo</span>():
+    <span class="keyword">return</span> {<span class="string">"mensaje"</span>: <span class="string">"Hola Mundo"</span>}</code></pre>
+        </div>
+
+        <!-- NestJS -->
+        <div class="code-panel" id="code-nest">
+          <pre><code><span class="keyword">import</span> { Controller, Get } <span class="keyword">from</span> <span class="string">'@nestjs/common'</span>;
+
+<span class="annotation">@Controller</span>(<span class="string">'api'</span>)
+<span class="keyword">export class</span> <span class="type">SaludoController</span> {
+  
+  <span class="annotation">@Get</span>(<span class="string">'saludo'</span>)
+  <span class="method">obtenerSaludo</span>() {
+    <span class="keyword">return</span> { mensaje: <span class="string">'Hola Mundo'</span> };
+  }
+}</code></pre>
+        </div>
+
+        <!-- Laravel -->
+        <div class="code-panel" id="code-laravel">
+          <pre><code><span class="keyword">use</span> Illuminate\\Support\\Facades\\Route;
+
+<span class="comment">// Mapeado de rutas en routes/api.php</span>
+<span class="type">Route</span>::<span class="method">get</span>(<span class="string">'/saludo'</span>, <span class="keyword">function</span> () {
+    <span class="keyword">return</span> response()-><span class="method">json</span>([<span class="string">'mensaje'</span> => <span class="string">'Hola Mundo'</span>]);
+});</code></pre>
+        </div>
+
+        <!-- Gin -->
+        <div class="code-panel" id="code-gin">
+          <pre><code><span class="keyword">package</span> main
+
+<span class="keyword">import</span> (
+	<span class="string">"github.com/gin-gonic/gin"</span>
+)
+
+<span class="keyword">func</span> <span class="method">main</span>() {
+	r := gin.<span class="method">Default</span>()
+	r.<span class="method">GET</span>(<span class="string">"/api/saludo"</span>, <span class="keyword">func</span>(c *gin.Context) {
+		c.<span class="method">JSON</span>(<span class="type">200</span>, gin.H{<span class="string">"mensaje"</span>: <span class="string">"Hola Mundo"</span>})
+	})
+	r.<span class="method">Run</span>()
+}</code></pre>
+        </div>
+
+        <!-- Axum -->
+        <div class="code-panel" id="code-axum">
+          <pre><code><span class="keyword">use</span> axum::{routing::get, Json, Router};
+<span class="keyword">use</span> serde_json::{json, Value};
+
+<span class="annotation">#[tokio::main]</span>
+<span class="keyword">async fn</span> <span class="method">main</span>() {
+    <span class="keyword">let</span> app = <span class="type">Router</span>::new().route(<span class="string">"/api/saludo"</span>, get(obtener_saludo));
+    
+    <span class="keyword">let</span> listener = tokio::net::<span class="type">TcpListener</span>::bind(<span class="string">"127.0.0.1:3000"</span>).<span class="keyword">await</span>.unwrap();
+    axum::serve(listener, app).<span class="keyword">await</span>.unwrap();
+}
+
+<span class="keyword">async fn</span> <span class="method">obtener_saludo</span>() -> <span class="type">Json</span>&lt;<span class="type">Value</span>&gt; {
+    <span class="type">Json</span>(json!({ <span class="string">"mensaje"</span>: <span class="string">"Hola Mundo"</span> }))
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">4. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Valida tus conocimientos adquiridos sobre los frameworks backend de última generación:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Si tu equipo requiere desarrollar microservicios en Java que arranquen casi instantáneamente y tengan un bajísimo consumo de memoria para ejecutarse en contenedores Kubernetes, ¿qué framework moderno es la alternativa ideal a Spring Boot?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Express.js</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Django</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Quarkus</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> ¿Cuál de los siguientes frameworks destaca en JavaScript/TypeScript por adoptar una arquitectura opinada, modular y fuertemente inspirada en Angular?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>NestJS</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Laravel</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>FastAPI</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> En el lenguaje de programación Rust, ¿qué característica principal diferencia a frameworks como Actix Web y Axum?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>La compilación en caliente interpretada.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>El rendimiento de seguridad de tipos y concurrencia asíncrona sobre hilos nativos sin bloqueos de CPU.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>La dependencia exclusiva del framework Django.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> ¿Qué es un micro-framework o framework no opinado (ej. Flask, Gin)?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>Un framework limitado a retornar vistas HTML renderizadas en servidor de bases de datos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Una herramienta mínima y flexible que no impone reglas sobre la estructura de archivos ni la inyección de dependencias.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>Un software desarrollado exclusivamente en PHP para la web tradicional.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Languages Matrix Data & Logic
+       ========================================== */
+    const langData = {
+      java: {
+        name: "Java",
+        model: "Modelo de Concurrencia: Hilos nativos OS / Hilos Virtuales (Project Loom)",
+        desc: "Java es el líder indiscutible del software empresarial corporativo a gran escala. Su Máquina Virtual (JVM) ofrece un ecosistema sumamente maduro, recolección de basura optimizada y soporte corporativo de largo plazo.",
+        fws: [
+          { name: "Spring Boot", tag: "Opinado", desc: "El estándar industrial empresarial. Ofrece inyección de dependencias, abstracción JPA e integración masiva en ecosistemas cloud de forma transparente." },
+          { name: "Quarkus", tag: "Micro / Cloud", desc: "Diseñado por Red Hat. Optimiza el arranque en milisegundos y minimiza la huella de memoria compilando a binario nativo mediante GraalVM." },
+          { name: "Micronaut", tag: "Micro / Cloud", desc: "Framework nativo de cloud que realiza inyección de dependencias en tiempo de compilación, eliminando la reflexión dinámica para reducir memoria." }
+        ]
+      },
+      csharp: {
+        name: "C# (.NET)",
+        model: "Modelo de Concurrencia: Pool de hilos administrado con soporte nativo de Async/Await",
+        desc: "C# es el lenguaje de Microsoft optimizado para desarrollo corporativo y de videojuegos. Ofrece un rendimiento extremadamente competitivo gracias a su motor CLR y JIT de última generación.",
+        fws: [
+          { name: "ASP.NET Core", tag: "Opinado", desc: "Framework web oficial de Microsoft de alto rendimiento, multiplataforma y código abierto. Soporta APIs mínimas y MVC de forma nativa con excelente integración a Azure." }
+        ]
+      },
+      python: {
+        name: "Python",
+        model: "Modelo de Concurrencia: Multiproceso / Asíncrono (Asyncio con límites de GIL)",
+        desc: "El lenguaje de scripting líder en ciencia de datos e inteligencia artificial. Su enfoque principal es la simplicidad sintáctica y el desarrollo rápido de funcionalidades.",
+        fws: [
+          { name: "Django", tag: "Opinado", desc: "El framework con 'baterías incluidas'. Provee un ORM potente, panel de administración autogenerado y sistema de autenticación nativo." },
+          { name: "Flask", tag: "Micro-framework", desc: "Micro-framework minimalista y flexible. Da total control al desarrollador para integrar las extensiones y arquitecturas necesarias." },
+          { name: "FastAPI", tag: "Micro / Async", desc: "Moderno framework asíncrono basado en tipos de Python (Pydantic). Autogenera documentación Swagger interactiva y ofrece gran rendimiento." }
+        ]
+      },
+      javascript: {
+        name: "JavaScript / TypeScript",
+        model: "Modelo de Concurrencia: Event-Loop asíncrono mono-hilo con E/S no bloqueante",
+        desc: "El lenguaje universal de la web, ejecutado en el backend sobre NodeJS o Deno. Ofrece alta velocidad de desarrollo de prototipos compartiendo tipos con el frontend.",
+        fws: [
+          { name: "Express.js", tag: "Micro-framework", desc: "El micro-framework clásico e informal de NodeJS. Extremadamente minimalista e ideal para construir middlewares y enrutamiento rápido." },
+          { name: "NestJS", tag: "Opinado", desc: "Framework TypeScript estructurado y modular inspirado en Angular. Utiliza inyección de dependencias nativa y promueve arquitecturas limpias." },
+          { name: "Fastify", tag: "Micro-framework", desc: "Micro-framework enfocado en maximizar el rendimiento y la velocidad de procesamiento de peticiones JSON por segundo, con muy baja sobrecarga." }
+        ]
+      },
+      php: {
+        name: "PHP",
+        model: "Modelo de Concurrencia: Proceso compartido por petición (Share Nothing Architecture)",
+        desc: "El motor tradicional del 78% de la web. Su ciclo de vida es simple: cada request HTTP inicializa el script de cero y lo destruye al retornar la respuesta, facilitando el despliegue.",
+        fws: [
+          { name: "Laravel", tag: "Opinado", desc: "El framework PHP más popular. Ofrece una sintaxis elegante y fluida, ORM Eloquent, migraciones fáciles y ecosistema robusto de herramientas." },
+          { name: "Symfony", tag: "Opinado", desc: "Framework corporativo pesado y modular. Destaca por su alta flexibilidad y robustez arquitectónica para aplicaciones empresariales grandes." }
+        ]
+      },
+      go: {
+        name: "Go (Golang)",
+        model: "Modelo de Concurrencia: Goroutines asíncronas ligeras gestionadas por el runtime de Go",
+        desc: "Diseñado por Google. Es un lenguaje compilado estático extremadamente rápido, minimalista y orientado al desarrollo de sistemas distribuidos y microservicios nativos.",
+        fws: [
+          { name: "Gin", tag: "Micro-framework", desc: "El framework web más popular de Go. Cuenta con un enrutador basado en árboles Radix que le permite procesar peticiones con alta velocidad." },
+          { name: "Fiber", tag: "Micro-framework", desc: "Construido sobre Fasthttp, el motor HTTP más rápido para Go. Adopta un diseño de middlewares similar a Express.js de NodeJS." }
+        ]
+      },
+      rust: {
+        name: "Rust",
+        model: "Modelo de Concurrencia: Asincronía basada en Tokio con hilos nativos y garantía estricta de propiedad (ownership)",
+        desc: "Un lenguaje de programación de sistemas que compila directamente a binario nativo de CPU sin recolector de basura (garbage collector), garantizando velocidad extrema y seguridad en memoria.",
+        fws: [
+          { name: "Actix Web", tag: "Micro-framework", desc: "Uno de los frameworks web más rápidos del mundo. Utiliza el modelo de actores e hilos nativos para alcanzar un rendimiento brutal de peticiones." },
+          { name: "Axum", tag: "Micro-framework", desc: "Desarrollado por el equipo oficial de Tokio. Integra de forma natural el ecosistema de servicios Tower y las facilidades asíncronas estándar de Rust." }
+        ]
+      }
+    };
+
+    function selectLanguage(lang) {
+      // Toggle button active class
+      document.querySelectorAll('.lang-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const targetBtn = Array.from(document.querySelectorAll('.lang-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(lang));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const data = langData[lang];
+
+      // Update text sheet with quick fade animation
+      const sheet = document.getElementById('lang-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      document.getElementById('lang-name').innerText = data.name;
+      document.getElementById('lang-model').innerText = data.model;
+      document.getElementById('lang-desc').innerText = data.desc;
+
+      // Populate framework list
+      const fwList = document.getElementById('fw-list');
+      fwList.innerHTML = '';
+
+      data.fws.forEach(fw => {
+        const item = document.createElement('div');
+        item.className = 'fw-pill-item';
+        
+        const isOpinado = fw.tag.toLowerCase().includes('opinado');
+        const tagClass = isOpinado ? 'tag-opinado' : 'tag-micro';
+
+        item.innerHTML = `
+          <div class="fw-pill-header">
+            <span class="fw-name">${fw.name}</span>
+            <span class="fw-tag ${tagClass}">${fw.tag}</span>
+          </div>
+          <p class="fw-desc">${fw.desc}</p>
+        `;
+        fwList.appendChild(item);
+      });
+    }
+
+    // Default load Java
+    selectLanguage('java');
+
+    /* ==========================================
+       REST Code Tabs Switching Logic
+       ========================================== */
+    function switchTab(event, panelId) {
+      const container = event.target.closest('.code-comparator');
+      
+      container.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      container.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'c',
+      q2: 'a',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado las diferencias técnicas e identidades de los principales frameworks backend.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Revisa la clasificación de micro-frameworks y herramientas compiladas nativas.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te recomendamos revisar el comparador interactivo de lenguajes y sus herramientas.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

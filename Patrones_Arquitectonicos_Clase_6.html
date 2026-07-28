@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 6: Catálogo completo de Patrones Arquitectónicos. Análisis a fondo de Capas, Clean Architecture, Hexagonal, Onion, MVC, CQRS, Event-Driven y Microkernel. Incluye árboles de carpetas, código fuente de ejemplo y quiz interactivo.">
+  <title>Patrones Arquitectónicos de Software | Guía Definitiva</title>
+  
+  <!-- Google Fonts: Outfit and Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Amber */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      color: var(--color-accent);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Cards Grid Layout
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.25rem;
+    }
+
+    .icon-blue { background: rgba(59, 130, 246, 0.1); color: var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.2); }
+    .icon-purple { background: rgba(139, 92, 246, 0.1); color: var(--color-secondary); border: 1px solid rgba(139, 92, 246, 0.2); }
+    .icon-cyan { background: rgba(6, 182, 212, 0.1); color: var(--color-accent); border: 1px solid rgba(6, 182, 212, 0.2); }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .card-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Interactive Pattern Explorer & Sheet
+       ========================================== */
+    .patterns-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .patterns-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 868px) {
+      .patterns-tabs {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .patterns-tabs {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pattern-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .pattern-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .pattern-tab-btn.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+    }
+
+    .pattern-sheet {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 1024px) {
+      .pattern-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pattern-details-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .pattern-sheet-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .pattern-sheet-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .pattern-rule-box {
+      background: rgba(6, 182, 212, 0.05);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Pattern visual schematic containers */
+    .pattern-visual-container {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 250px;
+      gap: 15px;
+    }
+
+    /* CSS schematics classes */
+    .schematic-box {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+      width: 90%;
+    }
+
+    .schematic-arrow {
+      color: var(--color-accent);
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    .schematic-highlight {
+      background: rgba(139, 92, 246, 0.06) !important;
+      border-color: rgba(139, 92, 246, 0.3) !important;
+      color: var(--color-secondary) !important;
+      font-weight: 600;
+    }
+
+    /* Concentric rings styled as stacked flex boxes for Clean/Onion */
+    .ring-outer {
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      padding: 12px;
+      width: 95%;
+      background: rgba(255,255,255,0.01);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ring-middle {
+      border: 2px solid var(--color-primary);
+      border-radius: 10px;
+      padding: 12px;
+      width: 95%;
+      margin-top: 6px;
+      background: rgba(59, 130, 246, 0.03);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ring-inner {
+      border: 2px solid var(--color-secondary);
+      border-radius: 8px;
+      padding: 12px;
+      width: 95%;
+      margin-top: 6px;
+      background: rgba(139, 92, 246, 0.08);
+      text-align: center;
+      color: var(--text-bright);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    .ring-label {
+      font-size: 0.72rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+
+    /* Directory layout styling */
+    .directory-tree {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-light);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      color: var(--color-success);
+      width: 100%;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* Code Panel within Interactive Explorers */
+    .pattern-code-box {
+      margin-top: 15px;
+      width: 100%;
+    }
+
+    .code-tabs-container {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 14px 18px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .code-panel {
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.83rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Syntax highlighting */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Table Comparison Style
+       ========================================== */
+    .comparison-table-wrapper {
+      overflow-x: auto;
+      margin-top: 24px;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    .comparison-table th {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-bright);
+      font-weight: 700;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .comparison-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comparison-table tr:hover td {
+      background: rgba(255, 255, 255, 0.01);
+      color: var(--text-bright);
+    }
+
+    .col-highlight {
+      color: var(--color-accent) !important;
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(59, 130, 246, 0.06);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    /* ==========================================
+       Footer Style
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 6: Patrones Arq.</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 6</h2>
+        <span>Patrones Arq.</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. Contexto Histórico</a></li>
+      <li><a href="#modulo2">2. Catálogo de Patrones</a></li>
+      <li><a href="#modulo3">3. Explorador de Fichas</a></li>
+      <li><a href="#modulo4">4. Tabla Comparativa</a></li>
+      <li><a href="#quiz">5. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6c0 1.1-.9 2-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2" />
+        </svg>
+        <span>Módulo Arquitectónico Conceptual</span>
+      </div>
+      <h1 class="hero-title">Patrones Arquitectónicos<br>(Antes de los Frameworks)</h1>
+      <p class="hero-subtitle">
+        Estudia a fondo las filosofías, estructuras físicas de archivos, ejemplos sintácticos y reglas fundamentales que organizan el código fuente desde su núcleo teórico.
+      </p>
+    </header>
+
+    <!-- Modulo 1: Contexto Histórico -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. El Contexto antes de los Frameworks</h2>
+      <p class="intro-paragraph">
+        Antes de que surgieran frameworks como <span class="highlight">Spring Boot (Java), Django (Python) o NestJS (NodeJS)</span>, los desarrolladores de software se enfrentaban a un caos de organización de código. El acceso a bases de datos mediante SQL crudo y el procesamiento de UI (como los antiguos archivos CGI o JSPs) terminaban mezclados en una maraña indescifrable conocida como <em>Código Espagueti</em>.
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon icon-blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          </div>
+          <h3 class="card-title">La Era del Caos Técnico</h3>
+          <p class="card-content">
+            Sin guías arquitectónicas claras, un simple cambio de base de datos o de motor gráfico forzaba a los ingenieros a reprogramar casi el 100% de la aplicación en cascada.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+          </div>
+          <h3 class="card-title">Propósito de los Patrones</h3>
+          <p class="card-content">
+            Los patrones se introdujeron como planos conceptuales de diseño probados y repetibles. Brindan un vocabulario común y definen límites de software para aislar preocupaciones.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-cyan">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+          </div>
+          <h3 class="card-title">Independencia del Framework</h3>
+          <p class="card-content">
+            Aprender patrones permite programar software limpio de forma independiente a la tecnología de turno. Los frameworks vienen y van; los principios de diseño perduran.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Catálogo de Patrones -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Catálogo de los 8 Patrones Arquitectónicos</h2>
+      <p class="intro-paragraph">
+        Para diseñar sistemas de software mantenibles, robustos y flexibles, es mandatorio dominar las siguientes aproximaciones:
+      </p>
+
+      <ul style="list-style: none; display: flex; flex-direction: column; gap: 16px; font-size: 1rem; color: var(--text-muted); margin-bottom: 20px; padding-left: 10px;">
+        <li>🛡️ <span class="highlight">Arquitectura en Capas (Layered)</span>: Divide el código en jerarquías rígidas (Presentación, Negocio, Acceso a Datos).</li>
+        <li>🌀 <span class="highlight">Clean Architecture</span>: Propuesto por Robert C. Martin, coloca las reglas de negocio en el centro y las dependencias de frameworks en la periferia.</li>
+        <li>🔩 <span class="highlight">Hexagonal (Ports & Adapters)</span>: Propuesto por Alistair Cockburn, aísla la lógica comercial mediante interfaces (puertos) inyectables.</li>
+        <li>Onion Architecture (Cebolla)</li>: Diseñada por Jeffrey Palermo, similar a la Hexagonal, utiliza el dominio comercial en el núcleo y las dependencias fluyen hacia dentro mediante inversión de control.</li>
+        <li>🎨 <span class="highlight">MVC (Model-View-Controller)</span>: Separa la lógica de presentación (Vista), los datos (Modelo) y las llamadas del cliente (Controlador).</li>
+        <li>🔍 <span class="highlight">CQRS</span>: Divide las operaciones de escritura (Commands) y lectura (Queries) en canales o bases de datos independientes.</li>
+        <li>✉️ <span class="highlight">Event-Driven Architecture</span>: Comunicación asíncrona entre componentes mediante emisión y consumo de eventos (ej. colas de mensajería).</li>
+        <li>🔌 <span class="highlight">Microkernel (Plugins)</span>: Core central minimalista que extiende sus capacidades mediante módulos de conexión (plugins) independientes.</li>
+      </ul>
+    </section>
+
+    <!-- Modulo 3: Selector Interactivo -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Explorador de Fichas Técnicas de Patrones</h2>
+      <p class="intro-paragraph">
+        Haz clic en cada botón para explorar la filosofía detallada, árbol de directorios, código de ejemplo y representación esquemática de cada patrón:
+      </p>
+
+      <div class="patterns-explorer">
+        <!-- Tabs selectors -->
+        <div class="patterns-tabs">
+          <button class="pattern-tab-btn active" onclick="selectPattern('layered')">Capas</button>
+          <button class="pattern-tab-btn" onclick="selectPattern('clean')">Clean Architecture</button>
+          <button class="pattern-tab-btn" onclick="selectPattern('hexagonal')">Hexagonal</button>
+          <button class="pattern-tab-btn" onclick="selectPattern('onion')">Onion</button>
+          <button class="pattern-tab-btn" onclick="selectPattern('mvc')">MVC</button>
+          <button class="pattern-tab-btn" onclick="selectPattern('cqrs')">CQRS</button>
+          <button class="pattern-tab-btn" onclick="selectPattern('event')">Event-Driven</button>
+          <button class="pattern-tab-btn" onclick="selectPattern('microkernel')">Microkernel</button>
+        </div>
+
+        <!-- Pattern Sheet Panel -->
+        <div class="pattern-sheet" id="pattern-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="pattern-details-card">
+            <h4 class="pattern-sheet-title" id="pattern-title">Cargando...</h4>
+            <p class="pattern-sheet-desc" id="pattern-desc"></p>
+            
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700;">Árbol de Directorios Típico:</h5>
+            <div class="directory-tree" id="pattern-tree"></div>
+
+            <div class="pattern-rule-box" id="pattern-rule"></div>
+          </div>
+
+          <div>
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:10px;">Esquema Arquitectónico:</h5>
+            <div class="pattern-visual-container" id="pattern-visual"></div>
+
+            <div class="pattern-code-box">
+              <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:8px;">Código de Ejemplo:</h5>
+              <div class="code-tabs-container">
+                <div class="code-panel">
+                  <pre><code id="pattern-code"></code></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Tabla Comparativa -->
+    <section class="topic-section" id="modulo4">
+      <h2 class="section-title">4. Tabla Comparativa de Patrones</h2>
+      <p class="intro-paragraph">
+        Esta matriz provee a los arquitectos e ingenieros una referencia de decisión rápida basada en el balance de ventajas y desventajas de cada diseño:
+      </p>
+
+      <div class="comparison-table-wrapper">
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Patrón</th>
+              <th>Cuándo usar</th>
+              <th>Ventajas</th>
+              <th>Desventajas</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>MVC</strong></td>
+              <td>Proyectos CRUD y de desarrollo rápido.</td>
+              <td>Muy simple de entender e implementar.</td>
+              <td>Fuerte acoplamiento entre presentación y negocio.</td>
+            </tr>
+            <tr>
+              <td><strong>Clean Architecture</strong></td>
+              <td>Sistemas empresariales complejos y grandes.</td>
+              <td>Extremadamente mantenible e independiente del framework.</td>
+              <td>Mayor complejidad inicial y duplicidad de modelos (DTOs).</td>
+            </tr>
+            <tr>
+              <td><strong>Hexagonal</strong></td>
+              <td>APIs, microservicios y sistemas que cambian de tecnologías.</td>
+              <td>Facilidad extrema para pruebas unitarias (testing).</td>
+              <td>Curva de aprendizaje moderada y cantidad elevada de interfaces.</td>
+            </tr>
+            <tr>
+              <td><strong>Onion</strong></td>
+              <td>Aplicaciones basadas en dominio (DDD).</td>
+              <td>Inversión de dependencias total orientada al dominio comercial.</td>
+              <td>Requiere amplia experiencia en patrones de diseño orientados a interfaces.</td>
+            </tr>
+            <tr>
+              <td><strong>CQRS</strong></td>
+              <td>Sistemas con alta asimetría de lecturas y escrituras (ej. E-commerce).</td>
+              <td>Optimización masiva del rendimiento de lectura.</td>
+              <td>Consistencia eventual y sincronización compleja de base de datos.</td>
+            </tr>
+            <tr>
+              <td><strong>Event-Driven</strong></td>
+              <td>Microservicios desacoplados y sistemas asíncronos en tiempo real.</td>
+              <td>Desacoplamiento total entre emisor y receptor.</td>
+              <td>Dificultad alta para trazar errores en cascada.</td>
+            </tr>
+            <tr>
+              <td><strong>Microkernel</strong></td>
+              <td>Herramientas de escritorio, editores de código (IDE) y apps de plugins.</td>
+              <td>Alta extensibilidad y aislamiento de nuevas funcionalidades.</td>
+              <td>El kernel central se vuelve un cuello de botella si crece demasiado.</td>
+            </tr>
+            <tr>
+              <td><strong>Layered (Capas)</strong></td>
+              <td>Sistemas tradicionales y equipos pequeños que inician un proyecto.</td>
+              <td>Fácil reparto de tareas de desarrollo.</td>
+              <td>El negocio suele terminar acoplado a la persistencia (Base de Datos).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Modulo 5: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">5. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Ponte a prueba respondiendo a este quiz sobre los principios teóricos y prácticos de los patrones arquitectónicos:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Si tu aplicación requiere optimizar al máximo el tiempo de lectura de listados pesados de productos y la consistencia eventual es permitida, ¿qué patrón es el más adecuado?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>MVC (Model-View-Controller)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>CQRS (Command Query Responsibility Segregation)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Arquitectura en Capas (Layered)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> ¿Cuál es la regla dorada compartida por Clean Architecture y Onion Architecture?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Las dependencias de código fluyen siempre hacia el núcleo interno (Dominio).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>La base de datos debe ser accesible directamente desde los controladores REST.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Es obligatorio utilizar un broker de eventos asíncronos como Apache Kafka.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> Un editor de texto que permite a programadores externos añadir correctores ortográficos personalizados sin alterar el código fuente original adopta un patrón:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>MVC</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Event-Driven</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Microkernel (Plugins)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> ¿Cuál es la principal desventaja asociada al patrón clásico MVC?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>Acoplamiento entre capas que dificulta reutilizar la lógica de negocio y sus vistas.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Bajo rendimiento del protocolo de red HTTP.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>Costo elevado de infraestructura en servidores dedicados.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 5 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q5.</span> En la Arquitectura Hexagonal, ¿cómo se denominan las clases encargadas de traducir datos entre el protocolo externo y los puertos de negocio?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q5" value="a">
+              <span>Entidades</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5" value="b">
+              <span>Adaptadores</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q5" value="c">
+              <span>Casos de Uso</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/5</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Pattern Sheets Data & Logic
+       ========================================== */
+    const patternData = {
+      layered: {
+        title: "Arquitectura en Capas (Layered)",
+        desc: "El código se organiza en niveles horizontales de abstracción rígidos. Cada capa tiene un rol específico e inalterable. La capa superior consume los servicios de la capa inmediatamente inferior de forma secuencial. Muy recomendado para software con lógica sencilla (CRUD) o con equipos pequeños de desarrollo.",
+        tree: `src/
+├── presentation/   (Controllers, UI Views)
+├── business/       (Services, Business Logic)
+└── data/           (Repositories, JPA Entities)`,
+        rule: "➔ Regla: El flujo de dependencias es secuencial y vertical hacia abajo.",
+        visual: `
+          <div class="schematic-box">Capa 1: Presentación / UI</div>
+          <div class="schematic-arrow">▼</div>
+          <div class="schematic-box schematic-highlight">Capa 2: Lógica de Negocio</div>
+          <div class="schematic-arrow">▼</div>
+          <div class="schematic-box">Capa 3: Acceso a Datos / DB</div>
+        `,
+        code: `<span class="annotation">@RestController</span>
+<span class="keyword">public class</span> <span class="type">UserController</span> {
+    <span class="keyword">private final</span> <span class="type">UserService</span> userService;
+    
+    <span class="keyword">public</span> <span class="method">UserController</span>(<span class="type">UserService</span> s) { <span class="keyword">this</span>.userService = s; }
+    
+    <span class="annotation">@GetMapping</span>(<span class="string">"/users/{id}"</span>)
+    <span class="keyword">public</span> <span class="type">User</span> <span class="method">getUser</span>(<span class="annotation">@PathVariable</span> <span class="type">Long</span> id) {
+        <span class="keyword">return</span> userService.<span class="method">findById</span>(id); <span class="comment">// Llama a capa de negocio</span>
+    }
+}`
+      },
+      clean: {
+        title: "Clean Architecture",
+        desc: "Propuesta por Robert C. Martin (Uncle Bob). Organiza el código en capas concéntricas separando de forma tajante las reglas de negocio puro (Entidades y Casos de Uso) de la tecnología (Bases de datos, frameworks, UI, APIs). El negocio es completamente independiente de cambios de base de datos o frameworks.",
+        tree: `src/
+├── domain/            (Entities, Enterprise Rules)
+├── application/       (Use Cases, Business Rules)
+├── interface_adapters/(Controllers, Gateways, Presenters)
+└── infrastructure/    (DB, Frameworks, Web Services)`,
+        rule: "➔ Regla: Regla de Dependencia: Las dependencias de código deben apuntar siempre al centro.",
+        visual: `
+          <div class="ring-outer">
+            <span class="ring-label">Infraestructura (Frameworks, DB, Web)</span>
+            <div class="ring-middle">
+              <span class="ring-label">Adaptadores (Controllers, Presenters)</span>
+              <div class="ring-inner">
+                Casos de Uso y Entidades (Dominio)
+              </div>
+            </div>
+          </div>
+        `,
+        code: `<span class="keyword">public class</span> <span class="type">CrearPedidoUseCase</span> {
+    <span class="keyword">private final</span> <span class="type">PedidoRepository</span> repository; <span class="comment">// Interfaz pura de dominio</span>
+    
+    <span class="keyword">public</span> <span class="method">CrearPedidoUseCase</span>(<span class="type">PedidoRepository</span> r) { <span class="keyword">this</span>.repository = r; }
+    
+    <span class="keyword">public void</span> <span class="method">ejecutar</span>(<span class="type">Pedido</span> pedido) {
+        pedido.<span class="method">validarReglasDeNegocio</span>(); <span class="comment">// Lógica de negocio comercial</span>
+        repository.<span class="method">guardar</span>(pedido);
+    }
+}`
+      },
+      hexagonal: {
+        title: "Hexagonal (Ports & Adapters)",
+        desc: "Propuesto por Alistair Cockburn. El núcleo de la aplicación (dominio) define interfaces (puertos) para comunicarse con el exterior. Las tecnologías externas (SQL, REST, colas de mensajería) se comunican con el dominio mediante implementaciones de estas interfaces llamadas adaptadores. Altamente recomendado para microservicios y facilidad de tests unitarios.",
+        tree: `src/
+├── domain/        (Entities, Value Objects)
+├── ports/
+│   ├── inbound/   (Input interfaces: Use Cases)
+│   └── outbound/  (Output interfaces: Repositories)
+└── adapters/
+    ├── inbound/   (Controllers, CLI, Event Receivers)
+    └── outbound/  (Postgres SQL, Redis, REST Clients)`,
+        rule: "➔ Regla: El dominio solo interactúa a través de puertos (interfaces) libres de tecnología.",
+        visual: `
+          <div class="schematic-box">Adaptador REST (Entrada)</div>
+          <div class="schematic-arrow">▼ (Invocación)</div>
+          <div class="schematic-box schematic-highlight" style="border-radius:14px;">PUERTO ⬌ DOMINIO ⬌ PUERTO</div>
+          <div class="schematic-arrow">▼ (Implementación)</div>
+          <div class="schematic-box">Adaptador Base de Datos (Salida)</div>
+        `,
+        code: `<span class="keyword">public interface</span> <span class="type">Notificador</span> { <span class="comment">// Puerto de Salida</span>
+    <span class="keyword">void</span> <span class="method">enviarNotificacion</span>(<span class="type">String</span> mensaje);
+}
+
+<span class="annotation">@Component</span>
+<span class="keyword">public class</span> <span class="type">NotificadorEmail</span> <span class="keyword">implements</span> <span class="type">Notificador</span> { <span class="comment">// Adaptador de Salida</span>
+    <span class="annotation">@Override</span>
+    <span class="keyword">public void</span> <span class="method">enviarNotificacion</span>(<span class="type">String</span> msg) {
+        <span class="comment">// Lógica real de infraestructura de correo</span>
+    }
+}`
+      },
+      onion: {
+        title: "Onion Architecture (Arquitectura de Cebolla)",
+        desc: "Diseñada por Jeffrey Palermo en 2008. Al igual que Hexagonal, sitúa al dominio comercial en el centro del sistema y las dependencias fluyen hacia dentro mediante la inversión de control. Las capas externas (como la base de datos o interfaces UI) dependen de las capas internas del núcleo de aplicación y del modelo de dominio comercial.",
+        tree: `src/
+├── core/
+│   ├── domain/       (Entities, Domain Services)
+│   └── application/  (Interfaces, Application Services)
+└── infrastructure/   (Persistence, UI, External APIs)`,
+        rule: "➔ Regla: El modelo de dominio comercial no tiene dependencias externas.",
+        visual: `
+          <div class="ring-outer" style="border-color: var(--color-accent); background: rgba(6, 182, 212, 0.01)">
+            <span class="ring-label" style="color: var(--color-accent)">Infraestructura (UI, DB)</span>
+            <div class="ring-middle" style="border-color: var(--color-primary)">
+              <span class="ring-label" style="color: var(--color-primary)">Servicios de Aplicación</span>
+              <div class="ring-inner" style="border-color: var(--color-secondary)">
+                Modelo de Dominio (Core)
+              </div>
+            </div>
+          </div>
+        `,
+        code: `<span class="keyword">public class</span> <span class="type">DomainService</span> {
+    <span class="keyword">public void</span> <span class="method">calcularDescuentoTotal</span>(<span class="type">Cliente</span> cliente, <span class="type">Pedido</span> pedido) {
+        <span class="comment">// Lógica de dominio puro basada exclusivamente en contratos de interfaz</span>
+        <span class="type">double</span> desc = cliente.<span class="method">obtenerFactorDeDescuento</span>();
+        pedido.<span class="method">aplicarDescuento</span>(desc);
+    }
+}`
+      },
+      mvc: {
+        title: "Model-View-Controller (MVC)",
+        desc: "Separa la aplicación en tres áreas lógicas. El Modelo representa los datos y la lógica comercial. La Vista renderiza la interfaz visual al usuario. El Controlador procesa las acciones y eventos del cliente, actualizando el modelo e indicando la nueva vista a renderizar. Muy útil para sistemas web tradicionales y monolitos.",
+        tree: `src/
+├── models/         (Data models, state representation)
+├── views/          (User interface templates, HTML/JSP)
+└── controllers/    (HTTP endpoints, navigation flow)`,
+        rule: "➔ Regla: La vista no manipula directamente los datos de la base de datos sin pasar por el controlador.",
+        visual: `
+          <div class="schematic-box schematic-highlight">Controlador (Recibe Petición)</div>
+          <div style="display:flex; justify-content:space-around; width:80%; margin: 8px 0;">
+            <span style="font-size:0.9rem; color:var(--color-primary)">↙</span>
+            <span style="font-size:0.9rem; color:var(--color-accent)">↘</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; width:90%; gap: 10px;">
+            <div class="schematic-box" style="width:48%;">Modelo (Negocio)</div>
+            <div class="schematic-box" style="width:48%;">Vista (Interfaz)</div>
+          </div>
+        `,
+        code: `<span class="annotation">@Controller</span>
+<span class="keyword">public class</span> <span class="type">ProductMvcController</span> {
+    
+    <span class="annotation">@GetMapping</span>(<span class="string">"/productos"</span>)
+    <span class="keyword">public</span> <span class="type">String</span> <span class="method">listar</span>(<span class="type">Model</span> model) {
+        <span class="type">List</span>&lt;<span class="type">Product</span>&gt; list = productService.<span class="method">findAll</span>();
+        model.<span class="method">addAttribute</span>(<span class="string">"productos"</span>, list);
+        <span class="keyword">return</span> <span class="string">"productos_template"</span>; <span class="comment">// Retorna la vista HTML</span>
+    }
+}`
+      },
+      cqrs: {
+        title: "CQRS",
+        desc: "Command Query Responsibility Segregation. Separa por completo las operaciones que modifican datos (Comandos: guardar, actualizar, borrar) de las operaciones que leen datos (Consultas: filtros, reportes, búsquedas). Permite escalar individualmente el rendimiento de lecturas utilizando bases de datos diferentes.",
+        tree: `src/
+├── commands/  (Write database handlers & entities)
+└── queries/   (Read database handlers & optimized models)`,
+        rule: "➔ Regla: Los comandos no deben retornar datos. Las consultas no deben modificar datos.",
+        visual: `
+          <div style="display:flex; justify-content:space-between; width:95%; gap:12px;">
+            <div style="width:48%; display:flex; flex-direction:column; align-items:center;">
+              <div class="schematic-box schematic-highlight" style="width:100%;">Comando (Escribir)</div>
+              <div class="schematic-arrow">▼</div>
+              <div class="schematic-box" style="width:100%;">Base de Datos Escritura</div>
+            </div>
+            <div style="width:48%; display:flex; flex-direction:column; align-items:center;">
+              <div class="schematic-box" style="width:100%; border-color:var(--color-accent)">Consulta (Leer)</div>
+              <div class="schematic-arrow">▼</div>
+              <div class="schematic-box" style="width:100%; border-color:var(--color-accent)">Base de Datos Lectura</div>
+            </div>
+          </div>
+        `,
+        code: `<span class="comment">// Comando de escritura</span>
+<span class="keyword">public record</span> <span class="type">CrearPedidoCommand</span>(<span class="type">String</span> item, <span class="keyword">int</span> cantidad) {}
+
+<span class="comment">// Consulta de lectura optimizada</span>
+<span class="keyword">public record</span> <span class="type">BuscarPedidoQuery</span>(<span class="type">Long</span> id) {}`
+      },
+      event: {
+        title: "Event-Driven Architecture",
+        desc: "Las llamadas se realizan de forma asíncrona mediante la publicación y suscripción de eventos en un bus central de mensajería (ej. Kafka, RabbitMQ). Los componentes no se conocen de forma directa; reaccionan de manera desacoplada a las notificaciones de eventos lanzados por otros servicios.",
+        tree: `src/
+├── events/       (Event schema definitions)
+├── publishers/   (Message broker emitters)
+└── consumers/    (Message listener handlers)`,
+        rule: "➔ Regla: El componente emisor del evento no conoce la identidad de los consumidores.",
+        visual: `
+          <div class="schematic-box">Emisor (Genera Evento)</div>
+          <div class="schematic-arrow">▼</div>
+          <div class="schematic-box schematic-highlight" style="background:rgba(6,182,212,0.06)!important; border-color:var(--color-accent)">Event Bus (Kafka / RabbitMQ)</div>
+          <div class="schematic-arrow">▼</div>
+          <div style="display:flex; justify-content:space-between; width:90%; gap:10px;">
+            <div class="schematic-box" style="width:48%;">Consumidor 1</div>
+            <div class="schematic-box" style="width:48%;">Consumidor 2</div>
+          </div>
+        `,
+        code: `<span class="keyword">public class</span> <span class="type">OrderService</span> {
+    <span class="keyword">private final</span> <span class="type">EventPublisher</span> publisher;
+    
+    <span class="keyword">public void</span> <span class="method">crear</span>() {
+        <span class="comment">// Lógica de creación de pedido...</span>
+        publisher.<span class="method">emitir</span>(<span class="keyword">new</span> <span class="type">PedidoCreadoEvent</span>(id)); <span class="comment">// Asíncrono</span>
+    }
+}`
+      },
+      microkernel: {
+        title: "Microkernel (Plug-ins)",
+        desc: "Divide el software en un núcleo central minimalista (microkernel) con las funciones elementales de ejecución, y un conjunto de módulos acoplables (plugins) independientes que extienden sus capacidades en caliente sin recompilar el núcleo. Muy utilizado en IDEs como VS Code, navegadores o sistemas operativos.",
+        tree: `src/
+├── core/         (Kernel execution engine)
+├── interfaces/   (Extension points definitions)
+└── plugins/      (Add-on packages / extensions)`,
+        rule: "➔ Regla: Los plugins dependen del kernel central, pero el kernel desconoce los detalles de los plugins.",
+        visual: `
+          <div style="display:flex; justify-content:space-between; width:95%; align-items:center; gap: 8px;">
+            <div class="schematic-box" style="width:30%;">Plugin A</div>
+            <span style="color:var(--color-secondary)">⇄</span>
+            <div class="schematic-box schematic-highlight" style="width:40%; padding: 25px 10px;">KERNEL CORE</div>
+            <span style="color:var(--color-secondary)">⇄</span>
+            <div class="schematic-box" style="width:30%;">Plugin B</div>
+          </div>
+        `,
+        code: `<span class="keyword">public interface</span> <span class="type">Plugin</span> {
+    <span class="keyword">void</span> <span class="method">ejecutar</span>();
+}
+
+<span class="keyword">public class</span> <span class="type">Microkernel</span> {
+    <span class="keyword">private final</span> <span class="type">List</span>&lt;<span class="type">Plugin</span>&gt; plugins = <span class="keyword">new</span> <span class="type">ArrayList</span>&lt;&gt;();
+    
+    <span class="keyword">public void</span> <span class="method">registrar</span>(<span class="type">Plugin</span> p) { plugins.<span class="method">add</span>(p); }
+    <span class="keyword">public void</span> <span class="method">ejecutarTodos</span>() { plugins.<span class="method">forEach</span>(<span class="type">Plugin</span>::<span class="method">ejecutar</span>); }
+}`
+      }
+    };
+
+    function selectPattern(key) {
+      // Toggle button classes
+      document.querySelectorAll('.patterns-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      const targetBtn = Array.from(document.querySelectorAll('.patterns-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(key));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      // Update panel with quick fade
+      const sheet = document.getElementById('pattern-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      const data = patternData[key];
+      document.getElementById('pattern-title').innerText = data.title;
+      document.getElementById('pattern-desc').innerText = data.desc;
+      document.getElementById('pattern-tree').innerText = data.tree;
+      document.getElementById('pattern-rule').innerHTML = `<span>${data.rule}</span>`;
+      document.getElementById('pattern-visual').innerHTML = data.visual;
+      document.getElementById('pattern-code').innerHTML = data.code;
+    }
+
+    // Default load layered
+    selectPattern('layered');
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'a',
+      q3: 'c',
+      q4: 'a',
+      q5: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 5;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado la clasificación y decisión de patrones arquitectónicos.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 3) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Revisa las diferencias finas entre los patrones de capas concéntricas.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te sugerimos repasar la comparación detallada de patrones arquitectónicos.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

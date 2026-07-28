@@ -1,0 +1,2146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 6.2: Decisiones Arquitectónicas (ADRs), Trade-offs, Atributos de Calidad (ISO 25010) y Frameworks de Desarrollo Backend (Spring Boot, Flask, Django, NestJS) y Frontend (Angular, React, Vue) para Diseño y Arquitectura de Software.">
+  <title>Decisiones Arquitectónicas y Frameworks | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Amber */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      color: var(--color-accent);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Grid / Card Styles (Objectives, Modules)
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.25rem;
+    }
+
+    .icon-blue {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--color-primary);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    .icon-purple {
+      background: rgba(139, 92, 246, 0.1);
+      color: var(--color-secondary);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .icon-cyan {
+      background: rgba(6, 182, 212, 0.1);
+      color: var(--color-accent);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+    }
+
+    .icon-emerald {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--color-success);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .card-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       ADR Visual Layout
+       ========================================== */
+    .adr-container {
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 30px;
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .adr-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 20px;
+    }
+
+    .adr-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .adr-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .adr-val {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+
+    .badge-status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      width: fit-content;
+      text-transform: uppercase;
+    }
+
+    .badge-accepted {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .adr-block {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .adr-block-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .adr-block-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .adr-list {
+      list-style: none;
+      padding-left: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .adr-list li {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .adr-list li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      color: var(--color-secondary);
+    }
+
+    /* ==========================================
+       Trade-off Simulator Component
+       ========================================== */
+    .simulator-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 30px;
+    }
+
+    @media (max-width: 868px) {
+      .simulator-container {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .sim-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .sim-control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sim-label-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sim-control-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-bright);
+    }
+
+    .sim-control-value {
+      font-family: var(--font-mono);
+      font-size: 0.9rem;
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .sim-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: #1e293b;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .sim-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+      transition: background-color 0.2s ease;
+    }
+
+    .sim-slider::-webkit-slider-thumb:hover {
+      background: var(--color-accent);
+    }
+
+    .sim-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    .sim-results {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .sim-result-item {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sim-result-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .sim-bar-bg {
+      height: 12px;
+      background: #111827;
+      border-radius: 6px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sim-bar-fill {
+      height: 100%;
+      width: 50%;
+      border-radius: 6px;
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+    }
+
+    /* Dynamic bar colors based on status */
+    .bar-latency { background: linear-gradient(90deg, var(--color-success), var(--color-warning)); }
+    .bar-cost { background: linear-gradient(90deg, var(--color-primary), var(--color-danger)); }
+    .bar-availability { background: linear-gradient(90deg, var(--color-warning), var(--color-success)); }
+    .bar-complexity { background: linear-gradient(90deg, var(--color-accent), var(--color-secondary)); }
+
+    /* ==========================================
+       ISO 25010 Quality Matrix Component
+       ========================================== */
+    .quality-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .quality-selector {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 568px) {
+      .quality-selector {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quality-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .quality-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .quality-btn.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+    }
+
+    .quality-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 868px) {
+      .quality-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .quality-scores {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .quality-score-item {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .quality-score-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .quality-stars {
+      color: var(--color-warning);
+      letter-spacing: 2px;
+    }
+
+    .quality-bar-bg {
+      height: 8px;
+      background: #111827;
+      border-radius: 4px;
+    }
+
+    .quality-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .quality-description-card {
+      background: rgba(10, 15, 30, 0.3);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      justify-content: space-between;
+    }
+
+    .quality-desc-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+
+    .quality-desc-text {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .quality-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .pros-box h4 { color: var(--color-success); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+    .cons-box h4 { color: var(--color-danger); font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+    .pros-box ul, .cons-box ul { list-style: none; font-size: 0.8rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+    .pros-box ul li::before { content: '✓ '; color: var(--color-success); }
+    .cons-box ul li::before { content: '✗ '; color: var(--color-danger); }
+
+    /* ==========================================
+       Code Resizable / Tabs Layout
+       ========================================== */
+    .code-tabs-container {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-panel.active {
+      display: block;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Coloreado de sintaxis */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Frameworks Grid layout
+       ========================================== */
+    .frameworks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .framework-pill {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .framework-logo-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.95rem;
+      font-weight: 800;
+    }
+
+    .logo-spring { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .logo-django { background: rgba(4, 120, 87, 0.15); color: #34d399; border: 1px solid rgba(4, 120, 87, 0.3); }
+    .logo-flask { background: rgba(255, 255, 255, 0.1); color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .logo-nest { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .logo-angular { background: rgba(220, 38, 38, 0.15); color: #f87171; border: 1px solid rgba(220, 38, 38, 0.3); }
+    .logo-react { background: rgba(6, 182, 212, 0.15); color: #22d3ee; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .logo-vue { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    .framework-pill-info h4 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .framework-pill-info span {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(59, 130, 246, 0.06);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: var(--text-bright);
+    }
+
+    /* Correct & Incorrect classes applied on validation */
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    /* ==========================================
+       Footer Style
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 6.2: Decisiones y Frameworks</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 6.2</h2>
+        <span>Arquitectura & Frameworks</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. Decisiones Arquitectónicas (ADRs)</a></li>
+      <li><a href="#modulo2">2. Trade-offs Arquitectónicos</a></li>
+      <li><a href="#modulo3">3. Atributos de Calidad (ISO 25010)</a></li>
+      <li><a href="#modulo4">4. Frameworks Backend</a></li>
+      <li><a href="#modulo5">5. Práctica Angular + NestJS</a></li>
+      <li><a href="#quiz">6. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        <span>Módulo Educativo Interactivo</span>
+      </div>
+      <h1 class="hero-title">Decisiones Arquitectónicas<br>& Frameworks de Desarrollo</h1>
+      <p class="hero-subtitle">
+        Aprende a justificar decisiones de diseño mediante el análisis formal de trade-offs, la evaluación de atributos de calidad sistémicos bajo la norma ISO 25010, y el entendimiento de las filosofías y estructuras que gobiernan los principales frameworks backend y frontend modernos.
+      </p>
+    </header>
+
+    <!-- Modulo 1: Decisiones Arquitectónicas -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Decisiones Arquitectónicas (ADRs)</h2>
+      <p class="intro-paragraph">
+        Una <span class="highlight">Decisión de Arquitectura de Software (SAD)</span> no es una elección casual. Es una postura de diseño que impacta significativamente en la estructura, comportamiento e infraestructura del software. Documentar estas elecciones mediante <span class="highlight">Architectural Decision Records (ADRs)</span> evita la degradación del conocimiento técnico y previene la "deuda de diseño".
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon icon-blue">1</div>
+          <h3 class="card-title">¿Por qué documentar?</h3>
+          <p class="card-content">
+            Un ADR actúa como la bitácora del proyecto. Explica <strong>por qué</strong> se tomó una ruta tecnológica determinada y bajo qué restricciones históricas, evitando que futuros programadores reviertan decisiones justificadas.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-purple">2</div>
+          <h3 class="card-title">Estructura del ADR</h3>
+          <p class="card-content">
+            Un ADR típico contiene el <strong>Contexto</strong> (problema y restricciones), la <strong>Decisión</strong> (propuesta de diseño), el <strong>Estado</strong> (propuesto, aceptado, obsoleto) y las <strong>Consecuencias</strong> (impactos positivos y negativos).
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-cyan">3</div>
+          <h3 class="card-title">Impacto en el Ciclo de Vida</h3>
+          <p class="card-content">
+            Las decisiones tempranas son difíciles de cambiar. Conforme avanza el proyecto, el coste de modificar una decisión arquitectónica fundamental crece de manera exponencial en comparación con un cambio de lógica.
+          </p>
+        </div>
+      </div>
+
+      <!-- ADR Interactive Card Example -->
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin: 35px 0 15px 0; color: var(--text-bright);">
+        Ejemplo Práctico de un ADR Documentado:
+      </h3>
+      <div class="adr-container">
+        <div class="adr-meta-grid">
+          <div class="adr-meta-item">
+            <span class="adr-label">ADR ID & Título</span>
+            <span class="adr-val">ADR-004: Migración a API Gateway</span>
+          </div>
+          <div class="adr-meta-item">
+            <span class="adr-label">Fecha</span>
+            <span class="adr-val">28 de Julio, 2026</span>
+          </div>
+          <div class="adr-meta-item">
+            <span class="adr-label">Estado</span>
+            <div><span class="badge-status badge-accepted">Aceptado</span></div>
+          </div>
+          <div class="adr-meta-item">
+            <span class="adr-label">Autor / Rol</span>
+            <span class="adr-val">Arq. de Software Senior</span>
+          </div>
+        </div>
+
+        <div class="adr-block">
+          <div class="adr-block-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            Contexto del Problema
+          </div>
+          <div class="adr-block-content">
+            Nuestros clientes (Web y Móvil) consumen servicios directamente de 12 microservicios backend separados. Esto provoca un excesivo acoplamiento de URLs en el cliente, alta latencia debido a múltiples conexiones HTTPS consecutivas, problemas de gestión de CORS complejos, y la necesidad de implementar autenticación JWT en cada microservicio de manera redundante.
+          </div>
+        </div>
+
+        <div class="adr-block">
+          <div class="adr-block-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            Decisión Tomada
+          </div>
+          <div class="adr-block-content">
+            Implementaremos un patrón <strong>API Gateway</strong> centralizado utilizando NestJS y Fastify. Todos los clientes consultarán únicamente el puerto del Gateway, el cual se encargará del enrutamiento de peticiones internas, la agregación de datos de múltiples microservicios en un único payload, el filtrado de seguridad SSL y la validación / extracción del token JWT en el borde del sistema.
+          </div>
+        </div>
+
+        <div class="adr-block">
+          <div class="adr-block-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+            Consecuencias Generadas
+          </div>
+          <div class="adr-block-content">
+            <ul class="adr-list">
+              <li><strong>Positivo:</strong> Punto único de entrada. Se simplifica la seguridad (JWT) y el registro de llamadas (Logging). Los clientes no conocen la topología interna del backend.</li>
+              <li><strong>Positivo:</strong> Reducción de latencia de red en clientes móviles mediante agregación de respuestas.</li>
+              <li><strong>Negativo:</strong> Se introduce un Punto Único de Fallo (Single Point of Failure). Si el API Gateway cae, todo el sistema queda inaccesible.</li>
+              <li><strong>Negativo:</strong> Costo adicional de latencia interna por puente (salto de red adicional de Gateway a microservicio).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Trade-offs Arquitectónicos -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Trade-offs Arquitectónicos</h2>
+      <p class="intro-paragraph">
+        En arquitectura de software, no existen soluciones "perfectas", solo existen <span class="highlight">trade-offs (compromisos o equilibrios)</span>. Como afirman Ford y Richards en sus leyes de la arquitectura: <em>"Si un arquitecto piensa que ha encontrado una solución que no tiene ningún aspecto negativo, es muy probable que no los haya identificado todavía"</em>.
+      </p>
+
+      <!-- Interactive Trade-off Simulator -->
+      <div class="simulator-container">
+        <div class="sim-controls">
+          <div>
+            <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px;">Simulador de Trade-offs</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted);">Modifica los sliders de decisión arquitectónica para observar el impacto en los atributos clave del sistema.</p>
+          </div>
+
+          <!-- Slider 1: Cifrado -->
+          <div class="sim-control-group">
+            <div class="sim-label-wrapper">
+              <span class="sim-control-title">Nivel de Cifrado y Seguridad</span>
+              <span class="sim-control-value" id="val-security">Medio (SHA-256)</span>
+            </div>
+            <input type="range" min="1" max="3" value="2" class="sim-slider" id="slider-security" oninput="updateSimulator()">
+            <span class="sim-desc">Aumentar la seguridad requiere algoritmos más complejos (ej. AES-256-GCM) y validación estricta de firmas en tránsito.</span>
+          </div>
+
+          <!-- Slider 2: Redundancia -->
+          <div class="sim-control-group">
+            <div class="sim-label-wrapper">
+              <span class="sim-control-title">Nodos de Redundancia (Réplicas)</span>
+              <span class="sim-control-value" id="val-redundancy">2 Nodos</span>
+            </div>
+            <input type="range" min="1" max="5" value="2" class="sim-slider" id="slider-redundancy" oninput="updateSimulator()">
+            <span class="sim-desc">Duplicar la cantidad de instancias del servidor mejora la disponibilidad pero requiere balanceadores y almacenamiento replicado.</span>
+          </div>
+
+          <!-- Slider 3: Desacoplamiento -->
+          <div class="sim-control-group">
+            <div class="sim-label-wrapper">
+              <span class="sim-control-title">Desacoplamiento (Servicios)</span>
+              <span class="sim-control-value" id="val-decoupling">Monolito Modular</span>
+            </div>
+            <input type="range" min="1" max="3" value="1" class="sim-slider" id="slider-decoupling" oninput="updateSimulator()">
+            <span class="sim-desc">Pasar de un monolito a microservicios distribuidos disminuye el acoplamiento pero introduce latencia de red interna.</span>
+          </div>
+        </div>
+
+        <div class="sim-results">
+          <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-bright); border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+            Métricas de Impacto Resultantes
+          </h3>
+
+          <!-- Latencia -->
+          <div class="sim-result-item">
+            <div class="sim-result-header">
+              <span>Rendimiento / Latencia</span>
+              <span id="metric-latency">Bueno (45ms)</span>
+            </div>
+            <div class="sim-bar-bg">
+              <div class="sim-bar-fill bar-latency" id="bar-latency" style="width: 80%;"></div>
+            </div>
+          </div>
+
+          <!-- Costo -->
+          <div class="sim-result-item">
+            <div class="sim-result-header">
+              <span>Costo Financiero (Infraestructura)</span>
+              <span id="metric-cost">Moderado ($120/mes)</span>
+            </div>
+            <div class="sim-bar-bg">
+              <div class="sim-bar-fill bar-cost" id="bar-cost" style="width: 40%;"></div>
+            </div>
+          </div>
+
+          <!-- Disponibilidad -->
+          <div class="sim-result-item">
+            <div class="sim-result-header">
+              <span>Disponibilidad (Uptime)</span>
+              <span id="metric-availability">99.0% SLA</span>
+            </div>
+            <div class="sim-bar-bg">
+              <div class="sim-bar-fill bar-availability" id="bar-availability" style="width: 70%;"></div>
+            </div>
+          </div>
+
+          <!-- Complejidad -->
+          <div class="sim-result-item">
+            <div class="sim-result-header">
+              <span>Complejidad de Mantenimiento</span>
+              <span id="metric-complexity">Baja</span>
+            </div>
+            <div class="sim-bar-bg">
+              <div class="sim-bar-fill bar-complexity" id="bar-complexity" style="width: 30%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Factores de Calidad (ISO 25010) -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Factores de Calidad (ISO 25010)</h2>
+      <p class="intro-paragraph">
+        El estándar internacional <span class="highlight">ISO/IEC 25010</span> define un modelo estructurado para la evaluación de la calidad del producto de software. Describe los atributos de calidad sistémicos (no funcionales) indispensables para el éxito de una plataforma productiva.
+      </p>
+
+      <!-- Quality Attribute Grid Selector -->
+      <div class="quality-container">
+        <div class="quality-selector">
+          <button class="quality-btn active" id="btn-mono" onclick="selectQuality('mono')">Monolito Tradicional</button>
+          <button class="quality-btn" id="btn-micro" onclick="selectQuality('micro')">Microservicios Distribuidos</button>
+          <button class="quality-btn" id="btn-serverless" onclick="selectQuality('serverless')">Arquitectura Serverless</button>
+        </div>
+
+        <div class="quality-grid" id="quality-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="quality-scores">
+            <div class="quality-score-item">
+              <div class="quality-score-label">
+                <span>Mantenibilidad (Facilidad de modularización y corrección)</span>
+                <span class="quality-stars" id="stars-maint">★★★☆☆</span>
+              </div>
+              <div class="quality-bar-bg">
+                <div class="quality-bar-fill" id="bar-maint" style="width: 60%; background-color: var(--color-warning);"></div>
+              </div>
+            </div>
+            <div class="quality-score-item">
+              <div class="quality-score-label">
+                <span>Escalabilidad (Crecimiento ante volumen de carga)</span>
+                <span class="quality-stars" id="stars-scale">★★☆☆☆</span>
+              </div>
+              <div class="quality-bar-bg">
+                <div class="quality-bar-fill" id="bar-scale" style="width: 40%; background-color: var(--color-danger);"></div>
+              </div>
+            </div>
+            <div class="quality-score-item">
+              <div class="quality-score-label">
+                <span>Portabilidad y Despliegue (Facilidad de instalación)</span>
+                <span class="quality-stars" id="stars-deploy">★★★★☆</span>
+              </div>
+              <div class="quality-bar-bg">
+                <div class="quality-bar-fill" id="bar-deploy" style="width: 80%; background-color: var(--color-success);"></div>
+              </div>
+            </div>
+            <div class="quality-score-item">
+              <div class="quality-score-label">
+                <span>Rendimiento y Latencia (Tiempos de respuesta iniciales)</span>
+                <span class="quality-stars" id="stars-perf">★★★★★</span>
+              </div>
+              <div class="quality-bar-bg">
+                <div class="quality-bar-fill" id="bar-perf" style="width: 95%; background-color: var(--color-success);"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="quality-description-card">
+            <div>
+              <h4 class="quality-desc-title" id="quality-title">Monolito Tradicional</h4>
+              <p class="quality-desc-text" id="quality-desc">
+                Toda la lógica de negocio, persistencia e interfaz de usuario se compilan y despliegan en una única unidad de ejecución. Excelente para arranques rápidos y equipos pequeños, pero difícil de escalar individualmente.
+              </p>
+            </div>
+            <div class="quality-pros-cons">
+              <div class="pros-box">
+                <h4>Fortalezas (Pros)</h4>
+                <ul id="quality-pros">
+                  <li>Latencia de red interna nula.</li>
+                  <li>Despliegue simple y unitario.</li>
+                  <li>Pruebas de integración fáciles.</li>
+                </ul>
+              </div>
+              <div class="cons-box">
+                <h4>Debilidades (Cons)</h4>
+                <ul id="quality-cons">
+                  <li>Punto único de fallo total.</li>
+                  <li>Escalado vertical obligatorio.</li>
+                  <li>Largo tiempo de compilación global.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Frameworks Backend -->
+    <section class="topic-section" id="modulo4">
+      <h2 class="section-title">4. Frameworks Backend</h2>
+      <p class="intro-paragraph">
+        Los frameworks de desarrollo aceleran la programación al proveer plantillas de diseño preconcebidas, abstracciones de base de datos (ORMs) y gestores de servidores web HTTP. La elección del framework backend impacta directamente la mantenibilidad y la velocidad de entrega del equipo.
+      </p>
+
+      <!-- Framework Pills -->
+      <div class="frameworks-grid">
+        <div class="framework-pill">
+          <div class="framework-logo-circle logo-spring">Sp</div>
+          <div class="framework-pill-info">
+            <h4>Spring Boot</h4>
+            <span>Java / Enterprise</span>
+          </div>
+        </div>
+        <div class="framework-pill">
+          <div class="framework-logo-circle logo-django">Dj</div>
+          <div class="framework-pill-info">
+            <h4>Django</h4>
+            <span>Python / Baterías Incluidas</span>
+          </div>
+        </div>
+        <div class="framework-pill">
+          <div class="framework-logo-circle logo-flask">Fl</div>
+          <div class="framework-pill-info">
+            <h4>Flask</h4>
+            <span>Python / Micro-framework</span>
+          </div>
+        </div>
+        <div class="framework-pill">
+          <div class="framework-logo-circle logo-nest">Ne</div>
+          <div class="framework-pill-info">
+            <h4>NestJS</h4>
+            <span>NodeJS / TypeScript</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="intro-paragraph" style="margin-bottom: 20px;">
+        A continuación, compara cómo se codifica un mismo Endpoint REST GET (<code>/api/productos</code>) que retorna un listado en formato JSON, reflejando el enfoque sintáctico y arquitectónico de cada herramienta:
+      </p>
+
+      <!-- Tabbed Code Blocks -->
+      <div class="code-tabs-container">
+        <div class="code-tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'code-spring')">Spring Boot (Java)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-flask')">Flask (Python)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-django')">Django (Python)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-nest')">NestJS (TypeScript)</button>
+        </div>
+
+        <!-- Spring Boot -->
+        <div class="code-panel active" id="code-spring">
+          <pre><code><span class="annotation">@RestController</span>
+<span class="annotation">@RequestMapping</span>(<span class="string">"/api"</span>)
+<span class="keyword">public class</span> <span class="type">ProductController</span> {
+
+    <span class="keyword">private final</span> <span class="type">ProductService</span> productService;
+
+    <span class="comment">// Inyección de dependencias por constructor</span>
+    <span class="keyword">public</span> <span class="method">ProductController</span>(<span class="type">ProductService</span> productService) {
+        <span class="keyword">this</span>.productService = productService;
+    }
+
+    <span class="annotation">@GetMapping</span>(<span class="string">"/productos"</span>)
+    <span class="keyword">public</span> <span class="type">List</span>&lt;<span class="type">Product</span>&gt; <span class="method">getAllProducts</span>() {
+        <span class="keyword">return</span> productService.<span class="method">findAll</span>();
+    }
+}</code></pre>
+        </div>
+
+        <!-- Flask -->
+        <div class="code-panel" id="code-flask">
+          <pre><code><span class="keyword">from</span> flask <span class="keyword">import</span> Flask, jsonify
+<span class="keyword">from</span> services <span class="keyword">import</span> ProductService
+
+app = Flask(__name__)
+product_service = ProductService() <span class="comment"># Instanciación directa y manual</span>
+
+<span class="annotation">@app.route</span>(<span class="string">'/api/productos'</span>, methods=[<span class="string">'GET'</span>])
+<span class="keyword">def</span> <span class="method">get_all_products</span>():
+    products = product_service.find_all()
+    <span class="keyword">return</span> jsonify(products)
+
+<span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:
+    app.run(port=<span class="type">5000</span>)</code></pre>
+        </div>
+
+        <!-- Django -->
+        <div class="code-panel" id="code-django">
+          <pre><code><span class="keyword">from</span> django.http <span class="keyword">import</span> JsonResponse
+<span class="keyword">from</span> django.views <span class="keyword">import</span> View
+<span class="keyword">from</span> .models <span class="keyword">import</span> Product
+
+<span class="comment"># Django se basa en vistas de clase u orientadas a funciones mapeadas en urls.py</span>
+<span class="keyword">class</span> <span class="type">ProductListView</span>(View):
+    <span class="keyword">def</span> <span class="method">get</span>(<span class="keyword">self</span>, request):
+        products = Product.objects.all().values(<span class="string">'id'</span>, <span class="string">'name'</span>, <span class="string">'price'</span>)
+        <span class="keyword">return</span> JsonResponse(list(products), safe=<span class="keyword">False</span>)</code></pre>
+        </div>
+
+        <!-- NestJS -->
+        <div class="code-panel" id="code-nest">
+          <pre><code><span class="keyword">import</span> { Controller, Get } <span class="keyword">from</span> <span class="string">'@nestjs/common'</span>;
+<span class="keyword">import</span> { ProductService } <span class="keyword">from</span> <span class="string">'./product.service'</span>;
+
+<span class="annotation">@Controller</span>(<span class="string">'api'</span>)
+<span class="keyword">export class</span> <span class="type">ProductController</span> {
+  <span class="comment">// Inyección automática del proveedor de servicios por TypeScript</span>
+  <span class="keyword">constructor</span>(<span class="keyword">private readonly</span> productService: <span class="type">ProductService</span>) {}
+
+  <span class="annotation">@Get</span>(<span class="string">'productos'</span>)
+  <span class="method">getAllProducts</span>() {
+    <span class="keyword">return this</span>.productService.<span class="method">findAll</span>();
+  }
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 5: Práctica Angular + NestJS -->
+    <section class="topic-section" id="modulo5">
+      <h2 class="section-title">5. Práctica: Angular, NestJS y más</h2>
+      <p class="intro-paragraph">
+        Una de las mayores ventajas del ecosistema moderno de desarrollo de software es la simetría y coherencia arquitectónica entre el frontend (<span class="highlight">Angular</span>) y el backend (<span class="highlight">NestJS</span>). Ambos frameworks adoptan los principios de diseño de Angular originales: uso de TypeScript tipado de forma estricta, programación modular, fuerte inyección de dependencias (DI) nativa y desacoplamiento mediante decoradores.
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon icon-emerald">Frontend</div>
+          <h3 class="card-title">Angular (Estructura SPA)</h3>
+          <p class="card-content">
+            Divide la interfaz de usuario en <strong>Componentes</strong> (HTML para vista, CSS para diseño, TypeScript para comportamiento), organizados en <strong>Módulos</strong> y comunicados con el backend mediante <strong>Servicios</strong> inyectables a través de peticiones HTTP.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-cyan">Backend</div>
+          <h3 class="card-title">NestJS (Arquitectura Limpia)</h3>
+          <p class="card-content">
+            Estructura el servidor de forma idéntica: <strong>Controladores</strong> (mapean rutas HTTP y parámetros), <strong>Módulos</strong> (encapsulan lógica cohesiva) y <strong>Proveedores/Servicios</strong> (procesan lógica de bases de datos e integraciones).
+          </p>
+        </div>
+      </div>
+
+      <h3 style="font-size: 1.25rem; font-weight: 700; margin: 35px 0 15px 0; color: var(--text-bright);">
+        Comparativa de Ecosistemas Modernos (Frontend)
+      </h3>
+      <p class="intro-paragraph" style="margin-bottom: 20px;">
+        Los desarrolladores y arquitectos eligen las tecnologías frontend basándose en el tamaño del proyecto y el control requerido:
+      </p>
+
+      <div class="frameworks-grid">
+        <div class="framework-pill">
+          <div class="framework-logo-circle logo-angular">An</div>
+          <div class="framework-pill-info">
+            <h4>Angular</h4>
+            <span>Framework Completo / Opina la estructura</span>
+          </div>
+        </div>
+        <div class="framework-pill">
+          <div class="framework-logo-circle logo-react">Re</div>
+          <div class="framework-pill-info">
+            <h4>React</h4>
+            <span>Librería de Componentes / Flexible y popular</span>
+          </div>
+        </div>
+        <div class="framework-pill">
+          <div class="framework-logo-circle logo-vue">Vu</div>
+          <div class="framework-pill-info">
+            <h4>Vue.js</h4>
+            <span>Framework Progresivo / Curva de aprendizaje baja</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 6: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">6. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Valida los conocimientos que has adquirido sobre decisiones arquitectónicas, análisis de trade-offs, ISO 25010 y frameworks backend/frontend.
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> ¿Qué es un Architectural Decision Record (ADR)?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Un archivo XML autogenerado por el compilador con la configuración de las dependencias.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Un documento simple que registra una decisión de diseño, su contexto, motivación y consecuencias.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Una métrica que calcula el rendimiento del equipo de desarrollo de software.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> Según las Leyes de la Arquitectura de Software, ¿cuál de las siguientes opciones describe mejor un "trade-off"?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Una solución técnica que optimiza todos los factores de calidad al mismo tiempo.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Un equilibrio donde mejorar un atributo (ej. Seguridad) degrada inevitablemente otro (ej. Rendimiento).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Un error de diseño causado por no utilizar bases de datos no relacionales.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> ¿Qué framework backend se caracteriza por su arquitectura modular inspirada en Angular y el uso de TypeScript por defecto?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Flask</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Django</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>NestJS</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> En la norma ISO 25010, ¿a qué atributo nos referimos cuando medimos la facilidad para migrar el sistema de un servidor local a la nube de AWS?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>Mantenibilidad</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Portabilidad</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>Fiabilidad</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Trade-off Simulator Logic
+       ========================================== */
+    function updateSimulator() {
+      const security = parseInt(document.getElementById('slider-security').value);
+      const redundancy = parseInt(document.getElementById('slider-redundancy').value);
+      const decoupling = parseInt(document.getElementById('slider-decoupling').value);
+
+      // Text updates
+      const securityText = ['Mínima (Cifrado Base)', 'Media (SHA-256)', 'Máxima (AES-256-GCM + HTTPS)'];
+      document.getElementById('val-security').innerText = securityText[security - 1];
+
+      document.getElementById('val-redundancy').innerText = redundancy === 1 ? '1 Nodo (Sin respaldo)' : `${redundancy} Nodos`;
+
+      const decouplingText = ['Monolito Modular', 'Servicios Compartidos', 'Microservicios Distribuidos'];
+      document.getElementById('val-decoupling').innerText = decouplingText[decoupling - 1];
+
+      // Calculation metrics
+      // 1. Latency (decreases with high encryption and high decoupling)
+      let latencyVal = 95 - (security * 12) - (decoupling * 18);
+      latencyVal = Math.max(10, Math.min(100, latencyVal));
+      let latencyLabel = "Rápido (20ms)";
+      if (latencyVal < 40) latencyLabel = "Crítico (250ms)";
+      else if (latencyVal < 65) latencyLabel = "Moderado (110ms)";
+      
+      document.getElementById('bar-latency').style.width = latencyVal + '%';
+      document.getElementById('metric-latency').innerText = latencyLabel;
+
+      // 2. Cost (increases with redundancy and decoupling)
+      let costVal = (redundancy * 14) + (decoupling * 12) + (security * 5);
+      costVal = Math.max(10, Math.min(100, costVal));
+      let costLabel = `$${Math.round(costVal * 5)}/mes`;
+      
+      document.getElementById('bar-cost').style.width = costVal + '%';
+      document.getElementById('metric-cost').innerText = costLabel;
+
+      // 3. Availability (increases with redundancy, slightly decreases if too decoupled without circuit breakers)
+      let availVal = 40 + (redundancy * 12) - (decoupling * 3);
+      availVal = Math.max(10, Math.min(99, availVal));
+      let availLabel = `${(90 + (availVal * 0.1)).toFixed(2)}% SLA`;
+      
+      document.getElementById('bar-availability').style.width = availVal + '%';
+      document.getElementById('metric-availability').innerText = availLabel;
+
+      // 4. Complexity (increases with security, decoupling, redundancy)
+      let complexityVal = (decoupling * 25) + (security * 10) + (redundancy * 5);
+      complexityVal = Math.max(10, Math.min(100, complexityVal));
+      let complexityLabel = "Baja";
+      if (complexityVal > 75) complexityLabel = "Extrema";
+      else if (complexityVal > 45) complexityLabel = "Alta / Compleja";
+      
+      document.getElementById('bar-complexity').style.width = complexityVal + '%';
+      document.getElementById('metric-complexity').innerText = complexityLabel;
+    }
+
+    // Initialize simulator output
+    updateSimulator();
+
+    /* ==========================================
+       ISO 25010 Quality Selector Logic
+       ========================================== */
+    const qualityData = {
+      mono: {
+        title: "Monolito Tradicional",
+        desc: "Toda la lógica de negocio, persistencia e interfaz de usuario se compilan y despliegan en una única unidad de ejecución. Excelente para arranques rápidos y equipos pequeños, pero difícil de escalar individualmente.",
+        scores: [60, 40, 80, 95], // Maint, Scale, Deploy, Perf
+        stars: ["★★★☆☆", "★★☆☆☆", "★★★★☆", "★★★★★"],
+        colors: ["var(--color-warning)", "var(--color-danger)", "var(--color-success)", "var(--color-success)"],
+        pros: ["Latencia de red interna nula.", "Despliegue simple y unitario.", "Pruebas de integración fáciles."],
+        cons: ["Punto único de fallo total.", "Escalado vertical obligatorio.", "Largo tiempo de compilación global."]
+      },
+      micro: {
+        title: "Microservicios Distribuidos",
+        desc: "Divide la aplicación en servicios pequeños, independientes y acoplados de forma laxa que se comunican a través de red (ej. REST, gRPC). Permite a los equipos escalar piezas específicas del software.",
+        scores: [85, 95, 45, 60],
+        stars: ["★★★★☆", "★★★★★", "★★☆☆☆", "★★★☆☆"],
+        colors: ["var(--color-success)", "var(--color-success)", "var(--color-danger)", "var(--color-warning)"],
+        pros: ["Escalabilidad horizontal flexible.", "Tolerancia a fallos por aislamiento.", "Libertad tecnológica por servicio."],
+        cons: ["Monitoreo y debugging complejo.", "Alta latencia de red interna.", "Sincronización de datos difícil."]
+      },
+      serverless: {
+        title: "Arquitectura Serverless (FaaS)",
+        desc: "Ejecución de funciones basadas en eventos donde la infraestructura y escalabilidad es completamente administrada por el proveedor de la nube. Pago estricto por uso y ejecución por milisegundo.",
+        scores: [70, 100, 90, 50],
+        stars: ["★★★☆☆", "★★★★★", "★★★★☆", "★★☆☆☆"],
+        colors: ["var(--color-warning)", "var(--color-success)", "var(--color-success)", "var(--color-warning)"],
+        pros: ["Escalabilidad infinita automática.", "Cero administración de servidores.", "Costo cero en inactividad."],
+        cons: ["Arranque en frío (Cold start latency).", "Bloqueo por proveedor (Vendor lock-in).", "Monitoreo y pruebas locales complejas."]
+      }
+    };
+
+    function selectQuality(style) {
+      // Toggle active button class
+      document.querySelectorAll('.quality-selector button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.getElementById(`btn-${style}`).classList.add('active');
+
+      const data = qualityData[style];
+
+      // Update text details with quick fade animation
+      const grid = document.getElementById('quality-content');
+      grid.style.animation = 'none';
+      grid.offsetHeight; /* Trigger reflow */
+      grid.style.animation = 'fadeIn 0.3s ease';
+
+      // Update ratings & bars
+      document.getElementById('stars-maint').innerText = data.stars[0];
+      document.getElementById('bar-maint').style.width = data.scores[0] + '%';
+      document.getElementById('bar-maint').style.backgroundColor = data.colors[0];
+
+      document.getElementById('stars-scale').innerText = data.stars[1];
+      document.getElementById('bar-scale').style.width = data.scores[1] + '%';
+      document.getElementById('bar-scale').style.backgroundColor = data.colors[1];
+
+      document.getElementById('stars-deploy').innerText = data.stars[2];
+      document.getElementById('bar-deploy').style.width = data.scores[2] + '%';
+      document.getElementById('bar-deploy').style.backgroundColor = data.colors[2];
+
+      document.getElementById('stars-perf').innerText = data.stars[3];
+      document.getElementById('bar-perf').style.width = data.scores[3] + '%';
+      document.getElementById('bar-perf').style.backgroundColor = data.colors[3];
+
+      // Update description & pros/cons
+      document.getElementById('quality-title').innerText = data.title;
+      document.getElementById('quality-desc').innerText = data.desc;
+
+      // Pros list
+      const prosContainer = document.getElementById('quality-pros');
+      prosContainer.innerHTML = '';
+      data.pros.forEach(pro => {
+        const li = document.createElement('li');
+        li.innerText = pro;
+        prosContainer.appendChild(li);
+      });
+
+      // Cons list
+      const consContainer = document.getElementById('quality-cons');
+      consContainer.innerHTML = '';
+      data.cons.forEach(con => {
+        const li = document.createElement('li');
+        li.innerText = con;
+        consContainer.appendChild(li);
+      });
+    }
+
+    /* ==========================================
+       Backend Code Tabs Switching Logic
+       ========================================== */
+    function switchTab(event, panelId) {
+      const container = event.target.closest('.code-tabs-container');
+      
+      // Deactivate all tabs inside this container
+      container.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      // Deactivate all panels inside this container
+      container.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      // Set active to current
+      event.target.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'c',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        // Remove selected class from all options of this question
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        // Add selected class to clicked
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Check if all answered
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check answers
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        // Reset classes
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado las decisiones arquitectónicas, trade-offs y frameworks backend/frontend.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Revisa los conceptos erróneos para afianzar tu conocimiento.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te sugerimos repasar nuevamente la lección de trade-offs, ADRs y Atributos de Calidad.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

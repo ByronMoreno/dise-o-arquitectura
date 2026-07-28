@@ -1,0 +1,1669 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 6.5: Frameworks Frontend. Análisis detallado de Angular, React, Vue, Svelte, Next.js, Nuxt, Astro y SolidJS. Comparativa de código de componentes y quiz.">
+  <title>Frameworks Frontend | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Amber */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(6, 182, 212, 0.1);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      color: var(--color-accent);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Cards Grid Layout
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.25rem;
+    }
+
+    .icon-blue { background: rgba(59, 130, 246, 0.1); color: var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.2); }
+    .icon-purple { background: rgba(139, 92, 246, 0.1); color: var(--color-secondary); border: 1px solid rgba(139, 92, 246, 0.2); }
+    .icon-cyan { background: rgba(6, 182, 212, 0.1); color: var(--color-accent); border: 1px solid rgba(6, 182, 212, 0.2); }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .card-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Interactive Frontend Explorer
+       ========================================== */
+    .frontend-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .fw-tabs {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 868px) {
+      .fw-tabs {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .fw-tabs {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .fw-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .fw-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .fw-tab-btn.active {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+    }
+
+    .fw-sheet {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 968px) {
+      .fw-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .fw-details-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .fw-sheet-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .fw-sheet-badge {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      width: fit-content;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--color-accent);
+    }
+
+    .fw-sheet-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .fw-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .pros-box h4 { color: var(--color-success); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .cons-box h4 { color: var(--color-danger); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .pros-box ul, .cons-box ul { list-style: none; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+    .pros-box ul li::before { content: '✓ '; color: var(--color-success); font-weight: bold; }
+    .cons-box ul li::before { content: '✗ '; color: var(--color-danger); font-weight: bold; }
+
+    /* Visual schematic container */
+    .fw-visual-container {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 250px;
+      gap: 12px;
+    }
+
+    /* CSS schematics for frontend frameworks */
+    .sch-block {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      text-align: center;
+      width: 90%;
+    }
+
+    .sch-block.highlight {
+      background: rgba(59, 130, 246, 0.05);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .sch-arrow {
+      color: var(--color-accent);
+      font-size: 1rem;
+      line-height: 1;
+    }
+
+    /* ==========================================
+       Code Resizable / Tabs Layout
+       ========================================== */
+    .code-tabs-container {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-panel.active {
+      display: block;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Table Comparison Style
+       ========================================== */
+    .comparison-table-wrapper {
+      overflow-x: auto;
+      margin-top: 24px;
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.3);
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.95rem;
+    }
+
+    .comparison-table th {
+      background: rgba(15, 23, 42, 0.8);
+      color: var(--text-bright);
+      font-weight: 700;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .comparison-table td {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .comparison-table tr:hover td {
+      background: rgba(255, 255, 255, 0.01);
+      color: var(--text-bright);
+    }
+
+    .col-highlight {
+      color: var(--color-accent) !important;
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-accent);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(59, 130, 246, 0.06);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    /* ==========================================
+       Footer Style
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 6.5: Front-end</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 6.5</h2>
+        <span>Frontend</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. Evolución del Front-end</a></li>
+      <li><a href="#modulo2">2. Explorador de Fichas</a></li>
+      <li><a href="#modulo3">3. Comparación de Código</a></li>
+      <li><a href="#quiz">4. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+        <span>Módulo de Desarrollo Frontend</span>
+      </div>
+      <h1 class="hero-title">Frameworks y Librerías<br>de Frontend</h1>
+      <p class="hero-subtitle">
+        Conoce la clasificación y el enfoque técnico de las principales tecnologías de presentación: Angular, React, Vue, Svelte, Next.js, Nuxt, Astro y SolidJS.
+      </p>
+    </header>
+
+    <!-- Modulo 1: Evolución de las Arquitecturas de Frontend -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Evolución de las Arquitecturas de Frontend</h2>
+      <p class="intro-paragraph">
+        El desarrollo web ha transitado desde la renderización estática en servidor hacia el procesamiento masivo de JavaScript en el cliente (<span class="highlight">SPA</span>), y ahora experimenta una convergencia híbrida (<span class="highlight">SSR/SSG</span> e <span class="highlight">Islas de Interactividad</span>) para mitigar la sobrecarga de descarga en navegadores móviles:
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon icon-blue">🌐</div>
+          <h3 class="card-title">SPA (Single Page Application)</h3>
+          <p class="card-content">
+            Carga un único archivo HTML vacío y un archivo JavaScript pesado. El cliente renderiza y genera el DOM dinámicamente mediante el navegador. Ofrece transiciones fluidas pero penaliza la velocidad inicial y el SEO.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-purple">⚡</div>
+          <h3 class="card-title">SSR y Meta-frameworks</h3>
+          <p class="card-content">
+            Meta-frameworks (Next.js, Nuxt) pre-renderizan el HTML en un servidor Node.js por petición antes de enviarlo al cliente. El navegador recibe una página visual inmediata que luego se activa mediante un proceso llamado <em>Hidratación</em>.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-cyan">🏝️</div>
+          <h3 class="card-title">Islas de Interactividad</h3>
+          <p class="card-content">
+            Propuesto por Astro. Todo el sitio web es HTML estático sin JavaScript por defecto. Solo las regiones de UI dinámicas declaradas explícitamente (ej. un carrito) se descargan e hidratan de forma independiente como "islas".
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Explorador de Fichas -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Catálogo e Interactividad de Frameworks</h2>
+      <p class="intro-paragraph">
+        Haz clic en cada botón para explorar el tipo de herramienta, su filosofía de reactividad, sus pros y sus contras:
+      </p>
+
+      <div class="frontend-explorer">
+        <!-- Tabs selectors -->
+        <div class="fw-tabs">
+          <button class="fw-tab-btn active" onclick="selectFramework('angular')">Angular</button>
+          <button class="fw-tab-btn" onclick="selectFramework('react')">React</button>
+          <button class="fw-tab-btn" onclick="selectFramework('vue')">Vue</button>
+          <button class="fw-tab-btn" onclick="selectFramework('svelte')">Svelte</button>
+          <button class="fw-tab-btn" onclick="selectFramework('next')">Next.js</button>
+          <button class="fw-tab-btn" onclick="selectFramework('nuxt')">Nuxt</button>
+          <button class="fw-tab-btn" onclick="selectFramework('astro')">Astro</button>
+          <button class="fw-tab-btn" onclick="selectFramework('solid')">SolidJS</button>
+        </div>
+
+        <!-- Sheet Panel -->
+        <div class="fw-sheet" id="fw-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="fw-details-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 class="fw-sheet-title" id="fw-title">Angular</h4>
+              <span class="fw-sheet-badge" id="fw-badge">Framework</span>
+            </div>
+            <p class="fw-sheet-desc" id="fw-desc">
+              Framework de Google opinado y completo. Provee enrutamiento, cliente HTTP, validación de formularios e inyección de dependencias de forma nativa sin depender de librerías de terceros.
+            </p>
+            <div class="fw-pros-cons">
+              <div class="pros-box">
+                <h4>Fortalezas (Pros)</h4>
+                <ul id="fw-pros">
+                  <li>Estructura corporativa uniforme.</li>
+                  <li>Inyección de dependencias integrada.</li>
+                  <li>Tipado de TypeScript robusto nativo.</li>
+                </ul>
+              </div>
+              <div class="cons-box">
+                <h4>Debilidades (Cons)</h4>
+                <ul id="fw-cons">
+                  <li>Curva de aprendizaje empinada.</li>
+                  <li>Tamaño del bundle inicial pesado.</li>
+                  <li>Demasiado verboso para proyectos pequeños.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:10px;">Enfoque de Reactividad:</h5>
+            <div class="style-visual-container" id="fw-visual">
+              <div class="sch-block">Detección de Cambios Directa (Zone.js)</div>
+              <div class="sch-arrow">▼</div>
+              <div class="sch-block sch-highlight">Actualización de UI en DOM Real</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Comparación de Código -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Comparación de Código: Componente Contador</h2>
+      <p class="intro-paragraph">
+        Compara la sintaxis y la filosofía de gestión de estado reactivo necesaria para codificar un componente contador de clics simple:
+      </p>
+
+      <!-- Code comparator -->
+      <div class="code-tabs-container" style="margin-top:20px;">
+        <div class="code-tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'code-react')">React (JS/TS)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-angular')">Angular (TS)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-vue')">Vue (JS/TS)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-svelte')">Svelte</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-solid')">SolidJS (JS/TS)</button>
+        </div>
+
+        <!-- React -->
+        <div class="code-panel active" id="code-react">
+          <pre><code><span class="keyword">import</span> { useState } <span class="keyword">from</span> <span class="string">'react'</span>;
+
+<span class="keyword">export default function</span> <span class="type">Contador</span>() {
+  <span class="keyword">const</span> [count, setCount] = <span class="method">useState</span>(<span class="type">0</span>);
+
+  <span class="keyword">return</span> (
+    &lt;<span class="keyword">div</span>&gt;
+      &lt;<span class="keyword">p</span>&gt;Clicks: {count}&lt;/<span class="keyword">p</span>&gt;
+      &lt;<span class="keyword">button</span> <span class="method">onClick</span>={() => <span class="method">setCount</span>(count + <span class="type">1</span>)}&gt;Incrementar&lt;/<span class="keyword">button</span>&gt;
+    &lt;/<span class="keyword">div</span>&gt;
+  );
+}</code></pre>
+        </div>
+
+        <!-- Angular -->
+        <div class="code-panel" id="code-angular">
+          <pre><code><span class="keyword">import</span> { Component } <span class="keyword">from</span> <span class="string">'@angular/core'</span>;
+
+<span class="annotation">@Component</span>({
+  selector: <span class="string">'app-contador'</span>,
+  template: <span class="string">`
+    &lt;div&gt;
+      &lt;p&gt;Clicks: {{ count }}&lt;/p&gt;
+      &lt;button (click)="incrementar()"&gt;Incrementar&lt;/button&gt;
+    &lt;/div&gt;
+  `</span>
+})
+<span class="keyword">export class</span> <span class="type">ContadorComponent</span> {
+  count = <span class="type">0</span>;
+
+  <span class="method">incrementar</span>() {
+    <span class="keyword">this</span>.count++;
+  }
+}</code></pre>
+        </div>
+
+        <!-- Vue -->
+        <div class="code-panel" id="code-vue">
+          <pre><code>&lt;<span class="keyword">template</span>&gt;
+  &lt;<span class="keyword">div</span>&gt;
+    &lt;<span class="keyword">p</span>&gt;Clicks: {{ count }}&lt;/<span class="keyword">p</span>&gt;
+    &lt;<span class="keyword">button</span> <span class="annotation">@click</span>=<span class="string">"incrementar"</span>&gt;Incrementar&lt;/<span class="keyword">button</span>&gt;
+  &lt;/<span class="keyword">div</span>&gt;
+&lt;/<span class="keyword">template</span>&gt;
+
+&lt;<span class="keyword">script</span> <span class="keyword">setup</span>&gt;
+<span class="keyword">import</span> { ref } <span class="keyword">from</span> <span class="string">'vue'</span>;
+<span class="keyword">const</span> count = <span class="method">ref</span>(<span class="type">0</span>);
+
+<span class="keyword">function</span> <span class="method">incrementar</span>() {
+  count.value++;
+}
+&lt;/<span class="keyword">script</span>&gt;</code></pre>
+        </div>
+
+        <!-- Svelte -->
+        <div class="code-panel" id="code-svelte">
+          <pre><code>&lt;<span class="keyword">script</span>&gt;
+  <span class="keyword">let</span> count = <span class="type">0</span>; <span class="comment">// Svelte trata declaraciones como reactivas por defecto</span>
+  <span class="keyword">function</span> <span class="method">incrementar</span>() {
+    count += <span class="type">1</span>;
+  }
+&lt;/<span class="keyword">script</span>&gt;
+
+&lt;<span class="keyword">div</span>&gt;
+  &lt;<span class="keyword">p</span>&gt;Clicks: {count}&lt;/<span class="keyword">p</span>&gt;
+  &lt;<span class="keyword">button</span> <span class="keyword">on</span>:<span class="method">click</span>={incrementar}&gt;Incrementar&lt;/<span class="keyword">button</span>&gt;
+&lt;/<span class="keyword">div</span>&gt;</code></pre>
+        </div>
+
+        <!-- SolidJS -->
+        <div class="code-panel" id="code-solid">
+          <pre><code><span class="keyword">import</span> { createSignal } <span class="keyword">from</span> <span class="string">'solid-js'</span>;
+
+<span class="keyword">export default function</span> <span class="type">Contador</span>() {
+  <span class="keyword">const</span> [count, setCount] = <span class="method">createSignal</span>(<span class="type">0</span>); <span class="comment">// Reactividad sin Virtual DOM</span>
+
+  <span class="keyword">return</span> (
+    &lt;<span class="keyword">div</span>&gt;
+      &lt;<span class="keyword">p</span>&gt;Clicks: {count()}&lt;/<span class="keyword">p</span>&gt;
+      &lt;<span class="keyword">button</span> <span class="method">onClick</span>={() => <span class="method">setCount</span>(count() + <span class="type">1</span>)}&gt;Incrementar&lt;/<span class="keyword">button</span>&gt;
+    &lt;/<span class="keyword">div</span>&gt;
+  );
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">4. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Evalúa tus conocimientos del ecosistema de ingeniería frontend moderna:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Si tu prioridad de diseño es un portal de noticias estático con rendimiento extremo, donde el 95% del contenido es lectura fija pero necesitas un par de botones dinámicos de comentarios, ¿qué meta-framework híbrido e hidratación de islas es el más adecuado?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Angular</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Astro</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Next.js</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> ¿Qué clasifica formalmente a React en contraste con Angular y Vue?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Es un framework corporativo cerrado de Microsoft.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Es una librería enfocada exclusivamente en el renderizado de la interfaz mediante componentes, delegando enrutamientos y HTTP a paquetes externos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Es un compilador nativo de código C++ para web.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> Svelte y SolidJS comparten un enfoque arquitectónico clave frente a React:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Ambos dependen fuertemente de Zone.js para detectar cambios.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Ambos descartan el Virtual DOM y aplican reactividad directa en tiempo de compilación o de grano fino.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>No soportan programación reactiva en absoluto.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> ¿Cuál es la ventaja primordial de un meta-framework como Next.js o Nuxt frente a una SPA tradicional?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>Permiten prescindir del uso de JavaScript en el navegador.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Soportan de forma nativa renderizado en el servidor (SSR) y generación estática (SSG), mejorando radicalmente la carga inicial y el SEO.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>Eliminan la necesidad de contar con un servidor Node.js en producción.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Frontend Sheets Data & Logic
+       ========================================== */
+    const fwData = {
+      angular: {
+        title: "Angular",
+        badge: "Framework",
+        desc: "El framework corporativo por excelencia desarrollado por Google. Su filosofía es proveer una solución completa ('batteries-included') que predefine el enrutador, cliente HTTP, arquitectura de módulos e inyección de dependencias native.",
+        pros: ["Código altamente estructurado e ideal para equipos masivos.", "TypeScript integrado nativo de primer nivel.", "Inyección de dependencias robusta incorporada."],
+        cons: ["Elevada verbosidad y boilerplate de arranque.", "Curva de aprendizaje empinada para desarrolladores junior.", "Tamaño de bundle pesado."],
+        visual: `
+          <div class="sch-block">TypeScript Component Controller</div>
+          <div class="sch-arrow">▼ (Data binding)</div>
+          <div class="sch-block sch-highlight">DOM Real (Detección por Zone.js)</div>
+        `
+      },
+      react: {
+        title: "React",
+        badge: "Librería",
+        desc: "Librería creada por Meta enfocada puramente en renderizar la interfaz a través de componentes funcionales declarativos. Introduce el paradigma JSX y depende del Virtual DOM para realizar comparaciones e inyectar cambios de forma optimizada.",
+        pros: ["Flexibilidad absoluta para estructurar y elegir dependencias.", "Ecosistema masivo de librerías y componentes comunitarios.", "Paradigma funcional simple y limpio."],
+        cons: ["Fatiga de decisión: debes elegir enrutadores, validaciones y estilos externos.", "Renderizados innecesarios frecuentes si no se optimiza con memoization.", "Proceso complejo de hidratación inicial en SEO."],
+        visual: `
+          <div class="sch-block">State Change (useState)</div>
+          <div class="sch-arrow">▼</div>
+          <div class="sch-block sch-highlight">Virtual DOM (Reconciliation/Diffing)</div>
+          <div class="sch-arrow">▼</div>
+          <div class="sch-block">Actualización Física de DOM Real</div>
+        `
+      },
+      vue: {
+        title: "Vue.js",
+        badge: "Framework",
+        desc: "Framework progresivo que combina la flexibilidad de React con la estructura y directivas de Angular. Cuenta con una reactividad basada en Proxies de JavaScript y permite escribir archivos de Componentes Únicos (.vue) conteniendo HTML, CSS y JS en un bloque.",
+        pros: ["Curva de aprendizaje extremadamente amigable.", "Estructura de Single File Components (.vue) muy intuitiva.", "Reactividad nativa de alto rendimiento."],
+        cons: ["Menor respaldo corporativo en comparación con Angular y React.", "Ecosistema ligeramente fragmentado entre versiones 2 y 3.", "Flexibilidad excesiva que puede inducir a desorden en equipos grandes."]
+        ,
+        visual: `
+          <div class="sch-block">State Proxy (Reactive Ref)</div>
+          <div class="sch-arrow">▼ (Dependency Tracking)</div>
+          <div class="sch-block sch-highlight">Virtual DOM Optimizado (Compiler-Informed)</div>
+          <div class="sch-arrow">▼</div>
+          <div class="sch-block">Actualización Física de DOM Real</div>
+        `
+      },
+      svelte: {
+        title: "Svelte",
+        badge: "Compilador",
+        desc: "Svelte revoluciona el frontend al descartar el Virtual DOM. En su lugar, actúa como un compilador en tiempo de desarrollo, traduciendo tus componentes reactivos directamente a código nativo de JavaScript de grano fino que actualiza directamente el DOM real.",
+        pros: ["Bundle final ridículamente liviano al no requerir cargar un runtime en el cliente.", "Reactividad nativa simplificada sin necesidad de hooks ni proxies.", "Excelente rendimiento en dispositivos de bajo recurso."],
+        cons: ["Ecosistema de librerías menor en comparación con los tres gigantes.", "Límites estrictos de compilación para integraciones avanzadas.", "Soporte comunitario de mediano alcance."],
+        visual: `
+          <div class="sch-block">Compile-Time Component Analysis</div>
+          <div class="sch-arrow">▼ (Direct Vanilla Output)</div>
+          <div class="sch-block sch-highlight">DOM Real (Actualizaciones Directas de Grano Fino)</div>
+        `
+      },
+      next: {
+        title: "Next.js",
+        badge: "Meta-framework React",
+        desc: "Meta-framework estándar para React. Provee enrutamiento basado en archivos físicos, soporte nativo de optimización de imágenes, y permite combinar enrutamiento de servidor con renderización en el servidor (SSR) y generación estática (SSG) de forma híbrida.",
+        pros: ["Rendimiento de SEO y velocidad inicial espectaculares (SSR/SSG).", "Enrutamiento intuitivo e integrado basado en el directorio de carpetas.", "API Routes para construir backends ligeros sin salir del proyecto."],
+        cons: ["Requiere de un servidor Node.js corriendo constantemente para SSR.", "Complejidad técnica superior a una SPA clásica.", "Bloqueo técnico estrecho al ecosistema Vercel."],
+        visual: `
+          <div class="sch-block">Server-Side Rendering (NodeJS)</div>
+          <div class="sch-arrow">▼ (Envía HTML estático)</div>
+          <div class="sch-block sch-highlight">Navegador (Hidratación / React Active)</div>
+        `
+      },
+      nuxt: {
+        title: "Nuxt",
+        badge: "Meta-framework Vue",
+        desc: "El meta-framework oficial de la comunidad de Vue.js. Al igual que Next, automatiza el enrutamiento de archivos, optimiza el SEO mediante SSR y provee una capa arquitectónica impecable para estructurar proyectos web Vue de gran escala.",
+        pros: ["Experiencia de desarrollador (DX) de primer nivel.", "SSR y SSG listos para producción con cero configuraciones.", "Importación de componentes automáticos nativa."],
+        cons: ["Sobrecarga en la documentación entre la versión 2 y Nuxt 3.", "Consumo de memoria elevado en el servidor de compilación.", "Requiere servidor Node.js para SSR en caliente."],
+        visual: `
+          <div class="sch-block">Server-Side Render (Vue Component Engine)</div>
+          <div class="sch-arrow">▼ (HTML Pre-renderizado)</div>
+          <div class="sch-block sch-highlight">Navegador (Hidratación / Vue Active)</div>
+        `
+      },
+      astro: {
+        title: "Astro",
+        badge: "Meta-framework Híbrido",
+        desc: "Meta-framework enfocado en la velocidad y el contenido. Adopta la 'Arquitectura de Islas': genera HTML estático puro sin JavaScript. Si necesitas interactividad, inyectas componentes de React, Vue o Svelte como 'islas' que se hidratan de forma aislada.",
+        pros: ["Sitios web con rendimiento de puntuación de 100 en Lighthouse.", "Multi-framework: puedes mezclar componentes React, Vue y Svelte en el mismo sitio.", "Cero JavaScript enviado al cliente por defecto."],
+        cons: ["No es adecuado para aplicaciones altamente interactivas o paneles de control dinámicos (Dashboards).", "Curva de aprendizaje para dominar el enrutador híbrido.", "Poca madurez en integraciones de estado global complejo."],
+        visual: `
+          <div class="sch-block">HTML Estático Servidor (Cero JS)</div>
+          <div class="sch-arrow">▼</div>
+          <div style="display:flex; justify-content:space-between; width:100%; gap:8px;">
+            <div class="sch-block" style="width:48%; font-size:0.7rem;">Isla React (Hidratada)</div>
+            <div class="sch-block" style="width:48%; font-size:0.7rem;">Isla Vue (Hidratada)</div>
+          </div>
+        `
+      },
+      solid: {
+        title: "SolidJS",
+        badge: "Framework Reactivo",
+        desc: "Framework que combina la sintaxis JSX de React con un motor de reactividad basada en Signals (similar a Vue). Solid compila tu código a actualizaciones nativas de DOM directo sin utilizar Virtual DOM, logrando velocidades que rivalizan con Svelte y Vanilla JS.",
+        pros: ["Rendimiento y velocidad de renderizado sobresalientes.", "Sintaxis JSX familiar y amada por desarrolladores de React.", "Reactividad de grano fino sin re-renderizar componentes completos."],
+        cons: ["Ecosistema comunitario e integraciones reducido en la actualidad.", "Pocas plantillas y componentes UI pre-fabricados en el mercado.", "Requiere comprensión estricta del ciclo de vida de los Signals para evitar bugs."],
+        visual: `
+          <div class="sch-block">Component Signals Registration</div>
+          <div class="sch-arrow">▼ (Direct compile binding)</div>
+          <div class="sch-block sch-highlight">DOM Real (Actualización de Atributos Exactos)</div>
+        `
+      }
+    };
+
+    function selectFramework(fw) {
+      // Toggle button active class
+      document.querySelectorAll('.fw-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const targetBtn = Array.from(document.querySelectorAll('.fw-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(fw));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const data = fwData[fw];
+
+      // Update text sheet with quick fade animation
+      const sheet = document.getElementById('fw-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      document.getElementById('fw-title').innerText = data.title;
+      document.getElementById('fw-badge').innerText = data.badge;
+      document.getElementById('fw-desc').innerText = data.desc;
+
+      // Update pros
+      const prosContainer = document.getElementById('fw-pros');
+      prosContainer.innerHTML = '';
+      data.pros.forEach(pro => {
+        const li = document.createElement('li');
+        li.innerText = pro;
+        prosContainer.appendChild(li);
+      });
+
+      // Update cons
+      const consContainer = document.getElementById('fw-cons');
+      consContainer.innerHTML = '';
+      data.cons.forEach(con => {
+        const li = document.createElement('li');
+        li.innerText = con;
+        consContainer.appendChild(li);
+      });
+
+      // Update schematic visual
+      document.getElementById('fw-visual').innerHTML = data.visual;
+    }
+
+    // Default load Angular
+    selectFramework('angular');
+
+    /* ==========================================
+       Code Tabs Switching Logic
+       ========================================== */
+    function switchTab(event, panelId) {
+      const container = event.target.closest('.code-tabs-container');
+      
+      container.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      container.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado las clasificaciones, arquitecturas y reactividades del desarrollo frontend moderno.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Revisa el concepto de hidratación de islas y la reactividad sin Virtual DOM.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te recomendamos revisar detenidamente las fichas y comparativas de los frameworks.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>
