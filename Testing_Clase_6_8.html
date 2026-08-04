@@ -1,0 +1,1598 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 6.8: Frameworks de Testing. Pirámide de testing, unit testing, integración, mocking y extremo a extremo (E2E). Interactividad y código para JUnit, Mockito, Jest, Cypress, Playwright, Selenium y PyTest. Quiz interactivo.">
+  <title>Frameworks de Testing | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Amber */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-secondary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero Section / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(139, 92, 246, 0.1);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      color: var(--color-secondary);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-secondary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Testing Pyramid Layout (3D stacking CSS)
+       ========================================== */
+    .pyramid-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      margin: 40px auto;
+      max-width: 600px;
+      perspective: 1000px;
+    }
+
+    .pyramid-layer {
+      width: 100%;
+      text-align: center;
+      padding: 18px;
+      border-radius: 10px;
+      font-weight: 700;
+      color: white;
+      transition: all var(--transition-speed) ease;
+      cursor: pointer;
+      position: relative;
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .pyramid-layer:hover {
+      transform: translateZ(20px) scale(1.02);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    }
+
+    .layer-e2e {
+      width: 45%;
+      background: linear-gradient(135deg, var(--color-danger), #b91c1c);
+    }
+
+    .layer-int {
+      width: 70%;
+      background: linear-gradient(135deg, var(--color-warning), #d97706);
+    }
+
+    .layer-unit {
+      width: 95%;
+      background: linear-gradient(135deg, var(--color-success), #047857);
+    }
+
+    .layer-label {
+      font-size: 1.1rem;
+      margin-bottom: 4px;
+    }
+
+    .layer-desc {
+      font-size: 0.78rem;
+      opacity: 0.85;
+      font-weight: 400;
+    }
+
+    .layer-arrow-indicator {
+      display: flex;
+      justify-content: space-between;
+      width: 95%;
+      margin: 10px auto;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      border-top: 1px dashed rgba(255,255,255,0.1);
+      padding-top: 8px;
+    }
+
+    /* ==========================================
+       Interactive Testing Explorer
+       ========================================== */
+    .testing-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .test-tabs {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 968px) {
+      .test-tabs {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    @media (max-width: 568px) {
+      .test-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .test-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .test-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .test-tab-btn.active {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-secondary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.1);
+    }
+
+    .test-sheet {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 968px) {
+      .test-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .test-details-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .test-sheet-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .test-sheet-meta {
+      font-size: 0.9rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .test-sheet-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .test-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .pros-box h4 { color: var(--color-success); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .cons-box h4 { color: var(--color-danger); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .pros-box ul, .cons-box ul { list-style: none; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+    .pros-box ul li::before { content: '✓ '; color: var(--color-success); font-weight: bold; }
+    .cons-box ul li::before { content: '✗ '; color: var(--color-danger); font-weight: bold; }
+
+    /* Visual schematic container */
+    .test-visual-container {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      gap: 10px;
+    }
+
+    /* CSS flowcharts for testing execution models */
+    .flow-step {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: center;
+      width: 90%;
+    }
+
+    .flow-step.highlight {
+      background: rgba(139, 92, 246, 0.05);
+      border-color: rgba(139, 92, 246, 0.3);
+      color: var(--color-secondary);
+      font-weight: 600;
+    }
+
+    .flow-arrow {
+      color: var(--color-accent);
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+
+    /* ==========================================
+       Code Comparator (Tabs)
+       ========================================== */
+    .code-comparator {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-panel.active {
+      display: block;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-secondary);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-secondary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-secondary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(139, 92, 246, 0.06);
+      border-color: rgba(139, 92, 246, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-secondary), var(--color-accent));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    /* ==========================================
+       Footer Style
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 6.8: Testing</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 6.8</h2>
+        <span>Testing Fws</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. La Pirámide de Testing</a></li>
+      <li><a href="#modulo2">2. Fichas de Frameworks</a></li>
+      <li><a href="#modulo3">3. Comparativa de Código</a></li>
+      <li><a href="#quiz">4. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Módulo de Control de Calidad</span>
+      </div>
+      <h1 class="hero-title">Frameworks de Testing</h1>
+      <p class="hero-subtitle">
+        Domina la pirámide de pruebas y analiza la arquitectura y el comportamiento de JUnit, Mockito, Jest, Cypress, Playwright, Selenium y PyTest.
+      </p>
+    </header>
+
+    <!-- Modulo 1: La Pirámide de Testing -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. La Pirámide de Testing de Software</h2>
+      <p class="intro-paragraph">
+        La <span class="highlight">Pirámide de Testing</span> es un marco de diseño propuesto por Mike Cohn para estructurar las pruebas de software de forma eficiente. Establece que un sistema saludable debe tener una gran base de pruebas unitarias rápidas y económicas, y un número reducido de pruebas E2E complejas y costosas:
+      </p>
+
+      <div class="pyramid-container">
+        <!-- E2E -->
+        <div class="pyramid-layer layer-e2e">
+          <div class="layer-label">E2E (Extremo a Extremo)</div>
+          <div class="layer-desc">Simula flujos de usuario reales en el navegador. (Playwright, Cypress)</div>
+        </div>
+        <!-- Integración -->
+        <div class="pyramid-layer layer-int">
+          <div class="layer-label">Integración & Mocking</div>
+          <div class="layer-desc">Prueba la comunicación entre componentes. (Mockito)</div>
+        </div>
+        <!-- Unitario -->
+        <div class="pyramid-layer layer-unit">
+          <div class="layer-label">Unitario (Unit Testing)</div>
+          <div class="layer-desc">Prueba funciones y clases aisladas. (JUnit, Jest, PyTest)</div>
+        </div>
+      </div>
+
+      <div class="layer-arrow-indicator">
+        <span>▲ Mayor costo y tiempo de ejecución (E2E)</span>
+        <span>▼ Más veloces, económicos y aislados (Unitarios)</span>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Catálogo de Frameworks -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Explorador Interactivo de Testing</h2>
+      <p class="intro-paragraph">
+        Haz clic en cada pestaña para examinar el lenguaje principal, su nivel en la pirámide y su respectivo modelo de ejecución:
+      </p>
+
+      <div class="testing-explorer">
+        <!-- Tabs selectors -->
+        <div class="test-tabs">
+          <button class="test-tab-btn active" onclick="selectTest('junit')">JUnit</button>
+          <button class="test-tab-btn" onclick="selectTest('mockito')">Mockito</button>
+          <button class="test-tab-btn" onclick="selectTest('jest')">Jest</button>
+          <button class="test-tab-btn" onclick="selectTest('cypress')">Cypress</button>
+          <button class="test-tab-btn" onclick="selectTest('playwright')">Playwright</button>
+          <button class="test-tab-btn" onclick="selectTest('selenium')">Selenium</button>
+          <button class="test-tab-btn" onclick="selectTest('pytest')">PyTest</button>
+        </div>
+
+        <!-- Sheet Panel -->
+        <div class="test-sheet" id="test-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="test-details-card">
+            <h4 class="test-sheet-title" id="test-title">JUnit</h4>
+            <div class="test-sheet-meta" id="test-meta">Lenguaje: Java | Nivel: Pruebas Unitarias</div>
+            <p class="test-sheet-desc" id="test-desc">
+              El framework de pruebas unitarias estándar de facto en Java. Su quinta versión (JUnit 5 / Jupiter) incorpora pruebas parametrizadas avanzadas, inyección de dependencias en constructores de pruebas y soporte nativo para aserciones lambda de Java 8.
+            </p>
+            <div class="test-pros-cons">
+              <div class="pros-box">
+                <h4>Fortalezas (Pros)</h4>
+                <ul id="test-pros">
+                  <li>Integración perfecta en compiladores de Java (Gradle/Maven).</li>
+                  <li>Extremadamente rápido al probar código aislado.</li>
+                  <li>Gran soporte de extensiones (@ExtendWith).</li>
+                </ul>
+              </div>
+              <div class="cons-box">
+                <h4>Debilidades (Cons)</h4>
+                <ul id="test-cons">
+                  <li>Limitado a la capa de lógica, no simula interfaces de usuario.</li>
+                  <li>Requiere configuraciones complejas para levantar contextos Spring Boot completos.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:10px;">Esquema de Ejecución:</h5>
+            <div class="test-visual-container" id="test-visual">
+              <!-- Cargado dinámicamente por JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Comparativa de Código -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Comparación de Código: Casos de Prueba Reales</h2>
+      <p class="intro-paragraph">
+        Compara la sintaxis exacta necesaria para estructurar aserciones, mocks unitarios y pruebas de interacción E2E en el navegador:
+      </p>
+
+      <!-- Code comparator -->
+      <div class="code-comparator">
+        <div class="code-tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'code-junit-mockito')">JUnit + Mockito (Java)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-jest')">Jest (JavaScript)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-pytest')">PyTest (Python)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-playwright')">Playwright (TS/JS)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-cypress')">Cypress (JS)</button>
+        </div>
+
+        <!-- JUnit + Mockito -->
+        <div class="code-panel active" id="code-junit-mockito">
+          <pre><code><span class="annotation">@ExtendWith</span>(<span class="type">MockitoExtension</span>.class)
+<span class="keyword">class</span> <span class="type">UsuarioServiceTest</span> {
+
+    <span class="annotation">@Mock</span>
+    <span class="keyword">private</span> <span class="type">UsuarioRepository</span> repository;
+
+    <span class="annotation">@InjectMocks</span>
+    <span class="keyword">private</span> <span class="type">UsuarioService</span> service;
+
+    <span class="annotation">@Test</span>
+    <span class="keyword">void</span> <span class="method">debeRetornarUsuario</span>() {
+        <span class="comment">// Simular comportamiento del Mock</span>
+        <span class="type">Mockito</span>.<span class="method">when</span>(repository.<span class="method">findByEmail</span>(<span class="string">"test@mail.com"</span>))
+               .<span class="method">thenReturn</span>(<span class="type">Optional</span>.<span class="method">of</span>(<span class="keyword">new</span> <span class="type">Usuario</span>(<span class="string">"Juan"</span>)));
+
+        <span class="type">Usuario</span> resultado = service.<span class="method">buscar</span>(<span class="string">"test@mail.com"</span>);
+        <span class="method">assertEquals</span>(<span class="string">"Juan"</span>, resultado.<span class="method">getNombre</span>());
+    }
+}</code></pre>
+        </div>
+
+        <!-- Jest -->
+        <div class="code-panel" id="code-jest">
+          <pre><code><span class="comment">// Prueba unitaria en Jest</span>
+<span class="keyword">const</span> { calcularDescuento } = <span class="keyword">require</span>(<span class="string">'./tienda'</span>);
+
+<span class="method">describe</span>(<span class="string">'Módulo Tienda'</span>, () => {
+  <span class="method">test</span>(<span class="string">'debe aplicar 10% de descuento en compras mayores a $100'</span>, () => {
+    <span class="keyword">const</span> total = <span class="method">calcularDescuento</span>(<span class="type">120</span>);
+    <span class="method">expect</span>(total).<span class="method">toBe</span>(<span class="type">108</span>); <span class="comment">// Aserción</span>
+  });
+});</code></pre>
+        </div>
+
+        <!-- PyTest -->
+        <div class="code-panel" id="code-pytest">
+          <pre><code><span class="keyword">import</span> pytest
+
+<span class="comment"># Fixture para inyectar datos de prueba</span>
+<span class="annotation">@pytest.fixture</span>
+<span class="keyword">def</span> <span class="method">carrito_vacio</span>():
+    <span class="keyword">return</span> Carrito()
+
+<span class="keyword">def</span> <span class="method">test_agregar_producto</span>(carrito_vacio):
+    carrito_vacio.agregar(Producto(<span class="string">"Laptop"</span>, <span class="type">1000</span>))
+    <span class="keyword">assert</span> len(carrito_vacio.items) == <span class="type">1</span> <span class="comment"># PyTest usa aserciones de Python puras</span></code></pre>
+        </div>
+
+        <!-- Playwright -->
+        <div class="code-panel" id="code-playwright">
+          <pre><code><span class="keyword">import</span> { test, expect } <span class="keyword">from</span> <span class="string">'@playwright/test'</span>;
+
+<span class="method">test</span>(<span class="string">'debe iniciar sesión en el panel'</span>, <span class="keyword">async</span> ({ page }) => {
+  <span class="keyword">await</span> page.<span class="method">goto</span>(<span class="string">'https://ejemplo.com/login'</span>);
+  <span class="keyword">await</span> page.<span class="method">fill</span>(<span class="string">'#username'</span>, <span class="string">'admin'</span>);
+  <span class="keyword">await</span> page.<span class="method">fill</span>(<span class="string">'#password'</span>, <span class="string">'secreto'</span>);
+  <span class="keyword">await</span> page.<span class="method">click</span>(<span class="string">'button[type="submit"]'</span>);
+  
+  <span class="keyword">await</span> <span class="method">expect</span>(page.<span class="method">locator</span>(<span class="string">'.dashboard'</span>)).<span class="method">toBeVisible</span>();
+});</code></pre>
+        </div>
+
+        <!-- Cypress -->
+        <div class="code-panel" id="code-cypress">
+          <pre><code><span class="method">describe</span>(<span class="string">'Prueba E2E de Compra'</span>, () => {
+  <span class="method">it</span>(<span class="string">'debe poder buscar un artículo e ingresarlo al carro'</span>, () => {
+    cy.<span class="method">visit</span>(<span class="string">'https://ejemplo.com/tienda'</span>);
+    cy.<span class="method">get</span>(<span class="string">'.search-input'</span>).<span class="method">type</span>(<span class="string">'Teclado Mecánico'</span>);
+    cy.<span class="method">get</span>(<span class="string">'.search-btn'</span>).<span class="method">click</span>();
+    cy.<span class="method">contains</span>(<span class="string">'Añadir al Carrito'</span>).<span class="method">click</span>();
+    
+    cy.<span class="method">get</span>(<span class="string">'.cart-badge'</span>).<span class="method">should</span>(<span class="string">'have.text'</span>, <span class="string">'1'</span>);
+  });
+});</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">4. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Prueba tus conocimientos sobre el control de calidad y las arquitecturas de testing de software:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Si tu objetivo es programar pruebas extremo a extremo (E2E) con la capacidad de ejecutarlas en múltiples navegadores reales en paralelo de forma extremadamente rápida utilizando llamadas directas a las APIs del navegador (sin WebDrivers pesados), ¿qué herramienta moderna elegirías?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Selenium</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Mockito</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Playwright</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> ¿Cuál es la función principal de Mockito en la suite de pruebas de Java?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Abrir navegadores Chrome para hacer clic en el botón de guardar.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Permitir la creación de objetos simulados (Mocks) para aislar la clase bajo prueba de dependencias complejas de bases de datos o servicios externos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Formatear la salida HTML de los resultados de cobertura de código.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> Cypress presenta una diferencia de arquitectura fundamental respecto a Selenium y Playwright:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Requiere obligatoriamente de la instalación de Python en el servidor.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Se ejecuta y corre los scripts directamente dentro del mismo ciclo de ejecución del navegador, lo que le da acceso nativo al DOM.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>No soporta aserciones de interfaz (UI).</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> En el framework PyTest, ¿para qué se utilizan las "fixtures"?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>Para obligar a compilar a binario nativo el código de Python.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Para proporcionar un estado de prueba consistente, inyectando datos, objetos inicializados o recursos necesarios a los métodos de prueba de forma modular.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>Para ejecutar los tests exclusivamente en dispositivos móviles.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Testing Sheets Data & Logic
+       ========================================== */
+    const testData = {
+      junit: {
+        title: "JUnit",
+        meta: "Lenguaje: Java | Nivel: Pruebas Unitarias",
+        desc: "El framework estándar en el desarrollo Java. JUnit 5 (compuesto por JUnit Platform, Jupiter y Vintage) permite inyección de dependencias en pruebas, aserciones concurrentes assertAll y pruebas dinámicas en base a transmisiones de datos parametrizados.",
+        pros: ["Soporte de aserciones lambda y aserciones en bloque.", "Ejecución paralela integrada de alta velocidad.", "Integración nativa con Gradle, Maven y todos los IDEs de Java."],
+        cons: ["No está diseñado para pruebas visuales en navegador web.", "El levantamiento de contextos complejos (ej. base de datos en memoria H2) añade sobrecarga."],
+        visual: `
+          <div class="flow-step">Test Runner (JUnit engine)</div>
+          <div class="flow-arrow">▼ (Inyecta datos de prueba)</div>
+          <div class="flow-step highlight">Clase / Método de Negocio Java</div>
+          <div class="flow-arrow">▼ (Ejecuta assertEquals / assertAll)</div>
+          <div class="flow-step">Reporte: Aprobado / Rechazado</div>
+        `
+      },
+      mockito: {
+        title: "Mockito",
+        meta: "Lenguaje: Java | Nivel: Pruebas de Integración (Mocking)",
+        desc: "Librería especializada de mocking para Java. Permite la creación e inyección de objetos simulados (Mocks). Esto evita conectarse físicamente a base de datos, APIs de red o servicios de correo externos durante el proceso de prueba unitaria de la lógica comercial.",
+        pros: ["Sintaxis fluida y legible (when/thenReturn, verify).", "Aísla por completo la capa de lógica (Service) del exterior.", "Evita que un fallo de red o BD tire los tests lógicos."],
+        cons: ["Fácil de sobre-mockear, haciendo que el test pase pero el código real falle por fallos de integración real.", "Requiere cuidado con el tipado dinámico genérico."],
+        visual: `
+          <div class="flow-step">Clase Servicio (Bajo Test)</div>
+          <div class="flow-arrow">▼ (Llama a Repositorio/API)</div>
+          <div class="flow-step highlight">Mockito Mock Interceptor</div>
+          <div class="flow-arrow">▼ (Retorna datos enlatados / mockData)</div>
+          <div class="flow-step">Servicio recibe Datos (Sin red / Sin BD)</div>
+        `
+      },
+      jest: {
+        title: "Jest",
+        meta: "Lenguaje: JavaScript / TypeScript | Nivel: Unitario / Integración",
+        desc: "Creado por Meta. Es una suite completa que incluye el test runner, motor de aserciones, mocking nativo y soporte para Snapshot Testing (guardar instantáneas de HTML y validar que no cambien). Cuenta con un entorno JSDOM integrado para simular el navegador en consola sin abrir un navegador real.",
+        pros: ["Cero configuración necesaria para proyectos React.", "Sandboxing: simula el DOM (JSDOM) de forma veloz en terminal.", "Soporte de snapshot testing impecable."],
+        cons: ["JSDOM no representa con exactitud renderizados CSS o comportamientos específicos de navegadores móviles.", "Configuración con TypeScript a veces requiere Babel/ts-jest."],
+        visual: `
+          <div class="flow-step">Jest Runner (NodeJS context)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">JSDOM Sandbox (Virtual Browser DOM)</div>
+          <div class="flow-arrow">▼ (Compara Snapshots / HTML)</div>
+          <div class="flow-step">Consola de Resultados</div>
+        `
+      },
+      cypress: {
+        title: "Cypress",
+        meta: "Lenguaje: JavaScript / TypeScript | Nivel: Pruebas Extremo a Extremo (E2E)",
+        desc: "Cypress revolucionó las pruebas E2E. En lugar de comunicarse externamente por red con el navegador, Cypress se inyecta y ejecuta sus scripts directamente en el mismo hilo del navegador web. Provee un dashboard en tiempo real con grabaciones por pasos e inspección del DOM paso a paso.",
+        pros: ["Visión paso a paso (Time travel debugging) nativa en la UI.", "Esperas automáticas inteligentes (Auto-waiting) de elementos DOM.", "Fácil de aprender para programadores web."],
+        cons: ["Limitado a ejecutarse estrictamente dentro del navegador (difícil de interactuar con ventanas externas, múltiples pestañas o iframes complejos).", "No soporta ejecución paralela nativa a menos que uses servicios de pago o configs avanzadas."],
+        visual: `
+          <div class="flow-step">Cypress Test Runner App</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">Inyectado en ciclo de ejecución del Navegador</div>
+          <div class="flow-arrow">▼ (Control y aserción directa DOM)</div>
+          <div class="flow-step">Navegador Real (Chrome / Firefox)</div>
+        `
+      },
+      playwright: {
+        title: "Playwright",
+        meta: "Lenguaje: JS/TS, Python, C#, Java | Nivel: E2E y Componentes",
+        desc: "La herramienta moderna de Microsoft que compite con Cypress y Selenium. Controla navegadores headless o normales en paralelo utilizando directamente el protocolo de depuración del navegador (Chrome DevTools Protocol - CDP). Soporta multi-pestaña nativa y emulación móvil de red.",
+        pros: ["Rendimiento de velocidad y paralelización nativa excelente.", "Soporte nativo para múltiples pestañas, iframes y contextos de usuario aislados.", "Auto-espera robusta y generación de código automática (Codegen)."],
+        cons: ["No posee un panel visual interactivo tan integrado por defecto como Cypress (aunque tiene UI mode).", "Curva de aprendizaje inicial para configuraciones avanzadas."],
+        visual: `
+          <div class="flow-step">Playwright Node/C#/Python Client</div>
+          <div class="flow-arrow">▼ (Llamadas CDP directas de red)</div>
+          <div class="flow-step highlight">DevTools Debugging Protocol / WebDriver Bi-Di</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step">Headless Chromium / Webkit / Firefox</div>
+        `
+      },
+      selenium: {
+        title: "Selenium WebDriver",
+        meta: "Lenguaje: Multi-lenguaje (Java, C#, Python, JS, Ruby) | Nivel: E2E",
+        desc: "El abuelo y estándar histórico de la automatización web. Se comunica mediante la API estándar de WebDriver de W3C, enviando comandos HTTP a un driver específico de cada navegador (chromedriver, geckodriver) para que este controle el navegador físico.",
+        pros: ["Soporte de compatibilidad universal (funciona en cualquier navegador de los últimos 15 años).", "Ecosistema inmenso con integración a granjas de testing en la nube (SauceLabs, BrowserStack).", "Multi-lenguaje completo."],
+        cons: ["Lento en comparación con Playwright por el paso de traducción del protocolo de red WebDriver.", "Propenso a pruebas inestables (Flaky tests) al no tener auto-espera automática.", "Tooling de instalación pesado (Drivers de navegador manuales)."],
+        visual: `
+          <div class="flow-step">Código del Test (ej. Java WebDriver Client)</div>
+          <div class="flow-arrow">▼ (Petición HTTP WebDriver API)</div>
+          <div class="flow-step highlight">Browser Driver (ej. chromedriver.exe)</div>
+          <div class="flow-arrow">▼ (Comando nativo OS)</div>
+          <div class="flow-step">Instancia Física del Navegador</div>
+        `
+      },
+      pytest: {
+        title: "PyTest",
+        meta: "Lenguaje: Python | Nivel: Unitario / Integración",
+        desc: "El framework de pruebas más popular de Python. Su principal ventaja es que permite escribir aserciones de pruebas utilizando la palabra clave nativa de Python `assert` en lugar de AssertEquals. Ofrece inyección de dependencias modular mediante fixtures reutilizables.",
+        pros: ["Sintaxis limpia y libre de boilerplate (no requiere envolver en clases).", "fixtures altamente modulares y reutilizables.", "Ecosistema masivo de extensiones (pytest-mock, pytest-cov, pytest-xdist)."],
+        cons: ["La inyección mágica de fixtures por argumento puede complicar el rastreo de dependencias en proyectos gigantes.", "No tiene interfaz gráfica nativa incorporada de depuración."],
+        visual: `
+          <div class="flow-step">PyTest Test Runner Engine</div>
+          <div class="flow-arrow">▼ (Inyección mágica de Fixtures)</div>
+          <div class="flow-step highlight">Función de Prueba Python (con assert nativo)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step">Consola de Resultados</div>
+        `
+      }
+    };
+
+    function selectTest(key) {
+      // Toggle button active class
+      document.querySelectorAll('.test-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const targetBtn = Array.from(document.querySelectorAll('.test-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(key));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const data = testData[key];
+
+      // Update text sheet with quick fade animation
+      const sheet = document.getElementById('test-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      document.getElementById('test-title').innerText = data.title;
+      document.getElementById('test-meta').innerText = data.meta;
+      document.getElementById('test-desc').innerText = data.desc;
+
+      // Update pros
+      const prosContainer = document.getElementById('test-pros');
+      prosContainer.innerHTML = '';
+      data.pros.forEach(pro => {
+        const li = document.createElement('li');
+        li.innerText = pro;
+        prosContainer.appendChild(li);
+      });
+
+      // Update cons
+      const consContainer = document.getElementById('test-cons');
+      consContainer.innerHTML = '';
+      data.cons.forEach(con => {
+        const li = document.createElement('li');
+        li.innerText = con;
+        consContainer.appendChild(li);
+      });
+
+      // Update schematic visual
+      document.getElementById('test-visual').innerHTML = data.visual;
+    }
+
+    // Default load JUnit
+    selectTest('junit');
+
+    /* ==========================================
+       Code Tabs Switching Logic
+       ========================================== */
+    function switchTab(event, panelId) {
+      const container = event.target.closest('.code-comparator');
+      
+      container.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      container.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'c',
+      q2: 'b',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado las clasificaciones, arquitecturas y syntaxis de frameworks de testing de software.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Revisa el funcionamiento interno de Cypress y Playwright para consolidar el conocimiento.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te recomendamos revisar detenidamente las fichas y comparativas de los frameworks de testing.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>
