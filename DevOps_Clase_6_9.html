@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 6.9: Frameworks y Herramientas DevOps. Análisis e interactividad de Docker, Kubernetes, Docker Swarm, Jenkins, GitHub Actions, GitLab CI/CD, ArgoCD, Terraform y Ansible. Comparación de Dockerfile, pipelines YAML, IaC HCL y quiz.">
+  <title>Frameworks y Herramientas DevOps | Diseño y Arquitectura de Software</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6; /* Blue */
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981; /* Emerald */
+      --color-danger: #ef4444; /* Red */
+      --color-warning: #f59e0b; /* Amber */
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.07) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-accent);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--color-success);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-success), var(--color-primary));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Cards Grid Layout
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-success), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.25rem;
+    }
+
+    .icon-blue { background: rgba(59, 130, 246, 0.1); color: var(--color-primary); border: 1px solid rgba(59, 130, 246, 0.2); }
+    .icon-purple { background: rgba(139, 92, 246, 0.1); color: var(--color-secondary); border: 1px solid rgba(139, 92, 246, 0.2); }
+    .icon-cyan { background: rgba(6, 182, 212, 0.1); color: var(--color-accent); border: 1px solid rgba(6, 182, 212, 0.2); }
+
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+
+    .card-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Interactive DevOps Explorer
+       ========================================== */
+    .devops-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .dev-tabs {
+      display: grid;
+      grid-template-columns: repeat(9, 1fr);
+      gap: 6px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 1024px) {
+      .dev-tabs {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+
+    @media (max-width: 668px) {
+      .dev-tabs {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .dev-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .dev-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .dev-tab-btn.active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-success);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+    }
+
+    .dev-sheet {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 968px) {
+      .dev-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .dev-details-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .dev-sheet-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .dev-sheet-meta {
+      font-size: 0.9rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .dev-sheet-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .dev-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .pros-box h4 { color: var(--color-success); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .cons-box h4 { color: var(--color-danger); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .pros-box ul, .cons-box ul { list-style: none; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+    .pros-box ul li::before { content: '✓ '; color: var(--color-success); font-weight: bold; }
+    .cons-box ul li::before { content: '✗ '; color: var(--color-danger); font-weight: bold; }
+
+    /* Visual schematic container */
+    .dev-visual-container {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      gap: 10px;
+    }
+
+    /* CSS flowcharts for DevOps tools */
+    .flow-step {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: center;
+      width: 90%;
+    }
+
+    .flow-step.highlight {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+      font-weight: 600;
+    }
+
+    .flow-arrow {
+      color: var(--color-accent);
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+
+    /* ==========================================
+       Code Comparator (Tabs)
+       ========================================== */
+    .code-comparator {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-accent);
+      border-bottom-color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-panel.active {
+      display: block;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-success);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-success);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-success);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-success), var(--color-accent));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    /* ==========================================
+       Footer Style
+       ========================================== */
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding-top: 30px;
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      flex-wrap: wrap;
+      gap: 20px;
+    }
+
+    .accent-footer {
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 6.9: DevOps</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Clase 6.9</h2>
+        <span>DevOps</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. Ciclo DevOps</a></li>
+      <li><a href="#modulo2">2. Fichas de DevOps</a></li>
+      <li><a href="#modulo3">3. Comparativa de Código</a></li>
+      <li><a href="#quiz">4. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span>Módulo de Operaciones e Infraestructura</span>
+      </div>
+      <h1 class="hero-title">Herramientas y Frameworks DevOps</h1>
+      <p class="hero-subtitle">
+        Aprende el ciclo de vida de la infraestructura moderna. Domina contenedores, orquestadores, integración/despliegue continuo (CI/CD) e infraestructura como código (IaC).
+      </p>
+    </header>
+
+    <!-- Modulo 1: Ciclo DevOps -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Ciclo de Vida DevOps & Categorías</h2>
+      <p class="intro-paragraph">
+        El paradigma <span class="highlight">DevOps</span> unifica el desarrollo de software (Dev) y las operaciones de sistemas (Ops). Su principal objetivo es automatizar cada fase del ciclo de vida para realizar despliegues rápidos, seguros y predecibles. Las herramientas se dividen en tres áreas críticas:
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon icon-blue">📦</div>
+          <h3 class="card-title">Contenedores y Orquestación</h3>
+          <p class="card-content">
+            Aíslan las aplicaciones a nivel de sistema operativo eliminando el clásico "en mi máquina funciona" (Docker) y coordinan dinámicamente miles de contenedores distribuidos en clusters de servidores (Kubernetes, Swarm).
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-purple">🔄</div>
+          <h3 class="card-title">CI/CD & GitOps</h3>
+          <p class="card-content">
+            Automatizan las fases de compilación, ejecución de tests y despliegue físico ante eventos del código (Jenkins, GitHub Actions, GitLab CI). Con <strong>GitOps</strong> (ArgoCD), el repositorio Git es la única fuente de verdad del estado de la infraestructura.
+          </p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-cyan">📜</div>
+          <h3 class="card-title">IaC & Configuración</h3>
+          <p class="card-content">
+            Permiten definir de forma declarativa mediante archivos de código toda la infraestructura cloud (Terraform) y configurar en bloque las dependencias y paquetes de cientos de servidores remotos sin agentes (Ansible).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Selector de Fichas -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Catálogo e Interactividad DevOps</h2>
+      <p class="intro-paragraph">
+        Selecciona cada botón para explorar el tipo de herramienta, su filosofía operativa, sus pros/contras y su diagrama estructural:
+      </p>
+
+      <div class="devops-explorer">
+        <!-- Tabs selectors -->
+        <div class="dev-tabs">
+          <button class="dev-tab-btn active" onclick="selectDev('docker')">Docker</button>
+          <button class="dev-tab-btn" onclick="selectDev('k8s')">Kubernetes</button>
+          <button class="dev-tab-btn" onclick="selectDev('swarm')">Docker Swarm</button>
+          <button class="dev-tab-btn" onclick="selectDev('jenkins')">Jenkins</button>
+          <button class="dev-tab-btn" onclick="selectDev('gha')">GitHub Actions</button>
+          <button class="dev-tab-btn" onclick="selectDev('gitlab')">GitLab CI/CD</button>
+          <button class="dev-tab-btn" onclick="selectDev('argocd')">ArgoCD</button>
+          <button class="dev-tab-btn" onclick="selectDev('terraform')">Terraform</button>
+          <button class="dev-tab-btn" onclick="selectDev('ansible')">Ansible</button>
+        </div>
+
+        <!-- Sheet Panel -->
+        <div class="dev-sheet" id="dev-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="dev-details-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <h4 class="dev-sheet-title" id="dev-title">Docker</h4>
+              <span class="dev-sheet-badge" id="dev-badge">Virtualización OS</span>
+            </div>
+            <p class="dev-sheet-desc" id="dev-desc">
+              Empaqueta la aplicación, dependencias, variables y librerías en un único contenedor portátil e independiente. Utiliza características de aislamiento del Kernel de Linux (namespaces y cgroups) para ejecutar procesos de forma aislada sin levantar un hipervisor (máquina virtual pesada).
+            </p>
+            <div class="dev-pros-cons">
+              <div class="pros-box">
+                <h4>Fortalezas (Pros)</h4>
+                <ul id="dev-pros">
+                  <li>Arranque de contenedores en milisegundos.</li>
+                  <li>Inmutabilidad: la misma imagen corre en local y producción.</li>
+                  <li>Eficiente en consumo de recursos de CPU y RAM.</li>
+                </ul>
+              </div>
+              <div class="cons-box">
+                <h4>Debilidades (Cons)</h4>
+                <ul id="dev-cons">
+                  <li>Menor aislamiento de seguridad comparado con máquinas virtuales puras.</li>
+                  <li>Gestión de almacenamiento persistente (Volúmenes) algo compleja.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:10px;">Esquema de Flujo Operativo:</h5>
+            <div class="dev-visual-container" id="dev-visual">
+              <!-- Cargado por JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Comparador de Código -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Comparativa de Código de Configuración</h2>
+      <p class="intro-paragraph">
+        Compara la sintaxis exacta necesaria para definir la construcción de un contenedor, configurar automatizaciones de integración y desplegar infraestructura:
+      </p>
+
+      <div class="code-comparator">
+        <div class="code-tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'code-dockerfile')">Dockerfile (Empaquetado)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-gha')">GitHub Actions (YAML)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-terraform')">Terraform (IaC HCL)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-ansible')">Ansible (Playbook YAML)</button>
+        </div>
+
+        <!-- Dockerfile -->
+        <div class="code-panel active" id="code-dockerfile">
+          <pre><code><span class="comment"># Multi-stage Dockerfile para optimizar espacio</span>
+<span class="keyword">FROM</span> node:18-alpine <span class="keyword">AS</span> builder
+<span class="keyword">WORKDIR</span> /app
+<span class="keyword">COPY</span> package*.json ./
+<span class="keyword">RUN</span> npm ci
+<span class="keyword">COPY</span> . .
+<span class="keyword">RUN</span> npm run build
+
+<span class="keyword">FROM</span> node:18-alpine <span class="keyword">AS</span> runner
+<span class="keyword">WORKDIR</span> /app
+<span class="keyword">COPY</span> --from=builder /app/dist ./dist
+<span class="keyword">COPY</span> --from=builder /app/node_modules ./node_modules
+<span class="keyword">EXPOSE</span> 3000
+<span class="keyword">CMD</span> ["node", "dist/main.js"]</code></pre>
+        </div>
+
+        <!-- GitHub Actions -->
+        <div class="code-panel" id="code-gha">
+          <pre><code><span class="keyword">name</span>: CI/CD Pipeline
+<span class="keyword">on</span>:
+  <span class="keyword">push</span>:
+    <span class="keyword">branches</span>: [ main ]
+
+<span class="keyword">jobs</span>:
+  <span class="keyword">build-and-test</span>:
+    <span class="keyword">runs-on</span>: ubuntu-latest
+    <span class="keyword">steps</span>:
+      - <span class="keyword">name</span>: Checkout code
+        <span class="keyword">uses</span>: actions/checkout@v3
+
+      - <span class="keyword">name</span>: Install NodeJS
+        <span class="keyword">uses</span>: actions/setup-node@v3
+        <span class="keyword">with</span>:
+          <span class="keyword">node-version</span>: 18
+
+      - <span class="keyword">run</span>: npm ci
+      - <span class="keyword">run</span>: npm test</code></pre>
+        </div>
+
+        <!-- Terraform -->
+        <div class="code-panel" id="code-terraform">
+          <pre><code><span class="comment"># Configuración de Servidor AWS en Terraform</span>
+<span class="keyword">provider</span> <span class="string">"aws"</span> {
+  region = <span class="string">"us-east-1"</span>
+}
+
+<span class="keyword">resource</span> <span class="string">"aws_instance"</span> <span class="string">"web_server"</span> {
+  ami           = <span class="string">"ami-0c55b159cbfafe1f0"</span>
+  instance_type = <span class="string">"t2.micro"</span>
+
+  tags = {
+    Name = <span class="string">"ServidorClaseDevOps"</span>
+  }
+}</code></pre>
+        </div>
+
+        <!-- Ansible -->
+        <div class="code-panel" id="code-ansible">
+          <pre><code><span class="comment"># Playbook para configurar Nginx</span>
+- <span class="keyword">name</span>: Configurar servidor web remoto
+  <span class="keyword">hosts</span>: servidores_web
+  <span class="keyword">become</span>: yes
+  <span class="keyword">tasks</span>:
+    - <span class="keyword">name</span>: Asegurar que Nginx esté instalado
+      <span class="keyword">apt</span>:
+        name: nginx
+        state: latest
+        update_cache: yes
+
+    - <span class="keyword">name</span>: Asegurar que Nginx esté corriendo
+      <span class="keyword">service</span>:
+        name: nginx
+        state: started
+        enabled: yes</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">4. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Evalúa tus conocimientos sobre los flujos e infraestructura DevOps modernos:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Si tu objetivo es implementar despliegue continuo en Kubernetes, asegurando que el clúster se sincronice automáticamente con el estado declarado en archivos YAML en un repositorio Git, ¿qué herramienta de GitOps elegirías?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Jenkins</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Ansible</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>ArgoCD</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> ¿Cuál es la principal ventaja arquitectónica de Terraform como herramienta de Infraestructura como Código (IaC)?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Utiliza un enfoque puramente imperativo para configurar el sistema operativo de servidores individuales.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Permite definir infraestructura en la nube de manera declarativa y gestionar el estado real de los recursos en un archivo de estado (state file).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Requiere la instalación obligatoria de agentes pesados en los servidores aprovisionados.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> ¿Cuál es la diferencia operativa fundamental entre Docker Swarm y Kubernetes?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Docker Swarm es un orquestador altamente complejo diseñado para grandes nubes híbridas, mientras que Kubernetes solo corre en local.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Docker Swarm viene integrado nativamente en la CLI de Docker y es simple y liviano; Kubernetes es altamente escalable y modular, ofreciendo funciones avanzadas de red, scheduling y almacenamiento.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Swarm requiere de un clúster Kubernetes para funcionar.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> Ansible se caracteriza en la administración de configuración por ser:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>Basado en agentes (Agent-based), requiriendo un software Daemon corriendo en cada nodo administrado.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Sin agentes (Agentless), ejecutando comandos directamente a través de conexiones SSH estándar utilizando scripts de Python en caliente.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>Exclusivo para la compilación de binarios Java en servidores Windows.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive DevOps Sheets Data & Logic
+       ========================================== */
+    const devData = {
+      docker: {
+        title: "Docker",
+        badge: "Virtualización OS",
+        desc: "Empaqueta la aplicación, dependencias, variables y librerías en un único contenedor portátil e independiente. Utiliza características de aislamiento del Kernel de Linux (namespaces y cgroups) para ejecutar procesos de forma aislada sin levantar un hipervisor (máquina virtual pesada).",
+        pros: ["Arranque de contenedores en milisegundos.", "Inmutabilidad: la misma imagen corre en local y producción.", "Eficiente en consumo de recursos de CPU y RAM."],
+        cons: ["Menor aislamiento de seguridad comparado con máquinas virtuales puras.", "Gestión de almacenamiento persistente (Volúmenes) algo compleja."],
+        visual: `
+          <div class="flow-step">Código de App + Dockerfile</div>
+          <div class="flow-arrow">▼ (Build)</div>
+          <div class="flow-step highlight">Imagen de Docker (Capas Inmutables)</div>
+          <div class="flow-arrow">▼ (Run)</div>
+          <div class="flow-step">Contenedor en ejecución (Proceso Aislado)</div>
+        `
+      },
+      k8s: {
+        title: "Kubernetes (K8s)",
+        meta: "Categoría: Orquestación a Gran Escala",
+        desc: "Sistema open-source originalmente creado por Google para automatizar el despliegue, escalamiento horizontal y manejo de contenedores en clusters de servidores. Proporciona auto-recuperación (self-healing), descubrimiento de servicios, balanceo de carga y lanzamientos declarativos (rollouts).",
+        pros: ["Escalabilidad horizontal masiva automatizada.", "Alta disponibilidad nativa y tolerancia a fallos.", "Ecosistema e integraciones cloud masivos."],
+        cons: ["Extremadamente complejo de instalar, administrar y mantener (Steep learning curve).", "Sobrecarga de recursos para clusters pequeños."],
+        visual: `
+          <div class="flow-step">Archivo YAML del Despliegue</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">Kubernetes Control Plane (Master)</div>
+          <div class="flow-arrow">▼ (Distribución a Nodos)</div>
+          <div class="flow-step">Worker Nodes (Pods en ejecución)</div>
+        `
+      },
+      swarm: {
+        title: "Docker Swarm",
+        meta: "Categoría: Orquestación Integrada",
+        desc: "La herramienta de orquestación nativa integrada directamente en la CLI de Docker. Permite agrupar múltiples hosts de Docker en un único cluster virtual y desplegar pilas de aplicaciones (Stacks) de manera declarativa con baja sobrecarga de configuración.",
+        pros: ["Configuración inmediata (Cero dependencias externas al motor Docker).", "Fácil de aprender para equipos con base en Docker Compose.", "Ideal para clusters medianos y despliegues sencillos."],
+        cons: ["Limites de flexibilidad y modularidad comparado con Kubernetes.", "Menor comunidad y soporte corporativo en la actualidad."],
+        visual: `
+          <div class="flow-step">Docker Compose / Stack YAML</div>
+          <div class="flow-arrow">▼ (Swarm Init)</div>
+          <div class="flow-step highlight">Swarm Manager Node</div>
+          <div class="flow-arrow">▼ (Distribuye contenedores)</div>
+          <div class="flow-step">Worker Nodes (Replica Containers)</div>
+        `
+      },
+      jenkins: {
+        title: "Jenkins",
+        meta: "Categoría: CI/CD (Automatización Tradicional)",
+        desc: "El servidor de automatización líder clásico y extensible basado en plugins. Permite definir pipelines como código mediante archivos Jenkinsfile configurados con sintaxis declarativa o imperativa basada en Apache Groovy.",
+        pros: ["Extremadamente personalizable con miles de plugins disponibles.", "Maduro y ampliamente utilizado en la industria corporativa.", "Independencia de proveedores cloud."],
+        cons: ["Requiere de mantenimiento constante del servidor y parches de plugins (Plugin Hell).", "Interfaz gráfica antigua y configuración laboriosa."],
+        visual: `
+          <div class="flow-step">Código en Repositorio Git</div>
+          <div class="flow-arrow">▼ (Webhook)</div>
+          <div class="flow-step highlight">Jenkins Master (Orquesta)</div>
+          <div class="flow-arrow">▼ (Asigna Tareas)</div>
+          <div class="flow-step">Jenkins Agents (Ejecutan Pipeline)</div>
+        `
+      },
+      gha: {
+        title: "GitHub Actions",
+        meta: "Categoría: CI/CD (SaaS Integrado)",
+        desc: "El motor de automatización e integración continua integrado de forma nativa en la plataforma de GitHub. Permite escribir pipelines definidos en archivos YAML que se ejecutan directamente en servidores virtuales de GitHub ante eventos como Push o Pull Request.",
+        pros: ["Integración impecable con el repositorio Git sin servidores que mantener.", "Ecosistema espectacular de Actions predefinidas reutilizables.", "Configuración muy simple e inmediata."],
+        cons: ["Límite de minutos gratuitos para repositorios privados.", "Dependencia directa de la plataforma de GitHub."],
+        visual: `
+          <div class="flow-step">Evento de Git (Push / PR)</div>
+          <div class="flow-arrow">▼ (Triggers workflow)</div>
+          <div class="flow-step highlight">GitHub Actions Runner (Virtual VM)</div>
+          <div class="flow-arrow">▼ (Pasos YAML)</div>
+          <div class="flow-step">Build / Test / Deploy Output</div>
+        `
+      },
+      gitlab: {
+        title: "GitLab CI/CD",
+        meta: "Categoría: CI/CD (SaaS/Self-hosted Integrado)",
+        desc: "Herramienta integrada nativamente en GitLab que destaca por estructurar pipelines mediante un archivo `.gitlab-ci.yml`. Utiliza agentes ligeros llamados GitLab Runners que pueden instalarse en cualquier infraestructura física o en contenedores.",
+        pros: ["Control total sobre los agentes de ejecución (Runners).", "Excelente trazabilidad desde el commit hasta el entorno de producción.", "Seguridad robusta integrada."],
+        cons: ["Sintaxis de YAML extensa y compleja para pipelines ramificados.", "Requiere configurar runners propios si deseas despliegues rápidos."],
+        visual: `
+          <div class="flow-step">Cambio de Código (.gitlab-ci.yml)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">GitLab CI Coordinator</div>
+          <div class="flow-arrow">▼ (Ejecuta Jobs)</div>
+          <div class="flow-step">GitLab Runner Agent (Docker Executor)</div>
+        `
+      },
+      argocd: {
+        title: "ArgoCD",
+        meta: "Categoría: Continuous Delivery / GitOps",
+        desc: "Herramienta declarativa de entrega continua diseñada específicamente para Kubernetes bajo la filosofía GitOps. ArgoCD monitorea constantemente un repositorio de código Git (con manifiestos YAML) y asegura que el estado real del clúster de K8s coincida exactamente con lo declarado en Git.",
+        pros: ["Git es la única fuente de verdad (Inmune a modificaciones manuales en clúster).", "Fácil control de despliegues y rollback instantáneo en la UI.", "Sincronización automática de estado declarada."],
+        cons: ["Exclusivo del ecosistema de Kubernetes.", "No maneja la fase de compilación (CI), solo el despliegue (CD)."],
+        visual: `
+          <div class="flow-step">Configuración YAML en Git</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">ArgoCD Controller (Loop de Conciliación)</div>
+          <div class="flow-arrow">▼ (Sincroniza Estado)</div>
+          <div class="flow-step">Clúster Kubernetes (Estado Coincidente)</div>
+        `
+      },
+      terraform: {
+        title: "Terraform",
+        meta: "Categoría: Infraestructura como Código (IaC)",
+        desc: "Herramienta que permite definir de forma declarativa mediante lenguaje HCL (HashiCorp Configuration Language) la infraestructura en la nube (servidores, redes, DNS). Mapea los recursos creados en un archivo de estado (state file) para rastrear los cambios.",
+        pros: ["Multi-proveedor (AWS, Azure, GCP, Kubernetes).", "Muestra un plan de cambios antes de aplicarlo (Terraform Plan).", "Gestión declarativa del estado de la infraestructura."],
+        cons: ["Peligro de corrupción del archivo de estado si múltiples usuarios modifican sin bloqueo.", "Curva de aprendizaje del lenguaje HCL."],
+        visual: `
+          <div class="flow-step">Código Declarativo HCL (.tf)</div>
+          <div class="flow-arrow">▼ (terraform plan)</div>
+          <div class="flow-step highlight">Terraform State File (Mapeo Cloud)</div>
+          <div class="flow-arrow">▼ (terraform apply)</div>
+          <div class="flow-step">Infraestructura Cloud creada (VMs, VPCs)</div>
+        `
+      },
+      ansible: {
+        title: "Ansible",
+        meta: "Categoría: Aprovisionamiento y Configuración",
+        desc: "Herramienta que automatiza la configuración de servidores y despliegue de aplicaciones mediante playbooks escritos en YAML. Se caracteriza por ser agentless (no requiere instalar software en los servidores destino), ejecutando scripts vía SSH.",
+        pros: ["Agentless: solo requiere SSH en los servidores destino.", "YAML simple e intuitivo para declarar tareas secuenciales.", "Gran velocidad de instalación."],
+        cons: ["Menor rendimiento para grandes flujos paralelos comparado con arquitecturas basadas en agentes.", "Menor control sobre la desviación del estado (State drift)."],
+        visual: `
+          <div class="flow-step">Playbook de Tareas (YAML)</div>
+          <div class="flow-arrow">▼ (Ejecución local)</div>
+          <div class="flow-step highlight">Conexión SSH (Agentless)</div>
+          <div class="flow-arrow">▼ (Ejecuta módulos Python)</div>
+          <div class="flow-step">Servidores Remotos configurados</div>
+        `
+      }
+    };
+
+    function selectDev(key) {
+      // Toggle button active class
+      document.querySelectorAll('.dev-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const targetBtn = Array.from(document.querySelectorAll('.dev-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(key));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const data = devData[key];
+
+      // Update text sheet with quick fade animation
+      const sheet = document.getElementById('dev-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      document.getElementById('dev-title').innerText = data.title;
+      document.getElementById('dev-badge').innerText = data.meta ? data.meta : data.badge;
+      document.getElementById('dev-desc').innerText = data.desc;
+
+      // Update pros
+      const prosContainer = document.getElementById('dev-pros');
+      prosContainer.innerHTML = '';
+      data.pros.forEach(pro => {
+        const li = document.createElement('li');
+        li.innerText = pro;
+        prosContainer.appendChild(li);
+      });
+
+      // Update cons
+      const consContainer = document.getElementById('dev-cons');
+      consContainer.innerHTML = '';
+      data.cons.forEach(con => {
+        const li = document.createElement('li');
+        li.innerText = con;
+        consContainer.appendChild(li);
+      });
+
+      // Update schematic visual
+      document.getElementById('dev-visual').innerHTML = data.visual;
+    }
+
+    // Default load Docker
+    selectDev('docker');
+
+    /* ==========================================
+       Code Tabs Switching Logic
+       ========================================== */
+    function switchTab(event, panelId) {
+      const container = event.target.closest('.code-comparator');
+      
+      container.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      container.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'c',
+      q2: 'b',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado las clasificaciones, arquitecturas y flujos de DevOps.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Revisa el funcionamiento interno de GitOps e Infraestructura como Código (IaC).";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te recomendamos revisar detenidamente las diferencias técnicas de las herramientas DevOps.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>
