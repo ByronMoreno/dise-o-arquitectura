@@ -1,0 +1,2531 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<quiz>
+
+  <!-- question: 0  -->
+  <question type="category">
+    <category>
+      <text>$course$/top/Aporte II 2026-1</text>
+    </category>
+    <info format="html">
+      <text><![CDATA[Categoría de preguntas para el Examen Aporte II 2026-1]]></text>
+    </info>
+    <idnumber></idnumber>
+  </question>
+
+  <!-- question: 1  -->
+  <question type="multichoice">
+    <name>
+      <text>P1</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En el contexto de un Sistema de Matrículas en UML, un estudiante registra sus materias. Durante el análisis se determina que 'Validar Prerrequisitos' es obligatorio para completar la transacción, mientras que 'Realizar Pago en Línea' es un paso optativo. ¿Cuál es la representación correcta de estas relaciones?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA['Matricular Asignatura' tiene una relación &lt;&lt;include&gt;&gt; hacia 'Validar Prerrequisitos', y una relación &lt;&lt;extend&gt;&gt; desde 'Realizar Pago en Línea'.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA['Matricular Asignatura' tiene una relación &lt;&lt;extend&gt;&gt; hacia 'Validar Prerrequisitos', y una relación &lt;&lt;include&gt;&gt; hacia 'Realizar Pago en Línea'.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA['Validar Prerrequisitos' tiene una relación &lt;&lt;include&gt;&gt; hacia 'Matricular Asignatura', mientras que 'Realizar Pago en Línea' la asocia directamente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Todas las funcionalidades son casos de uso independientes asociados únicamente al actor Estudiante mediante líneas continuas de asociación.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 2  -->
+  <question type="multichoice">
+    <name>
+      <text>P2</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un estudiante intenta matricularse fuera de las fechas oficiales del calendario académico. Analizando las reglas de negocio, ¿cómo debe modelarse la intervención del Administrador en el diagrama de casos de uso de UML?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[El Administrador se asocia al caso de uso 'Autorizar Matrícula Extraordinaria', el cual extiende (&lt;&lt;extend&gt;&gt;) opcionalmente el flujo de 'Matricular Asignatura' bajo esa condición.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El Administrador debe asociarse directamente al caso de uso 'Matricular Asignatura' como actor principal del proceso.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El caso de uso 'Matricular Asignatura' incluye obligatoriamente (&lt;&lt;include&gt;&gt;) al caso de uso 'Autorizar Matrícula Extraordinaria' en todas las ejecuciones del sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El Administrador hereda la asociación del Estudiante y reemplaza sus permisos dentro del límite del sistema de matrículas.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 3  -->
+  <question type="truefalse">
+    <name>
+      <text>P3</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En un diagrama de clases UML, una relación de composición implica que el ciclo de vida del objeto parte está ligado estrictamente al del objeto todo (si el todo se destruye, la parte también); mientras que en la agregación, la parte puede existir de forma independiente.]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="100" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 4  -->
+  <question type="multichoice">
+    <name>
+      <text>P4</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué diagrama UML usarías para mostrar específicamente el orden temporal y la interacción de mensajes entre un Controller, un Service y un Repository al procesar una solicitud en el sistema?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Diagrama de Secuencia]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Diagrama de Clases]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Diagrama de Casos de Uso]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Diagrama de Componentes]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 5  -->
+  <question type="multichoice">
+    <name>
+      <text>P5</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En el modelado UML de casos de uso, ¿cuál es la definición correcta y analítica del concept de 'Actor'?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Representa un rol que juega una entidad externa (humano, dispositivo de hardware u otro sistema de software) que interactúa directamente con el sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Representa estrictamente a una persona física que interactúa mediante una interfaz de usuario visual.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Representa una clase o componente interno del sistema encargado de ejecutar las reglas de negocio principales.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Es un término exclusivo para designar al desarrollador que implementa el código de los casos de uso.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 6  -->
+  <question type="multichoice">
+    <name>
+      <text>P6</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En el modelo de vistas 4+1 de Kruchten, un DevOps/SRE necesita definir en qué contenedores Docker y con qué IPs se desplegará cada microservicio. ¿A qué vista corresponde esta preocupación y qué diagrama UML la representa?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Vista Física — Diagrama de Despliegue]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Vista Lógica — Diagrama de Clases]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Vista de Desarrollo — Diagrama de Paquetes]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Vista de Procesos — Diagrama de Secuencia]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 7  -->
+  <question type="multichoice">
+    <name>
+      <text>P7</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es la función principal de la 'Vista Lógica' dentro del modelo de vistas 4+1 de Philippe Kruchten?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Representar las funciones y la estructura del sistema desde el punto de vista del usuario final y diseñadores, utilizando diagramas de clases, paquetes y objetos.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Describir la topología de red, servidores físicos y máquinas virtuales donde se ejecutará el código.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Modelar la concurrencia, hilos de ejecución, rendimiento y tolerancia a fallos del sistema bajo carga masiva.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Detallar la organización de los módulos de software en el entorno de desarrollo y los repositorios de código.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 8  -->
+  <question type="truefalse">
+    <name>
+      <text>P8</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una clase llamada GestionUsuarios que registra usuarios en base de datos, envía correos de bienvenida, genera reportes PDF y realiza copias de seguridad de las tablas correspondientes cumple estrictamente con el Principio de Responsabilidad Única (SRP).]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="0" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 9  -->
+  <question type="multichoice">
+    <name>
+      <text>P9</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un arquitecto detecta que una clase de servicio inicializa directamente un objeto concreto usando 'new MySQLDatabase()' en lugar de recibir una abstracción. ¿Qué principio SOLID se está violando y cuál es la corrección correspondiente?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Principio de Inversión de Dependencias (DIP) — se debe inyectar una interfaz abstracta (ej. Database) a través del constructor.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Principio de Responsabilidad Única (SRP) — se debe dividir la clase de servicio en dos clases independientes.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Principio de Sustitución de Liskov (LSP) — se debe usar herencia para extender la funcionalidad de la base de datos.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Principio de Segregación de Interfaces (ISP) — se debe definir una interfaz con un único método de conexión.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 10  -->
+  <question type="truefalse">
+    <name>
+      <text>P10</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Si para agregar un nuevo método de pago a un e-commerce se requiere modificar directamente el código fuente del método procesarPago() de la clase principal, en lugar de extenderla, se está respetando el Principio Abierto/Cerrado (OCP).]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="0" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 11  -->
+  <question type="multichoice">
+    <name>
+      <text>P11</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es la implicación principal del Principio de Sustitución de Liskov (LSP) en la jerarquía de herencia de clases?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Cualquier objeto de una subclase debe poder reemplazar a un objeto de su superclase sin alterar la corrección ni el comportamiento esperado del programa.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Las subclases deben implementar obligatoriamente todos los métodos de todas las interfaces del sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El dominio de la aplicación debe depender de clases de bajo nivel para garantizar la herencia múltiple.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Las clases deben cerrarse para la modificación pero abrirse para la herencia estricta.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 12  -->
+  <question type="multichoice">
+    <name>
+      <text>P12</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un desarrollador define la interfaz 'OperacionesBaseDatos' con métodos para crear, leer, actualizar, borrar, respaldar base de datos y migrar tablas. Un cliente que solo lee datos se ve obligado a implementar todos los métodos. ¿Qué principio SOLID se viola?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Principio de Segregación de Interfaces (ISP)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Principio de Responsabilidad Única (SRP)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Principio Abierto/Cerrado (OCP)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Principio de Inversión de Dependencias (DIP)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 13  -->
+  <question type="multichoice">
+    <name>
+      <text>P13</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es el objetivo principal al estructurar una aplicación bajo el patrón de Arquitectura Hexagonal (Puertos y Adaptadores)?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Aislar y desacoplar la lógica de negocio (núcleo o dominio) de los frameworks, bases de datos y tecnologías externas.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Obligar a que la lógica del negocio dependa directamente de la base de datos para optimizar las consultas SQL.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Facilitar el uso de interfaces gráficas nativas en aplicaciones móviles multiplataforma.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Eliminar por completo el uso de interfaces y abstracciones para acelerar el tiempo de desarrollo.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 14  -->
+  <question type="multichoice">
+    <name>
+      <text>P14</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una empresa tiene un sistema en Arquitectura Hexagonal y decide migrar su base de datos de PostgreSQL a MongoDB. Según la regla de dependencia del patrón, ¿qué componente(s) deben modificarse?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Únicamente el adaptador de salida que implementa la interfaz (puerto) de persistencia correspondiente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El dominio y los puertos de entrada de la aplicación.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Los puertos de entrada y el controlador REST.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Toda la aplicación, incluyendo las entidades de negocio y los casos de uso.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 15  -->
+  <question type="multichoice">
+    <name>
+      <text>P15</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Se requiere exponer la misma lógica de negocio a través de una API REST HTTP y de un consumidor de colas de mensajería (RabbitMQ). En una Arquitectura Hexagonal, ¿qué cambios arquitectónicos son necesarios?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Se agregan nuevos Adaptadores de Entrada independientes; el núcleo de negocio (dominio y casos de uso) permanece intacto.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Se requiere cambiar las reglas del dominio y crear nuevos casos de uso para cada tecnología de entrada.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Se deben modificar los puertos de salida de la aplicación y la tecnología de persistencia.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Se debe reescribir toda la aplicación debido al cambio en la procedencia de los datos.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 16  -->
+  <question type="multichoice">
+    <name>
+      <text>P16</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál de los siguientes elementos pertenece estrictamente al núcleo interno (dominio/aplicación) de una Arquitectura Hexagonal?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Casos de uso y entidades de negocio]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Controladores HTTP (REST)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Drivers SQL y ORM de persistencia]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Clientes HTTP de integración con servicios externos]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 17  -->
+  <question type="multichoice">
+    <name>
+      <text>P17</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En la Arquitectura Hexagonal, ¿cuál es la función analítica principal de los 'puertos' (Ports)?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Definir interfaces o contratos abstractos que declaran cómo la aplicación interactúa con el mundo exterior (tanto de entrada como de salida).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Implementar las conexiones físicas a las APIs externas y bases de datos relacionales.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Reemplazar por completo a las entidades de negocio y a los modelos de dominio.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Centralizar los archivos de configuración de los frameworks web utilizados por el backend.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 18  -->
+  <question type="multichoice">
+    <name>
+      <text>P18</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuáles son las tres capas clásicas de la arquitectura en capas y cuál es su principal objetivo de diseño?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Presentación, Dominio/Negocio e Infraestructura/Datos, con el fin de separar los componentes del sistema en niveles con responsabilidades específicas.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Cliente, Servidor y Base de Datos, con el fin de optimizar el tiempo de compilación y evitar el uso de APIs.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Modelo, Vista y Controlador, con el fin de eliminar la necesidad de contar con bases de datos relacionales.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Frontend, Backend y DevOps, con el fin de desplegar cada componente en la nube de forma monolítica.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 19  -->
+  <question type="truefalse">
+    <name>
+      <text>P19</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En una Arquitectura en Capas estricta, cada capa tiene permitido comunicarse libremente e invocar componentes de cualquier otra capa del sistema, incluyendo capas superiores.]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="0" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 20  -->
+  <question type="multichoice">
+    <name>
+      <text>P20</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es el compromiso (trade-off) principal al seleccionar una arquitectura basada en microservicios en comparación con una monolítica?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Los microservicios ofrecen mayor escalabilidad independiente y tolerancia a fallos a costa de un aumento significativo en la complejidad de red, comunicación y despliegue.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Los microservicios reducen la complejidad operativa y facilitan el despliegue inicial del software en producción.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La arquitectura monolítica no permite aplicar la separación de responsabilidades ni organizar el código por capas.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La arquitectura de microservicios elimina la necesidad de contar con mecanismos de seguridad como autenticación y autorización.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 21  -->
+  <question type="multichoice">
+    <name>
+      <text>P21</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es la diferencia fundamental entre un monolito tradicional y un monolito modular?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[El monolito modular divide el código en módulos con límites lógicos claros y alta cohesión interna, pero todos los módulos se ejecutan en un único proceso desplegado conjuntamente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El monolito modular requiere que cada módulo se compile y despliegue como un proceso de red independiente en servidores diferentes.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El monolito tradicional no permite la conexión a bases de datos relacionales.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El monolito modular elimina por completo el uso de controladores e interfaces de usuario.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 22  -->
+  <question type="multichoice">
+    <name>
+      <text>P22</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Al analizar el caso histórico de Amazon, ¿cuál fue la principal justificación organizativa para realizar su transición de una arquitectura monolítica a microservicios?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[La necesidad de escalar y descentralizar el trabajo de los equipos de desarrollo para evitar cuellos de botella en despliegues coordinados, promoviendo autonomía y velocidad.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La necesidad técnica de optimizar el consumo de memoria RAM de la JVM en un 95% utilizando compilación nativa.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La imposibilidad de ejecutar transacciones relacionales complejas dentro de un monolito clásico.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La decisión de unificar todas las interfaces móviles en una sola tecnología basada en WebView.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 23  -->
+  <question type="multichoice">
+    <name>
+      <text>P23</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Una aplicación de comercio electrónico debe notificar a Inventario, Facturación y Envíos cuando se crea un pedido. Deciden aplicar una Arquitectura Orientada a Eventos (Event-Driven). ¿Cuál es la mayor ventaja analítica de esta decisión?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Desacoplamiento total: el módulo de Pedidos solo publica el evento 'Pedido Creado' y no necesita conocer qué otros módulos existen ni cómo procesan la información.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Garantía absoluta de consistencia transaccional inmediata (ACID) en todos los módulos distribuidos.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Eliminación de la necesidad de documentar la estructura de los datos del sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Reducción automática de los tiempos de carga en dispositivos móviles cliente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 24  -->
+  <question type="multichoice">
+    <name>
+      <text>P24</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Si un proceso principal en el backend necesita ejecutar una tarea secundaria cuyo resultado no es indispensable para responder de inmediato al usuario (ej. enviar un email), ¿qué enfoque de diseño reduce el tiempo de respuesta inicial?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Utilizar procesamiento asíncrono publicando un evento para la tarea secundaria, permitiendo que la respuesta al usuario retorne de inmediato.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Ejecutar ambas tareas dentro de la misma transacción síncrona para asegurar que no fallen.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Incrementar el tiempo de espera (timeout) de la solicitud del cliente para permitir que todo finalice.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Llamar secuencialmente a los servicios del backend por protocolo HTTP síncrono.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 25  -->
+  <question type="multichoice">
+    <name>
+      <text>P25</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un sistema académico necesita integrar un módulo nuevo de matrículas con un sistema contable heredado en COBOL de los años 90 que utiliza contratos XML rígidos. ¿Qué estilo arquitectónico es el más adecuado y por qué?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[SOA (Arquitectura Orientada a Servicios), porque está diseñada específicamente para integración empresarial de sistemas heterogéneos y legados mediante un bus de servicios (ESB).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Microservicios, porque al ser la tecnología más moderna se adapta mejor a los contratos XML heredados.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Cliente-Servidor, porque requiere que el servidor en COBOL sea reescrito en NodeJS de forma nativa.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Event-Driven, porque la base de datos de COBOL debe conectarse a colas de mensajería asíncronas directamente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 26  -->
+  <question type="multichoice">
+    <name>
+      <text>P26</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un sistema de e-commerce sufre picos de tráfico enormes durante el Black Friday, donde las consultas del catálogo de productos son extremadamente altas, pero las escrituras de pedidos son moderadas. ¿Qué combinación de patrones es la más justificable?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[CQRS para separar los modelos de lectura y escritura, junto con microservicios para escalar el catálogo de lectura de forma independiente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Arquitectura en capas clásica, porque unifica todos los datos en un solo modelo de base de datos relacional de fácil mantenimiento.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[SOA con bus de servicios (ESB) centralizado, para filtrar todo el tráfico de lectura y bloquearlo temporalmente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Monolito tradicional, porque garantiza consistencia eventual en la base de datos y un renderizado rápido en cliente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 27  -->
+  <question type="truefalse">
+    <name>
+      <text>P27</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En Clean Architecture (y Onion Architecture), la regla fundamental establece que las dependencias de código deben apuntar siempre hacia el interior (hacia el dominio o núcleo del negocio), por lo que el núcleo nunca conoce detalles de frameworks o bases de datos.]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="100" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 28  -->
+  <question type="multichoice">
+    <name>
+      <text>P28</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En el patrón arquitectónico Microkernel (o arquitectura de Plugins), ¿cuál es la responsabilidad analítica principal de la carpeta o módulo de interfaces/contratos?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Almacenar los contratos o abstracciones que los plugins deben implementar obligatoriamente para acoplarse y comunicarse con el núcleo (core).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Definir las interfaces gráficas de usuario (HTML/CSS) y los estilos de diseño visual de la aplicación.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Almacenar las conexiones de red físicas y los drivers de las bases de datos de bajo nivel.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Alojar el código ejecutable de todos los frameworks web que dan soporte al backend.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 29  -->
+  <question type="multichoice">
+    <name>
+      <text>P29</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál de las siguientes afirmaciones es correcta respecto a la implementación del patrón Microkernel?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Es un patrón conceptual abstracto, por lo que puede implementarse en cualquier lenguaje de programación que soporte modularidad y abstracciones.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Funciona únicamente en lenguaje C debido a la necesidad de gestionar la memoria RAM físicamente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Solo puede implementarse utilizando lenguajes de marcado como HTML y CSS.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Requiere de forma obligatoria el uso de bases de datos no relacionales como MongoDB.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 30  -->
+  <question type="truefalse">
+    <name>
+      <text>P30</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[El patrón Repository actúa como un mediador que desacopla la lógica de negocio del dominio de las tecnologías y llamadas concretas a la persistencia (como JPA, Hibernate o SQL directo).]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="100" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 31  -->
+  <question type="multichoice">
+    <name>
+      <text>P31</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un sistema utiliza un framework ORM (como Hibernate o Entity Framework) para mapear clases a tablas. ¿Qué problema arquitectónico se resuelve principalmente con esta herramienta?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[La incompatibilidad de tipos y estructuras entre el modelo orientado a objetos y el modelo de datos relacional (impedancia objeto-relacional).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La falta de cifrado en tránsito en las comunicaciones por red inalámbrica.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La necesidad de estructurar el frontend mediante componentes interactivos e hidratación.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La falta de un sistema de logs centralizado en los servidores de producción.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 32  -->
+  <question type="truefalse">
+    <name>
+      <text>P32</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Si una aplicación guarda su información de sesión y negocio únicamente en variables en memoria (RAM), los datos permanecerán seguros e intactos incluso si el servidor se reinicia.]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="0" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 33  -->
+  <question type="multichoice">
+    <name>
+      <text>P33</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En el contexto de transacciones ACID en bases de datos relacionales, ¿qué asegura específicamente la propiedad de 'Aislamiento' (Isolation)?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Que las operaciones de transacciones simultáneas se ejecuten de forma separada, evitando que vean datos intermedios inconsistentes de otras transacciones activas.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que la transacción se guarde de forma permanente en el disco duro incluso ante fallos de energía del hardware.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que la transacción se complete en su totalidad (todo o nada) en una sola operación atómica.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Que todos los datos escritos en la base de datos cumplan obligatoriamente con los esquemas XML del negocio.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 34  -->
+  <question type="multichoice">
+    <name>
+      <text>P34</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un equipo de arquitectura busca diseñar un microservicio en Java optimizado para Serverless, requiriendo un arranque de milisegundos y mínimo consumo de RAM. ¿Qué framework Java y qué mecanismo técnico responden mejor a esta necesidad?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Quarkus, compilando a binario nativo mediante GraalVM para minimizar la huella de memoria y los tiempos de arranque.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Spring Boot, utilizando inyección de dependencias dinámica por reflexión en tiempo de ejecución.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Laravel, aprovechando el modelo opinado con arquitectura MVC estricta.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Gin, utilizando el modelo Thread-per-request nativo de la JVM.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 35  -->
+  <question type="multichoice">
+    <name>
+      <text>P35</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cómo logra la compilación nativa en Quarkus (vía GraalVM) reducir significativamente la huella de memoria RAM y el tiempo de arranque de la aplicación?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Realiza un análisis en tiempo de compilación para eliminar el código muerto y pre-procesar la inyección de dependencias, creando un binario ejecutable que no requiere iniciar una JVM completa.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Traduce dinámicamente todo el código Java a lenguaje JavaScript ligero para ser interpretado en el navegador del cliente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Reemplaza todas las consultas de persistencia por llamadas a archivos estáticos pre-generados.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Desactiva las validaciones de seguridad de red en tiempo de ejecución para evitar el procesamiento redundante.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 36  -->
+  <question type="multichoice">
+    <name>
+      <text>P36</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Al comparar modelos de concurrencia ante peticiones masivas, ¿cuál es la diferencia crítica entre el modelo de Java clásico y tecnologías basadas en Event Loop (NodeJS, Rust)?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Java clásico asigna un hilo nativo del SO por petición (Thread-per-request), consumiendo más memoria RAM, mientras que NodeJS/Rust emplean un Event-Loop asíncrono no bloqueante con un pool reducido de hilos.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Java clásico utiliza un Event-Loop asíncrono no bloqueante, mientras que NodeJS exige un hilo de CPU dedicado por cliente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[NodeJS y Rust compilan a binarios nativos mediante GraalVM, mientras que Java carece por completo de recolector de basura.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[No existe diferencia en términos de consumo de memoria RAM o rendimiento bajo carga extrema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 37  -->
+  <question type="multichoice">
+    <name>
+      <text>P37</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un proyecto requiere alta flexibilidad sin imponer una estructura de carpetas rígida ni inyección de dependencias predefinida. ¿Qué clasificación corresponde a este tipo de frameworks y qué tecnología lo representa?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Micro-framework / No Opinado, representado por Gin (Go) o Express (Node.js).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Framework Opinado, representado por NestJS o Spring Boot.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Meta-framework SSR, representado por Next.js.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Framework de Canvas Nativo, representado por Flutter.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 38  -->
+  <question type="multichoice">
+    <name>
+      <text>P38</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué características de diseño de NestJS facilitan la implementación de una estructura modular limpia y desacoplada?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Su sistema de inyección de dependencias nativo basado en clases/proveedores y la organización mediante decoradores de módulos (@Module).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Su capacidad para ejecutar código directamente en la base de datos sin necesidad de adaptadores.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La imposición de compilar todo el código TypeScript a lenguaje binario del procesador nativo del hardware.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La eliminación automática del uso de controladores y servicios en el backend.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 39  -->
+  <question type="truefalse">
+    <name>
+      <text>P39</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[El uso de JWT (JSON Web Token) para la gestión de sesiones permite que el servidor valide la identidad de un usuario en cada petición de forma matemática sin necesidad de mantener el estado de la sesión almacenado en una base de datos.]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="100" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 40  -->
+  <question type="truefalse">
+    <name>
+      <text>P40</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En un sistema seguro, la Autenticación verifica si un usuario tiene permisos sobre un recurso o acción (¿qué puede hacer?), mientras que la Autorización valida la identidad de la entidad (¿quién es?).]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="0" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 41  -->
+  <question type="multichoice">
+    <name>
+      <text>P41</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un atacante cambia la URL de un endpoint en su navegador de '/api/usuarios/50' a '/api/usuarios/51' y logra ver los datos privados de otro usuario autenticado. ¿A qué categoría del OWASP Top 10 corresponde esta vulnerabilidad?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[A01:2021-Control de Acceso Roto (Broken Access Control)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A02:2021-Fallos Criptográficos (Cryptographic Failures)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A03:2021-Inyección (Injection)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A05:2021-Configuración de Seguridad Incorrecta (Security Misconfiguration)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 42  -->
+  <question type="multichoice">
+    <name>
+      <text>P42</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué concepto de tolerancia a fallos describe la capacidad de un sistema de software para recuperarse y seguir funcionando correctamente tras la presencia de un fallo o error inesperado en sus dependencias?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Resiliencia]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Monitoreo]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Logging estructurado]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Autenticación estricta]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 43  -->
+  <question type="truefalse">
+    <name>
+      <text>P43</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[El propósito principal de implementar el patrón Circuit Breaker es reintentar indefinidamente y en un bucle síncrono las llamadas HTTP fallidas hacia un servicio externo hasta que este responda correctamente.]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>1.0000000</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <answer fraction="0" format="html">
+      <text><![CDATA[true]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[false]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 44  -->
+  <question type="multichoice">
+    <name>
+      <text>P44</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Si el ratio de fallos de un servicio externo supera el umbral configurado en un Circuit Breaker, y este pasa a estado ABIERTO (Open), ¿qué consecuencia inmediata tiene sobre las peticiones del cliente?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Las peticiones se bloquean de inmediato en el lado del cliente (sin llamar al servicio fallido), activando típicamente una lógica de Fallback para proteger el sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Las peticiones continúan enviándose al servidor externo esperando a que se agote el tiempo de respuesta (timeout).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El sistema elimina de forma definitiva el módulo del servicio de la infraestructura de contenedores.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Las llamadas fallidas se reintentan en un bucle infinito síncrono hasta que el servicio web responda.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 45  -->
+  <question type="multichoice">
+    <name>
+      <text>P45</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué práctica de desarrollo contribuye a mantener la trazabilidad de un sistema y facilita el diagnóstico de errores e incidentes complejos en entornos de producción distribuidos?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Implementar un sistema de logging estructurado y centralizado, asociando un ID de correlación único a todas las trazas de una misma transacción entre microservicios.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Registrar únicamente excepciones críticas en archivos de texto locales de cada servidor de forma aislada.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Utilizar mensajes detallados de depuración ('debug') en consola en producción y eliminarlos al cerrar cada incidente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Almacenar las contraseñas y datos bancarios de los usuarios en texto claro en los logs para facilitar la auditoría manual.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 46  -->
+  <question type="multichoice">
+    <name>
+      <text>P46</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[De acuerdo con el estándar de calidad ISO 25010, ¿qué atributo describe la facilidad con la que un sistema de software puede ser analizado, modificado o testeado por el equipo de desarrollo?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Mantenibilidad (Maintainability)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Disponibilidad (Availability)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Escalabilidad (Scalability)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Rendimiento (Performance)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 47  -->
+  <question type="multichoice">
+    <name>
+      <text>P47</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es el objetivo principal del uso de 'Chaos Engineering' (Ingeniería del Caos) en arquitecturas de microservicios masivas como la de Netflix?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Validar la resiliencia y capacidad de auto-recuperación del sistema al inyectar fallos reales (caídas de servidores, latencia) de forma controlada en producción.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Validar la velocidad de descarga de archivos multimedia en navegadores web de gama baja.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Comprobar el cumplimiento estricto del patrón MVC en las aplicaciones del lado del cliente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Optimizar los esquemas XML de las transacciones financieras con entidades gubernamentales.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 48  -->
+  <question type="multichoice">
+    <name>
+      <text>P48</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Un usuario introduce un texto en un campo numérico. El sistema no valida la entrada, se genera una excepción no controlada en la base de datos y se muestra la traza técnica de SQL en pantalla. ¿Por qué es una mala práctica?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Expone detalles de la estructura interna del sistema facilitando ataques maliciosos, y degrada la experiencia del usuario final al no controlar el flujo.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Obliga a que el navegador web del usuario se reinicie automáticamente debido al error del sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Aumenta de forma drástica el tamaño del bundle de JavaScript que descarga el cliente final.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Impide el uso de conexiones mediante tokens seguros JWT y destruye la persistencia en disco.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 49  -->
+  <question type="multichoice">
+    <name>
+      <text>P49</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué diagrama UML es el más adecuado si el equipo necesita identificar a los diferentes stakeholders y las funciones principales que tienen disponibles para interactuar con el sistema?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Diagrama de casos de uso]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Diagrama de clases]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Diagrama de despliegue]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Diagrama de componentes]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 50  -->
+  <question type="multichoice">
+    <name>
+      <text>P50</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En Arquitectura Hexagonal, ¿qué tipo de componente es una interfaz que define un método para guardar un Pedido en la base de datos?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Un Adaptador de Entrada (Input Adapter).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Un Puerto de Salida (Output Port / SPI).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Una Entidad del Dominio.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 51  -->
+  <question type="multichoice">
+    <name>
+      <text>P51</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es la regla de dependencias fundamental en este estilo arquitectónico?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El dominio depende de los puertos, y estos de la base de datos.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[La base de datos y la interfaz gráfica dependen directamente de los controladores REST.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Todas las dependencias apuntan hacia el interior, es decir, hacia el dominio.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 52  -->
+  <question type="multichoice">
+    <name>
+      <text>P52</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Si decidimos reemplazar Spring Boot por Quarkus como framework de inyección de dependencias, ¿qué parte del código sufre modificaciones?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Las entidades y las reglas comerciales del dominio.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Únicamente los adaptadores de infraestructura y las clases de configuración.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Los puertos de entrada y los casos de uso exclusivamente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 53  -->
+  <question type="multichoice">
+    <name>
+      <text>P53</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Por qué el dominio no debe importar anotaciones de JPA o Hibernate?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Porque la persistencia es una preocupación de infraestructura externa y no de lógica de negocio.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Porque Java prohíbe usar anotaciones dentro de clases del paquete 'domain'.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Porque reduce significativamente la velocidad de compilación inicial del proyecto.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 54  -->
+  <question type="multichoice">
+    <name>
+      <text>P54</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Qué atributo de calidad de la norma ISO 25010 define la facilidad para probar y modificar el software?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Disponibilidad (Availability)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Mantenibilidad (Maintainability)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Escalabilidad (Scalability)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Rendimiento (Performance)]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 55  -->
+  <question type="multichoice">
+    <name>
+      <text>P55</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En un diagrama de clases UML, ¿cómo se representa una relación de Composición (fuerte todo-parte)?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Con una línea punteada y una flecha abierta.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Con una línea continua y un rombo relleno de color negro.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Con una línea continua y un rombo vacío.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Con una línea continua y una flecha vacía apuntando al padre.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 56  -->
+  <question type="multichoice">
+    <name>
+      <text>P56</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es el propósito principal de un Diagrama de Secuencia en UML?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Mostrar la distribución física de los servidores y el hardware de red.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Representar el flujo dinámico de mensajes entre objetos ordenados cronológicamente.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Definir el esquema lógico de las tablas de la base de datos SQL.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Agrupar carpetas y namespaces de código estructurado.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 57  -->
+  <question type="multichoice">
+    <name>
+      <text>P57</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[En un diagrama de Casos de Uso, la relación &lt;&lt;extend&gt;&gt; significa que:]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El caso de uso base obligatoriamente incluye el comportamiento del otro caso de uso.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[El caso de uso base puede incorporar el comportamiento de otro caso de uso de forma condicional/opcional.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El caso de uso hereda atributos de herencia del actor del sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[El caso de uso se conecta físicamente con la base de datos de auditoría.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 58  -->
+  <question type="multichoice">
+    <name>
+      <text>P58</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Si el caso de uso base "A" incluye (&lt;&lt;include&gt;&gt;) al caso de uso "B", ¿cuál de las siguientes opciones es verdadera?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[B se ejecuta de forma condicional, solo cuando se cumple un punto de extensión en A.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[B se ejecuta obligatoriamente cada vez que se inicia el caso de uso A.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A hereda todos los casos de uso y las conexiones del actor B.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[A y B representan nodos físicos en el diagrama de despliegue.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 59  -->
+  <question type="multichoice">
+    <name>
+      <text>P59</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[Si las reglas del negocio cambian y el pago del arancel de matrícula pasa a ser obligatorio e inmediato para poder completar la inscripción de materias, la relación entre "Matricular" y "Pagar" debe cambiar de:]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[De Inclusión (&lt;&lt;include&gt;&gt;) a Extensión (&lt;&lt;extend&gt;&gt;).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[De Extensión (&lt;&lt;extend&gt;&gt;) a Inclusión (&lt;&lt;include&gt;&gt;).]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[De Asociación Simple a Herencia.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[De Composición a Agregación.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+  <!-- question: 60  -->
+  <question type="multichoice">
+    <name>
+      <text>P60</text>
+    </name>
+    <questiontext format="html">
+      <text><![CDATA[¿Cuál es un error común (antipatrón) en el diseño de un diagrama de Casos de Uso?]]></text>
+    </questiontext>
+    <generalfeedback format="html">
+      <text></text>
+    </generalfeedback>
+    <defaultgrade>1.0000000</defaultgrade>
+    <penalty>0.3333333</penalty>
+    <hidden>0</hidden>
+    <idnumber></idnumber>
+    <single>true</single>
+    <shuffleanswers>true</shuffleanswers>
+    <answernumbering>abc</answernumbering>
+    <showstandardinstruction>0</showstandardinstruction>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Modelar sistemas externos (ej. pasarela de pagos) como actores del diagrama.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="100" format="html">
+      <text><![CDATA[Descomponer funcionalmente el sistema en mini-casos de uso que parecen simples pasos de algoritmo (ej. "Ingresar texto", "Hacer clic en botón").]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Dibujar un rectángulo que encierra a los casos de uso para denotar la frontera del sistema.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+    <answer fraction="0" format="html">
+      <text><![CDATA[Conectar un actor directamente con otro actor mediante herencia.]]></text>
+      <feedback format="html">
+        <text></text>
+      </feedback>
+    </answer>
+  </question>
+
+</quiz>
