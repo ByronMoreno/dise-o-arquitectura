@@ -399,6 +399,72 @@
     }
 
     /* ==========================================
+       Cards Grid Layout
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, transparent);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .info-card:hover::before {
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+    }
+
+    .card-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      font-size: 1.25rem;
+      font-weight: bold;
+    }
+
+    .icon-green {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--color-primary);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .icon-blue {
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--color-secondary);
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    /* ==========================================
        Interactive SOLID Explorer
        ========================================== */
     .solid-explorer {
@@ -907,6 +973,16 @@
           <div class="card-icon icon-green">L</div>
           <h3 class="card-title">Sustitución de Liskov</h3>
           <p class="card-content">Las subclases deben poder ser sustituidas por sus clases padre sin romper el sistema.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-green">I</div>
+          <h3 class="card-title">Segregación de Interfaces</h3>
+          <p class="card-content">Los clientes no deben verse obligados a depender de interfaces que no utilizan.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-green">D</div>
+          <h3 class="card-title">Inversión de Dependencias</h3>
+          <p class="card-content">Los módulos de alto nivel no deben depender de los de bajo nivel. Ambos deben depender de abstracciones.</p>
         </div>
       </div>
     </section>
