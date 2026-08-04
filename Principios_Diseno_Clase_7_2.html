@@ -1,0 +1,1493 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 7.2: Principios y Heurísticas de Diseño de Software. DRY, KISS, YAGNI, Separation of Concerns (SoC), Cohesión, Acoplamiento y Programación por Interfaces. Ejemplos de código y quiz.">
+  <title>Principios de Diseño | Unidad 4 Clase 7.2</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #10b981; /* Emerald */
+      --color-primary-rgb: 16, 185, 129;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-primary);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--color-primary);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Cards Grid Layout
+       ========================================== */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .info-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .info-card:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    /* ==========================================
+       Interactive Principles Explorer
+       ========================================== */
+    .principles-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .pr-tabs {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 868px) {
+      .pr-tabs {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .pr-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    .pr-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .pr-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .pr-tab-btn.active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+    }
+
+    .pr-sheet {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 968px) {
+      .pr-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .pr-details-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .pr-sheet-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .pr-sheet-meta {
+      font-size: 0.9rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .pr-sheet-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .pr-causes-solutions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .causes-box h4 { color: var(--color-danger); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .solutions-box h4 { color: var(--color-success); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .causes-box ul, .solutions-box ul { list-style: none; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+    .causes-box ul li::before { content: '⚠ '; color: var(--color-danger); font-weight: bold; }
+    .solutions-box ul li::before { content: '✓ '; color: var(--color-success); font-weight: bold; }
+
+    /* Visual schematic container */
+    .pr-visual-container {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      gap: 10px;
+    }
+
+    /* CSS flowcharts */
+    .flow-step {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: center;
+      width: 90%;
+    }
+
+    .flow-step.highlight {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .flow-arrow {
+      color: var(--color-accent);
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+
+    /* ==========================================
+       Code Comparator (Tabs)
+       ========================================== */
+    .code-comparator {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-panel.active {
+      display: block;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 7.2: Principios</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Unidad 4</h2>
+        <span>Clase 7.2: Principios</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. Heurísticas y Reglas</a></li>
+      <li><a href="#modulo2">2. Fichas de Principios</a></li>
+      <li><a href="#modulo3">3. Comparativa de Código</a></li>
+      <li><a href="#quiz">4. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+        <span>Unidad 4: Tema 3</span>
+      </div>
+      <h1 class="hero-title">Principios y Heurísticas de Diseño</h1>
+      <p class="hero-subtitle">
+        Domina las reglas de oro del diseño pragmático. Comprende DRY, KISS, YAGNI, Separation of Concerns, Cohesión/Acoplamiento y Programación por Interfaces.
+      </p>
+    </header>
+
+    <!-- Modulo 1: Introduccion -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. Heurísticas de Diseño Pragmático</h2>
+      <p class="intro-paragraph">
+        Más allá de SOLID, el diseño efectivo de software se apoya en <span class="highlight">heurísticas pragmáticas</span> acumuladas durante décadas de experiencia en la industria. Estas reglas prácticas previenen la sobreingeniería (crear soluciones excesivamente complejas para problemas sencillos) y aseguran que la base de código sea modificable y legible.
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <h3 class="card-title">DRY (Don't Repeat Yourself)</h3>
+          <p class="card-content">Toda pieza de conocimiento o lógica del negocio debe tener una representación única, no ambigua y autoritativa dentro del sistema.</p>
+        </div>
+        <div class="info-card">
+          <h3 class="card-title">KISS (Keep It Simple, Stupid)</h3>
+          <p class="card-content">Los sistemas funcionan mejor si se mantienen simples en lugar de complejos. La simplicidad debe ser una meta clave en el código.</p>
+        </div>
+        <div class="info-card">
+          <h3 class="card-title">YAGNI (You Aren't Gonna Need It)</h3>
+          <p class="card-content">No programes funcionalidades o abstracciones basándote en que "las vas a necesitar en el futuro". Agrégalas solo cuando sea necesario.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Explorador de Principios -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Catálogo e Interactividad de Heurísticas</h2>
+      <p class="intro-paragraph">
+        Selecciona cada botón para explorar el principio, sus síntomas de alerta y sus soluciones de refactorización limpia:
+      </p>
+
+      <div class="principles-explorer">
+        <!-- Tabs selectors -->
+        <div class="pr-tabs">
+          <button class="pr-tab-btn active" onclick="selectPr('dry')">DRY</button>
+          <button class="pr-tab-btn" onclick="selectPr('kiss')">KISS</button>
+          <button class="pr-tab-btn" onclick="selectPr('yagni')">YAGNI</button>
+          <button class="pr-tab-btn" onclick="selectPr('soc')">SoC</button>
+          <button class="pr-tab-btn" onclick="selectPr('cohesion')">Cohesión / Acoplamiento</button>
+          <button class="pr-tab-btn" onclick="selectPr('interfaces')">Interfaces</button>
+        </div>
+
+        <!-- Sheet Panel -->
+        <div class="pr-sheet" id="pr-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="pr-details-card">
+            <h4 class="pr-sheet-title" id="pr-title">DRY (Don't Repeat Yourself)</h4>
+            <div class="pr-sheet-meta" id="pr-meta">Evitar duplicidad</div>
+            <p class="pr-sheet-desc" id="pr-desc">
+              Toda pieza de conocimiento o lógica del negocio debe tener una representación única, no ambigua y autoritativa dentro del sistema. Evita copiar y pegar el mismo bloque de código lógico en múltiples clases.
+            </p>
+            <div class="pr-causes-solutions">
+              <div class="causes-box">
+                <h4>Consecuencias de Violación</h4>
+                <ul id="pr-causes">
+                  <li>Dispersión de bugs por copia y pega.</li>
+                  <li>Esfuerzo multiplicado al cambiar una regla del negocio.</li>
+                </ul>
+              </div>
+              <div class="solutions-box">
+                <h4>Solución / Enfoque</h4>
+                <ul id="pr-solutions">
+                  <li>Abstraer lógica común en helpers o utilidades compartidas.</li>
+                  <li>Reutilizar componentes modulares.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:10px;">Visualización Estructural:</h5>
+            <div class="pr-visual-container" id="pr-visual">
+              <!-- Cargado dinámicamente por JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Comparativa de codigo -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Comparativa de Código de Refactorización</h2>
+      <p class="intro-paragraph">
+        Compara soluciones reales demostrando sobreingeniería o violaciones contra el diseño limpio:
+      </p>
+
+      <div class="code-comparator">
+        <div class="code-tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'code-dry')">DRY (Duplicados)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-kiss')">KISS (Simplicidad)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-yagni')">YAGNI (Sobreingeniería)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-interfaces')">Programar a Interfaces</button>
+        </div>
+
+        <!-- DRY -->
+        <div class="code-panel active" id="code-dry">
+          <pre><code><span class="comment">// ANTES: Duplicidad de lógica para formatear monedas</span>
+<span class="keyword">public double</span> <span class="method">calcularPrecioFinal</span>(<span class="keyword">double</span> base) {
+    <span class="keyword">double</span> impuesto = base * <span class="type">0.12</span>;
+    <span class="type">System</span>.out.<span class="method">printf</span>(<span class="string">"Monto formateado: $%.2f"</span>, base + impuesto);
+    <span class="keyword">return</span> base + impuesto;
+}
+
+<span class="comment">// REFACTORIZADO (DRY): Abstracción del formateador</span>
+<span class="keyword">public class</span> <span class="type">CurrencyFormatter</span> {
+    <span class="keyword">public static</span> <span class="type">String</span> <span class="method">format</span>(<span class="keyword">double</span> val) {
+        <span class="keyword">return</span> <span class="type">String</span>.<span class="method">format</span>(<span class="string">"$%.2f"</span>, val);
+    }
+}</code></pre>
+        </div>
+
+        <!-- KISS -->
+        <div class="code-panel" id="code-kiss">
+          <pre><code><span class="comment">// ANTES: Complejidad absurda para buscar un string dentro de una lista</span>
+<span class="keyword">public boolean</span> <span class="method">buscarNombre</span>(<span class="type">List</span>&lt;<span class="type">String</span>&gt; lista, <span class="type">String</span> target) {
+    <span class="keyword">return</span> lista.<span class="method">stream</span>()
+        .<span class="method">filter</span>(n -&gt; n.<span class="method">equalsIgnoreCase</span>(target))
+        .<span class="method">findFirst</span>().<span class="method">isPresent</span>();
+}
+
+<span class="comment">// REFACTORIZADO (KISS): Directo, limpio y legible</span>
+<span class="keyword">public boolean</span> <span class="method">buscarNombreSimple</span>(<span class="type">List</span>&lt;<span class="type">String</span>&gt; lista, <span class="type">String</span> target) {
+    <span class="keyword">return</span> lista.<span class="method">contains</span>(target);
+}</code></pre>
+        </div>
+
+        <!-- YAGNI -->
+        <div class="code-panel" id="code-yagni">
+          <pre><code><span class="comment">// ANTES: Creación de interfaces, factorías y DTOs para un simple CRUD interno temporal</span>
+<span class="keyword">public interface</span> <span class="type">IUserService</span> { <span class="keyword">void</span> <span class="method">save</span>(); }
+<span class="keyword">public class</span> <span class="type">UserServiceFactory</span> { <span class="comment">/* Lógica genérica de creación */</span> }
+
+<span class="comment">// REFACTORIZADO (YAGNI): Clase directa. No agregues abstracción si no hay múltiples implementaciones.</span>
+<span class="keyword">public class</span> <span class="type">UserService</span> {
+    <span class="keyword">public void</span> <span class="method">saveUser</span>(<span class="type">User</span> u) { <span class="comment">/* Lógica directa */</span> }
+}</code></pre>
+        </div>
+
+        <!-- Interfaces -->
+        <div class="code-panel" id="code-interfaces">
+          <pre><code><span class="comment">// ANTES: Depender de clase concreta (Impide mockear y cambiar por otro motor de base de datos)</span>
+<span class="keyword">public class</span> <span class="type">FacturaService</span> {
+    <span class="keyword">private</span> <span class="type">MySQLDatabase</span> db = <span class="keyword">new</span> <span class="type">MySQLDatabase</span>();
+    <span class="keyword">public void</span> <span class="method">guardar</span>() { db.<span class="method">save</span>(); }
+}
+
+<span class="comment">// REFACTORIZADO: Programar orientado a Interfaces</span>
+<span class="keyword">public interface</span> <span class="type">Repository</span> { <span class="keyword">void</span> <span class="method">save</span>(); }
+<span class="keyword">public class</span> <span class="type">FacturaServiceRefactored</span> {
+    <span class="keyword">private</span> <span class="type">Repository</span> repo;
+    <span class="keyword">public</span> <span class="type">FacturaServiceRefactored</span>(<span class="type">Repository</span> r) { <span class="keyword">this</span>.repo = r; } <span class="comment">// Inyectado</span>
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">4. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Valida tu asimilación de heurísticas de diseño para evitar sobreingeniería:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Un programador decide implementar clases de abstracción genéricas para conectarse a tres proveedores de pasarelas de pago diferentes, a pesar de que el cliente explícitamente firmó que solo se usará 'Stripe' permanentemente. ¿Qué principio está violando?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>DRY</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>YAGNI (You Aren't Gonna Need It)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Separation of Concerns</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> El principio de Separation of Concerns (SoC) se define como:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Diseñar módulos que se encarguen de múltiples aspectos mezclados para ahorrar archivos físicos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Dividir una aplicación en secciones o capas distintas, de manera que cada una maneje un aspecto lógico exclusivo (ej. persistencia, negocio, presentación).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Programar sin preocuparse de las dependencias externas.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> Para lograr un diseño de software mantenible ante cambios de requerimientos en el futuro, ¿cuál es la combinación ideal de cohesión y acoplamiento?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>Alto Acoplamiento y Baja Cohesión.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>Bajo Acoplamiento y Alta Cohesión.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>Bajo Acoplamiento y Baja Cohesión.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> "Programar orientado a Interfaces, no a Implementaciones concretas" nos otorga como principal ventaja:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>La base de datos relacional ejecutará consultas un 50% más rápido.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Desacoplamiento: la clase de alto nivel desconoce los detalles técnicos específicos del proveedor, permitiendo sustituirlo o mockearlo sin alterar la lógica de negocio.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>El compilador ignorará los errores de sintaxis del código.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Principles Sheets Data & Logic
+       ========================================== */
+    const prData = {
+      dry: {
+        title: "DRY (Don't Repeat Yourself)",
+        meta: "Evitar duplicidad de conocimiento",
+        desc: "Toda pieza de conocimiento o regla del negocio debe tener una representación única dentro de la aplicación. Repetir fragmentos idénticos de código propaga los bugs y duplica el esfuerzo de mantenimiento ante modificaciones.",
+        causes: ["Duplicación de lógica idéntica en múltiples archivos.", "Reescribir formateadores de datos, consultas o validaciones."],
+        solutions: ["Abstraer lógica repetitiva en clases utilitarias o helpers compartidos.", "Reutilizar componentes de UI."],
+        visual: `
+          <div class="flow-step highlight">Código Compartido: Formatter.java</div>
+          <div class="flow-arrow">▲ (Inyectado / Importado por)</div>
+          <div style="display:flex; gap:10px; width:100%; justify-content:center;">
+            <div class="flow-step" style="width:45%; font-size:0.65rem;">Módulo A</div>
+            <div class="flow-step" style="width:45%; font-size:0.65rem;">Módulo B</div>
+          </div>
+        `
+      },
+      kiss: {
+        title: "KISS (Keep It Simple, Stupid)",
+        meta: "Priorizar la simplicidad",
+        desc: "Los sistemas funcionan mejor si se mantienen simples en lugar de complejos. Evita la sobreingeniería, el uso innecesario de patrones complejos para resolver flujos sencillos, y los algoritmos rebuscados.",
+        causes: ["Uso excesivo de patrones de diseño GoF para flujos triviales.", "Algoritmos enmarañados con condicionales anidados innecesarios."],
+        solutions: ["Escribir código directo, descriptivo y fácil de leer para un programador junior.", "Refactorizar código complejo."],
+        visual: `
+          <div class="flow-step">Problema Trivial</div>
+          <div class="flow-arrow">▼ (Solución Directa)</div>
+          <div class="flow-step highlight">Código Simple (Sin Abstracciones Extras)</div>
+        `
+      },
+      yagni: {
+        title: "YAGNI (You Aren't Gonna Need It)",
+        meta: "No programes anticipadamente",
+        desc: "Nunca agregues funcionalidad al código basándote únicamente en que 'en el futuro tal vez lo necesitemos'. Genera código muerto, interfaces no utilizadas y sobrecarga de mantenimiento inútil.",
+        causes: ["Crear capas de extensibilidad genéricas por suposición de cambios futuros.", "Interfaces vacías o métodos no invocados."],
+        solutions: ["Implementar solo lo requerido en el sprint actual.", "Escribir código limpio que sea fácil de refactorizar si el futuro cambia."],
+        visual: `
+          <div class="flow-step">Requerimiento Real Actual</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">Código Justo y Necesario</div>
+          <div style="font-size:0.8rem; color:var(--color-danger); text-align:center; margin-top:5px;">[X] Abstracciones futuristas eliminadas</div>
+        `
+      },
+      soc: {
+        title: "Separation of Concerns (SoC)",
+        meta: "Separación de Capas Lógicas",
+        desc: "Divide un programa de software en secciones distintas, de manera que cada sección aborde una responsabilidad lógica exclusiva (ej. persistencia, negocio, API HTTP, presentación UI).",
+        pros: ["Facilidad de mantenimiento: los cambios en BD no afectan la vista.", "Permite el desarrollo en paralelo de backend y frontend.", "Facilidad de pruebas."],
+        cons: ["Mezclar queries SQL físicas directamente dentro de la interfaz de usuario.", "Controladores lógicos manejando transacciones SMTP de correos."],
+        visual: `
+          <div class="flow-step">Presentación (Vista/UI)</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">Controlador / Lógica de Negocio</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step">Acceso a Datos (Persistencia / BD)</div>
+        `
+      },
+      cohesion: {
+        title: "Alta Cohesión & Bajo Acoplamiento",
+        meta: "El Santo Grial del Diseño",
+        desc: "La Cohesión mide qué tan enfocadas están las responsabilidades internas de un módulo (debe ser ALTA). El Acoplamiento mide el nivel de dependencia directa entre módulos distintos (debe ser BAJO).",
+        pros: ["Módulos auto-contenidos e independientes.", "Facilidad de sustitución y escalabilidad.", "Cambios aislados sin efectos dominó."],
+        cons: ["Clases que heredan o importan dependencias circulares complejas.", "Modificar un archivo y romper accidentalmente 5 módulos lejanos."],
+        visual: `
+          <div style="display:flex; justify-content:space-around; width:100%;">
+            <div class="flow-step highlight" style="width:45%; font-size:0.65rem;">Modulo A (Alta Cohesión)</div>
+            <div class="flow-step highlight" style="width:45%; font-size:0.65rem;">Modulo B (Alta Cohesión)</div>
+          </div>
+          <div style="font-size:0.9rem; color:var(--color-primary); text-align:center; margin-top:8px;">◄ Conexión débil e indirecta (Bajo Acoplamiento) ►</div>
+        `
+      },
+      interfaces: {
+        title: "Programación por Interfaces",
+        meta: "Depender de contratos, no de detalles",
+        desc: "Establece que las dependencias de una clase deben acoplarse a interfaces o abstracciones en lugar de clases concretas. Esto permite cambiar o sustituir la implementación física por otra en caliente sin alterar el cliente.",
+        pros: ["Desacoplamiento total del proveedor del servicio.", "Facilidad inmediata de realizar mocks en testing.", "Cumplimiento del principio de inversión de dependencias."],
+        cons: ["Instanciar con la palabra clave 'new' las implementaciones específicas dentro del código del negocio."],
+        visual: `
+          <div class="flow-step">Cliente (Facturación)</div>
+          <div class="flow-arrow">▼ (Llama a interfaz)</div>
+          <div class="flow-step highlight">&lt;&lt;interface&gt;&gt; PaymentGateway</div>
+          <div class="flow-arrow">▲ (Implementado por)</div>
+          <div class="flow-step">StripeService | PayPalService</div>
+        `
+      }
+    };
+
+    function selectPr(key) {
+      // Toggle button active class
+      document.querySelectorAll('.pr-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const targetBtn = Array.from(document.querySelectorAll('.pr-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(key));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const data = prData[key];
+
+      // Update text sheet with quick fade animation
+      const sheet = document.getElementById('pr-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      document.getElementById('pr-title').innerText = data.title;
+      document.getElementById('pr-meta').innerText = data.meta;
+      document.getElementById('pr-desc').innerText = data.desc;
+
+      // Update causes
+      const causesContainer = document.getElementById('pr-causes');
+      causesContainer.innerHTML = '';
+      data.causes.forEach(cause => {
+        const li = document.createElement('li');
+        li.innerText = cause;
+        causesContainer.appendChild(li);
+      });
+
+      // Update solutions
+      const solutionsContainer = document.getElementById('pr-solutions');
+      solutionsContainer.innerHTML = '';
+      data.solutions.forEach(sol => {
+        const li = document.createElement('li');
+        li.innerText = sol;
+        solutionsContainer.appendChild(li);
+      });
+
+      // Update schematic visual
+      document.getElementById('pr-visual').innerHTML = data.visual;
+    }
+
+    // Default load DRY
+    selectPr('dry');
+
+    /* ==========================================
+       Code Tabs Switching Logic
+       ========================================== */
+    function switchTab(event, panelId) {
+      const container = event.target.closest('.code-comparator');
+      
+      container.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      container.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          // Fix local selector references
+        });
+        // Clear all states first
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado las heurísticas de diseño limpio de software.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Repasa los conceptos de acoplamiento rígido e inyección de interfaces.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te recomendamos revisar detenidamente las fichas de YAGNI y Separation of Concerns.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

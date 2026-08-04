@@ -1,0 +1,1325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 7.4: Métricas de Calidad de Software. Tiempo de respuesta, Disponibilidad, MTBF, MTTR, Cobertura, Complejidad Ciclomática y panel SonarQube. Quiz interactivo.">
+  <title>Métricas de Calidad | Unidad 4 Clase 7.4</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #10b981; /* Emerald */
+      --color-primary-rgb: 16, 185, 129;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-primary);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--color-primary);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Interactive Metrics Explorer
+       ========================================== */
+    .metrics-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .met-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+
+    @media (max-width: 768px) {
+      .met-tabs {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .met-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .met-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .met-tab-btn.active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+    }
+
+    .met-sheet {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 968px) {
+      .met-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .met-details-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .met-sheet-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .met-sheet-meta {
+      font-size: 0.9rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .met-sheet-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .met-ranges {
+      border-top: 1px solid var(--border-light);
+      padding-top: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .range-box h4 { color: var(--color-primary); font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+    .range-box p { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* Visual schematic container */
+    .met-visual-container {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      gap: 10px;
+    }
+
+    /* CSS elements for Metrics Diagrams */
+    .flow-step {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: center;
+      width: 90%;
+    }
+
+    .flow-step.highlight {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .flow-arrow {
+      color: var(--color-accent);
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+
+    /* SonarQube UI Panel Mockup */
+    .sonar-panel {
+      width: 100%;
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      background: #0f172a;
+      overflow: hidden;
+      font-family: var(--font-sans);
+    }
+
+    .sonar-header {
+      background: #1e293b;
+      padding: 10px 16px;
+      font-weight: 700;
+      color: var(--text-bright);
+      font-size: 0.85rem;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .sonar-body {
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .sonar-metric {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+    }
+
+    .sonar-metric-title {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .sonar-metric-value {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--color-primary);
+      font-family: var(--font-mono);
+    }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 7.4: Métricas</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Unidad 4</h2>
+        <span>Clase 7.4: Métricas</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. Cuantificar Calidad</a></li>
+      <li><a href="#modulo2">2. Catálogo e Interactividad</a></li>
+      <li><a href="#quiz">3. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+        <span>Unidad 4: Tema 5</span>
+      </div>
+      <h1 class="hero-title">Métricas de Calidad de Software</h1>
+      <p class="hero-subtitle">
+        Cuantifica la fiabilidad y salud de tu arquitectura. Comprende el cálculo de MTBF, MTTR, Complejidad Ciclomática (McCabe), Cobertura de tests y analiza el panel de SonarQube.
+      </p>
+    </header>
+
+    <!-- Modulo 1: Introduccion -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. La Necesidad de Cuantificar</h2>
+      <p class="intro-paragraph">
+        En ingeniería de software, <span class="highlight">"lo que no se mide, no se puede mejorar"</span>. Las métricas de software proveen datos cuantitativos e históricos sobre la complejidad del código, el nivel de fallos en producción y el grado de confianza en la suite de pruebas automatizadas, facilitando a los líderes técnicos tomar decisiones de refactorización justificadas.
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <h3 class="card-title">Complejidad Ciclomática</h3>
+          <p class="card-content">Métrica cuantitativa que mide el número de caminos de ejecución lógicamente independientes a través del código fuente de un programa.</p>
+        </div>
+        <div class="info-card">
+          <h3 class="card-title">MTBF & MTTR</h3>
+          <p class="card-content">Métricas de fiabilidad e infraestructura que determinan cuánto dura el sistema en línea y qué tan rápido se recupera de una caída.</p>
+        </div>
+        <div class="info-card">
+          <h3 class="card-title">SonarQube Gates</h3>
+          <p class="card-content">Panel automatizado de análisis estático que evalúa la cobertura, duplicación, bugs e índice de mantenibilidad (Quality Gates).</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Explorador de Metricas -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Catálogo e Interactividad de Métricas</h2>
+      <p class="intro-paragraph">
+        Selecciona cada botón para explorar su fórmula matemática de cálculo, su propósito y su representación gráfica en CSS:
+      </p>
+
+      <div class="metrics-explorer">
+        <!-- Tabs selectors -->
+        <div class="met-tabs">
+          <button class="met-tab-btn active" onclick="selectMet('mtbf')">MTBF & MTTR</button>
+          <button class="met-tab-btn" onclick="selectMet('mccabe')">Complejidad (McCabe)</button>
+          <button class="met-tab-btn" onclick="selectMet('cov')">Cobertura (Tests)</button>
+          <button class="met-tab-btn" onclick="selectMet('maint')">Índice Mantenibilidad</button>
+          <button class="met-tab-btn" onclick="selectMet('sonar')">SonarQube Panel</button>
+        </div>
+
+        <!-- Sheet Panel -->
+        <div class="met-sheet" id="met-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="met-details-card">
+            <h4 class="met-sheet-title" id="met-title">MTBF & MTTR</h4>
+            <div class="met-sheet-meta" id="met-meta">Categoría: Fiabilidad de Infraestructura</div>
+            <p class="met-sheet-desc" id="met-desc">
+              <strong>MTBF</strong> (Mean Time Between Failures) mide el tiempo medio que el sistema opera sin fallos. <strong>MTTR</strong> (Mean Time To Repair) mide el tiempo medio que toma reparar y levantar el sistema tras un fallo físico o lógico.
+            </p>
+            <div class="met-ranges">
+              <div class="range-box">
+                <h4>Fórmulas</h4>
+                <p id="met-formula">
+                  MTBF = Tiempo de operación / Número de fallos.<br>
+                  MTTR = Tiempo de inactividad / Número de reparaciones.
+                </p>
+              </div>
+              <div class="range-box">
+                <h4>Rangos Óptimos</h4>
+                <p id="met-optimal">
+                  MTBF: Cuanto más alto, mejor (meses/años).<br>
+                  MTTR: Cuanto más bajo, mejor (minutos/segundos con automatizaciones).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:10px;">Esquema Visual de la Métrica:</h5>
+            <div class="met-visual-container" id="met-visual">
+              <!-- Cargado dinámicamente por JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">3. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Valida tu capacidad para calcular e interpretar las métricas de software de un proyecto:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Si calculamos la Complejidad Ciclomática (McCabe) de una función y obtenemos un valor de M = 28, ¿cómo se clasifica esta función y qué acción se debe tomar?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>Función de complejidad baja. No requiere modificaciones ni pruebas complejas.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>Función altamente compleja y propensa a errores (M > 20). Requiere de forma crítica refactorización inmediata para dividirla en funciones modulares.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>Función inútil que debe borrarse del repositorio.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> ¿Qué mide exactamente el "Índice de Mantenibilidad" (Maintainability Index) de un proyecto de software?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>La cantidad de servidores replicados en producción.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Un puntaje sintético (0 a 100) calculado mediante una fórmula matemática combinando el Volumen de Halstead, la Complejidad Ciclomática y las Líneas de Código (LOC).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>El porcentaje de cobertura de pruebas unitarias.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> Si en un periodo de 12 horas, tu servidor de base de datos se cae 3 veces, acumulando un tiempo total de caída y recuperación de 45 minutos. ¿Cuál es el MTTR de esa base de datos para ese periodo?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>MTTR = 3 horas.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>MTTR = 15 minutos (45 minutos / 3 caídas).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>MTTR = 45 minutos.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> En SonarQube, ¿qué define el concepto de "Quality Gate" (Puerta de Calidad)?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>El firewall de red que bloquea ataques de inyección SQL externos.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Un conjunto de condiciones y límites predefinidos (ej. cobertura > 80%, 0 bugs críticos) que el código del commit debe pasar para permitir el merge o despliegue.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>La clave SSL para encriptar los datos del servidor.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive Metrics Sheets Data & Logic
+       ========================================== */
+    const metData = {
+      mtbf: {
+        title: "MTBF & MTTR",
+        meta: "Categoría: Fiabilidad de Infraestructura",
+        desc: "MTBF (Mean Time Between Failures) mide el tiempo medio que el sistema opera sin fallos. MTTR (Mean Time To Repair) mide el tiempo medio que toma reparar y levantar el sistema tras un fallo físico o lógico.",
+        formula: "MTBF = Tiempo de operación / Número de fallos.\nMTTR = Tiempo de inactividad / Número de reparaciones.",
+        optimal: "MTBF: Cuanto más alto, mejor (meses/años).\nMTTR: Cuanto más bajo, mejor (minutos/segundos con automatizaciones).",
+        visual: `
+          <div class="flow-step" style="background:rgba(16,185,129,0.1); border-color:var(--color-primary);">Funcionamiento Normal (Operando...)</div>
+          <div class="flow-arrow">▼ (Ocurre Fallo)</div>
+          <div class="flow-step danger">Caída de Sistema (Down Time)</div>
+          <div class="flow-arrow">▼ (MTTR: Tiempo de Reparación)</div>
+          <div class="flow-step">Servicio Restablecido</div>
+          <div style="font-size:0.75rem; color:var(--text-muted); text-align:center; margin-top:5px;">Distancia entre caídas = MTBF</div>
+        `
+      },
+      mccabe: {
+        title: "Complejidad Ciclomática (McCabe)",
+        meta: "Categoría: Complejidad Estructural",
+        desc: "Mide el número de caminos linealmente independientes a través del código. Se calcula usando el grafo de flujo de control del método, donde los nodos representan bloques de código y las aristas representan transiciones.",
+        formula: "M = E - N + 2P\n(Donde E = Aristas/Edges, N = Nodos, P = Componentes conectados).",
+        optimal: "1-10: Bajo riesgo (Fácil de mantener).\n11-20: Riesgo moderado.\n> 20: Alta complejidad (Código propenso a errores, refactorizar).",
+        visual: `
+          <div style="display:flex; justify-content:space-around; width:100%;">
+            <div class="anti-node" style="font-size:0.65rem;">if(condición)</div>
+            <div class="anti-node" style="font-size:0.65rem;">else</div>
+          </div>
+          <div class="flow-arrow">⇅ (Ramas de control)</div>
+          <div class="flow-step highlight" style="font-size:0.75rem;">Complejidad M = Caminos Totales</div>
+        `
+      },
+      cov: {
+        title: "Cobertura de Pruebas (Test Coverage)",
+        meta: "Categoría: Confianza y Calidad",
+        desc: "Indica el porcentaje de líneas de código, métodos o ramas condicionales que son ejecutadas por la suite de pruebas unitarias automatizadas. Una cobertura alta reduce la aparición de bugs de regresión.",
+        formula: "Cobertura (%) = (Líneas ejecutadas por tests / Líneas totales de código) * 100.",
+        optimal: "Deseable: > 80% de cobertura de código.\n(Nota: 100% de cobertura no garantiza 0% de bugs logísticos).",
+        visual: `
+          <div class="flow-step">Función: registrarUsuario()</div>
+          <div style="display:flex; justify-content:space-around; width:100%; margin-top:5px;">
+            <div class="flow-step highlight" style="width:45%; font-size:0.65rem;">Camino A (Testeado - 100% OK)</div>
+            <div class="flow-step danger" style="width:45%; font-size:0.65rem;">Camino B (No Testeado)</div>
+          </div>
+        `
+      },
+      maint: {
+        title: "Índice de Mantenibilidad (Maintainability Index)",
+        meta: "Categoría: Salud del Código",
+        desc: "Un valor sintético entre 0 y 100 que calcula la facilidad de mantener y modificar el código de un proyecto. Combina las líneas de código, la complejidad ciclomática de McCabe y la métrica de Volumen de Halstead.",
+        formula: "Fórmula compleja de base logarítmica que arroja un índice entre 0 y 100.",
+        optimal: "20-100: Mantenibilidad alta (Verde).\n10-19: Mantenibilidad moderada (Amarillo).\n< 10: Baja mantenibilidad (Rojo, código legado intratable).",
+        visual: `
+          <div class="flow-step highlight" style="border-color:var(--color-primary); color:var(--color-success); font-weight:800; font-size:1.1rem;">Índice: 85 / 100 (Salud Excelente)</div>
+          <div style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:8px;">Calculado en base a LOC, Halstead y McCabe</div>
+        `
+      },
+      sonar: {
+        title: "SonarQube Panel",
+        meta: "Categoría: Automatización de Análisis Estático",
+        desc: "Recreación de un panel de SonarQube para evaluar las métricas de calidad de forma integrada en un pipeline de integración continua (CI/CD).",
+        formula: "Evalúa Quality Gates basándose en la suma de métricas configuradas por el arquitecto.",
+        optimal: "Pasar el Quality Gate (Passed) en cada push a la rama principal.",
+        visual: `
+          <div class="sonar-panel">
+            <div class="sonar-header">
+              <span>SonarQube Dashboard</span>
+              <span style="color:var(--color-primary); font-weight:bold;">GATE PASSED</span>
+            </div>
+            <div class="sonar-body">
+              <div class="sonar-metric">
+                <div class="sonar-metric-title">Bugs</div>
+                <div class="sonar-metric-value" style="color:var(--color-primary);">0</div>
+              </div>
+              <div class="sonar-metric">
+                <div class="sonar-metric-title">Coverage</div>
+                <div class="sonar-metric-value" style="color:var(--color-primary);">87.4%</div>
+              </div>
+              <div class="sonar-metric">
+                <div class="sonar-metric-title">Code Smells</div>
+                <div class="sonar-metric-value" style="color:var(--color-warning);">12</div>
+              </div>
+              <div class="sonar-metric">
+                <div class="sonar-metric-title">Duplications</div>
+                <div class="sonar-metric-value" style="color:var(--color-primary);">1.2%</div>
+              </div>
+            </div>
+          </div>
+        `
+      }
+    };
+
+    function selectMet(key) {
+      // Toggle button active class
+      document.querySelectorAll('.met-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const targetBtn = Array.from(document.querySelectorAll('.met-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(key));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const data = metData[key];
+
+      // Update text sheet with quick fade animation
+      const sheet = document.getElementById('met-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      document.getElementById('met-title').innerText = data.title;
+      document.getElementById('met-meta').innerText = data.meta;
+      document.getElementById('met-desc').innerText = data.desc;
+
+      // Update formulas and ranges
+      document.getElementById('met-formula').innerText = data.formula;
+      document.getElementById('met-optimal').innerText = data.optimal;
+
+      // Update schematic visual
+      document.getElementById('met-visual').innerHTML = data.visual;
+    }
+
+    // Default load MTBF
+    selectMet('mtbf');
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado el cálculo e interpretación de métricas de calidad.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Repasa los rangos de Complejidad Ciclomática y el cálculo de MTTR.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te sugerimos revisar detenidamente la ficha de Quality Gates en SonarQube.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>

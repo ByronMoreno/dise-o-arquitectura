@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 7.1: Principios SOLID. SRP, OCP, LSP, ISP y DIP. Ejemplos de refactorización en Java y Python, diagramas estructurales CSS y quiz interactivo.">
+  <title>Principios SOLID | Unidad 4 Clase 7.1</title>
+  
+  <!-- Google Fonts: Outfit (headings/body) and Fira Code (code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    /* ==========================================
+       CSS Variables & Global Reset
+       ========================================== */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.65);
+      --bg-card-hover: rgba(30, 41, 59, 0.85);
+      --border-glow: rgba(59, 130, 246, 0.15);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #10b981; /* Emerald */
+      --color-primary-rgb: 16, 185, 129;
+      --color-secondary: #8b5cf6; /* Purple */
+      --color-secondary-rgb: 139, 92, 246;
+      --color-accent: #06b6d4; /* Cyan */
+      --color-accent-rgb: 6, 182, 212;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      display: flex;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 60vw;
+      height: 60vw;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-dark);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* ==========================================
+       Sidebar Navigation Style
+       ========================================== */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 30px 24px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .sidebar-header svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: var(--color-primary);
+      stroke-width: 2;
+    }
+
+    .sidebar-logo-text h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text-bright), var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .sidebar-logo-text span {
+      font-size: 0.75rem;
+      color: var(--color-primary);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-bright);
+    }
+
+    .sidebar-menu li a:hover svg {
+      transform: translateX(3px);
+    }
+
+    .sidebar-menu li a.active {
+      background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(139, 92, 246, 0.05));
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-primary);
+      padding-left: 13px;
+    }
+
+    .sidebar-footer {
+      padding: 20px;
+      border-top: 1px solid var(--border-light);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* ==========================================
+       Main Content Layout
+       ========================================== */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 50px;
+    }
+
+    /* Reading Progress bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 101;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Top navbar for mobile */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 16px 24px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 99;
+    }
+
+    .top-nav h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #fff, var(--text-muted));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .menu-btn svg {
+      width: 24px;
+      height: 24px;
+      stroke: currentColor;
+      stroke-width: 2;
+    }
+
+    .menu-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 98;
+    }
+
+    /* ==========================================
+       Hero / Header
+       ========================================== */
+    .hero-section {
+      position: relative;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(30, 41, 59, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px;
+      overflow: hidden;
+      margin-top: 0;
+    }
+
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.1) 0%, rgba(0,0,0,0) 70%);
+      pointer-events: none;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--color-primary);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hero-tag svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #ffffff, #94a3b8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.6;
+    }
+
+    /* ==========================================
+       General Section / Content Elements
+       ========================================== */
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      letter-spacing: -0.5px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(to bottom, var(--color-primary), var(--color-accent));
+      border-radius: 4px;
+    }
+
+    .topic-section {
+      padding-top: 20px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 50px;
+    }
+
+    .topic-section:last-of-type {
+      border-bottom: none;
+    }
+
+    .intro-paragraph {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-muted);
+      margin-bottom: 30px;
+    }
+
+    .highlight {
+      color: var(--text-bright);
+      font-weight: 600;
+    }
+
+    /* ==========================================
+       Interactive SOLID Explorer
+       ========================================== */
+    .solid-explorer {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 30px;
+      margin-top: 24px;
+    }
+
+    .solid-tabs {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .solid-tabs {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .solid-tab-btn {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .solid-tab-btn:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+
+    .solid-tab-btn.active {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(6, 182, 212, 0.05));
+      border-color: var(--color-primary);
+      color: var(--color-accent);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.1);
+    }
+
+    .solid-sheet {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 30px;
+      animation: fadeIn 0.3s ease;
+    }
+
+    @media (max-width: 968px) {
+      .solid-sheet {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .solid-details-card {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .solid-sheet-title {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-bright);
+    }
+
+    .solid-sheet-meta {
+      font-size: 0.9rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      background: rgba(6, 182, 212, 0.08);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      padding: 8px 12px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    .solid-sheet-desc {
+      font-size: 0.98rem;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    .solid-pros-cons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .pros-box h4 { color: var(--color-success); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .cons-box h4 { color: var(--color-danger); font-size: 0.88rem; font-weight: 700; margin-bottom: 6px; }
+    .pros-box ul, .cons-box ul { list-style: none; font-size: 0.82rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 6px; }
+    .pros-box ul li::before { content: '✓ '; color: var(--color-success); font-weight: bold; }
+    .cons-box ul li::before { content: '⚠ '; color: var(--color-warning); font-weight: bold; }
+
+    /* Visual schematic container */
+    .solid-visual-container {
+      background: rgba(10, 15, 30, 0.4);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+      gap: 10px;
+    }
+
+    /* CSS flowcharts */
+    .flow-step {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-align: center;
+      width: 90%;
+    }
+
+    .flow-step.highlight {
+      background: rgba(16, 185, 129, 0.05);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    .flow-arrow {
+      color: var(--color-accent);
+      font-size: 0.95rem;
+      line-height: 1;
+    }
+
+    /* ==========================================
+       Code Comparator (Tabs)
+       ========================================== */
+    .code-comparator {
+      background: #0b0f19;
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      overflow: hidden;
+      margin-top: 24px;
+    }
+
+    .code-tabs-header {
+      background: rgba(15, 23, 42, 0.6);
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      overflow-x: auto;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 16px 20px;
+      color: var(--text-muted);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-bright);
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .tab-btn.active {
+      color: var(--color-primary);
+      border-bottom-color: var(--color-primary);
+      background: rgba(16, 185, 129, 0.05);
+    }
+
+    .code-panel {
+      display: none;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .code-panel.active {
+      display: block;
+    }
+
+    pre {
+      margin: 0;
+    }
+
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+    }
+
+    /* Syntax Highlighting */
+    .keyword { color: #f43f5e; font-weight: 600; }
+    .type { color: #06b6d4; font-weight: 500; }
+    .annotation { color: #8b5cf6; font-weight: 500; }
+    .method { color: #3b82f6; }
+    .string { color: #10b981; }
+    .comment { color: #64748b; font-style: italic; }
+
+    /* ==========================================
+       Quiz Section
+       ========================================== */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.4));
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 40px;
+      margin-top: 24px;
+    }
+
+    .quiz-question {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.01);
+      border: 1px solid rgba(255, 255, 255, 0.03);
+      padding: 24px;
+      border-radius: 12px;
+    }
+
+    .quiz-question h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text-bright);
+      display: flex;
+      gap: 10px;
+    }
+
+    .quiz-question h4 span.q-num {
+      color: var(--color-primary);
+      font-weight: 700;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid var(--border-light);
+      padding: 14px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+      color: var(--text-main);
+    }
+
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .quiz-option input[type="radio"] {
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      outline: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+
+    .quiz-option input[type="radio"]:checked {
+      border-color: var(--color-primary);
+    }
+
+    .quiz-option input[type="radio"]:checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      background-color: var(--color-primary);
+      border-radius: 50%;
+      display: block;
+    }
+
+    .quiz-option.selected {
+      background: rgba(16, 185, 129, 0.06);
+      border-color: rgba(16, 185, 129, 0.3);
+      color: var(--text-bright);
+    }
+
+    .quiz-option.correct {
+      background: rgba(16, 185, 129, 0.1) !important;
+      border-color: rgba(16, 185, 129, 0.4) !important;
+      color: var(--color-success) !important;
+    }
+
+    .quiz-option.correct input[type="radio"] {
+      border-color: var(--color-success) !important;
+    }
+    
+    .quiz-option.correct input[type="radio"]::after {
+      background-color: var(--color-success) !important;
+    }
+
+    .quiz-option.incorrect {
+      background: rgba(239, 68, 68, 0.1) !important;
+      border-color: rgba(239, 68, 68, 0.4) !important;
+      color: var(--color-danger) !important;
+    }
+
+    .quiz-option.incorrect input[type="radio"] {
+      border-color: var(--color-danger) !important;
+    }
+    
+    .quiz-option.incorrect input[type="radio"]::after {
+      background-color: var(--color-danger) !important;
+    }
+
+    .quiz-actions {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 14px 28px;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.2);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.4);
+    }
+
+    .quiz-results-summary {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      font-size: 1.05rem;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .score-badge {
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+
+    .score-badge.pass {
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: var(--color-success);
+    }
+
+    .score-badge.fail {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--color-danger);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ==========================================
+       Responsive breakpoints
+       ========================================== */
+    @media (max-width: 1024px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+      .sidebar.open {
+        transform: translateX(0);
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 80px 24px 40px 24px;
+      }
+      .progress-bar-container {
+        left: 0;
+      }
+      .top-nav {
+        display: flex;
+      }
+      .menu-overlay.open {
+        display: block;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Glow Elements -->
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Mobile Top Navigation Bar -->
+  <div class="top-nav">
+    <h1>Clase 7.1: SOLID</h1>
+    <button class="menu-btn" id="mobile-menu-toggle" aria-label="Abrir menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Mobile Drawer Overlay -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+
+  <!-- Navigation Sidebar -->
+  <aside class="sidebar" id="sidebar-nav">
+    <div class="sidebar-header">
+      <svg viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <div class="sidebar-logo-text">
+        <h2>Unidad 4</h2>
+        <span>Clase 7.1: SOLID</span>
+      </div>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#hero" class="active">Inicio</a></li>
+      <li><a href="#modulo1">1. ¿Qué es SOLID?</a></li>
+      <li><a href="#modulo2">2. Fichas SOLID</a></li>
+      <li><a href="#modulo3">3. Ejemplos Prácticos</a></li>
+      <li><a href="#quiz">4. Quiz Evaluativo</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <p>UNIBE - 2026</p>
+    </div>
+  </aside>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="reading-progress"></div>
+  </div>
+
+  <!-- Main Content Layout -->
+  <main class="main-content">
+    
+    <!-- Hero / Header -->
+    <header class="hero-section" id="hero">
+      <div class="hero-tag">
+        <svg viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+        </svg>
+        <span>Unidad 4: Tema 2</span>
+      </div>
+      <h1 class="hero-title">Principios SOLID</h1>
+      <p class="hero-subtitle">
+        Domina los cinco acrónimos de diseño orientado a objetos formulados por Robert C. Martin. Diseña clases cohesivas, extensibles y fáciles de mantener.
+      </p>
+    </header>
+
+    <!-- Modulo 1: Que es SOLID -->
+    <section class="topic-section" id="modulo1">
+      <h2 class="section-title">1. ¿Qué es SOLID?</h2>
+      <p class="intro-paragraph">
+        El acrónimo <span class="highlight">SOLID</span> representa cinco principios básicos de diseño de clases que guían al desarrollador para construir software limpio, reduciendo el acoplamiento rígido y la fragilidad del código. Su correcta aplicación permite cambiar o extender el comportamiento del sistema sin necesidad de rediseñar o reescribir gran parte de la base de código.
+      </p>
+
+      <div class="cards-grid">
+        <div class="info-card">
+          <div class="card-icon icon-green">S</div>
+          <h3 class="card-title">Responsabilidad Única</h3>
+          <p class="card-content">Una clase debe tener una sola razón para cambiar, enfocándose en una única tarea.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-green">O</div>
+          <h3 class="card-title">Abierto / Cerrado</h3>
+          <p class="card-content">Las clases deben estar abiertas a la extensión pero cerradas a la modificación.</p>
+        </div>
+        <div class="info-card">
+          <div class="card-icon icon-green">L</div>
+          <h3 class="card-title">Sustitución de Liskov</h3>
+          <p class="card-content">Las subclases deben poder ser sustituidas por sus clases padre sin romper el sistema.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 2: Fichas SOLID -->
+    <section class="topic-section" id="modulo2">
+      <h2 class="section-title">2. Catálogo e Interactividad de Principios</h2>
+      <p class="intro-paragraph">
+        Selecciona cada pestaña para explorar los detalles teóricos, consecuencias y esquemas lógicos de cada uno de los 5 principios:
+      </p>
+
+      <div class="solid-explorer">
+        <!-- Tabs selectors -->
+        <div class="solid-tabs">
+          <button class="solid-tab-btn active" onclick="selectSolid('srp')">SRP</button>
+          <button class="solid-tab-btn" onclick="selectSolid('ocp')">OCP</button>
+          <button class="solid-tab-btn" onclick="selectSolid('lsp')">LSP</button>
+          <button class="solid-tab-btn" onclick="selectSolid('isp')">ISP</button>
+          <button class="solid-tab-btn" onclick="selectSolid('dip')">DIP</button>
+        </div>
+
+        <!-- Sheet Panel -->
+        <div class="solid-sheet" id="solid-sheet-content">
+          <!-- Dinamicamente cargado por JS -->
+          <div class="solid-details-card">
+            <h4 class="solid-sheet-title" id="solid-title">SRP - Single Responsibility Principle</h4>
+            <div class="solid-sheet-meta" id="solid-meta">Responsabilidad Única</div>
+            <p class="solid-sheet-desc" id="solid-desc">
+              Cada clase, módulo o función debe encargarse de un único aspecto de la lógica del sistema. Esto simplifica su comprensión, facilita las pruebas unitarias y minimiza la posibilidad de romper funcionalidades no relacionadas cuando se realizan cambios.
+            </p>
+            <div class="solid-pros-cons">
+              <div class="pros-box">
+                <h4>Beneficios</h4>
+                <ul id="solid-pros">
+                  <li>Código altamente cohesivo.</li>
+                  <li>Facilidad de mantenimiento y pruebas unitarias.</li>
+                  <li>Menor riesgo de conflictos en fusiones (merges) de git.</li>
+                </ul>
+              </div>
+              <div class="cons-box">
+                <h4>Señales de Alerta</h4>
+                <ul id="solid-cons">
+                  <li>Clases gigantes ('God Objects') con miles de líneas.</li>
+                  <li>La clase importa librerías de múltiples capas (BD, email, UI).</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <h5 style="color:var(--text-bright); font-size:0.95rem; font-weight:700; margin-bottom:10px;">Estructura Lógica:</h5>
+            <div class="solid-visual-container" id="solid-visual">
+              <!-- Cargado dinámicamente por JS -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 3: Ejemplos de codigo -->
+    <section class="topic-section" id="modulo3">
+      <h2 class="section-title">3. Ejemplos de Código (Java y Python)</h2>
+      <p class="intro-paragraph">
+        Compara la sintaxis y los enfoques de refactorización limpia para cada principio SOLID:
+      </p>
+
+      <div class="code-comparator">
+        <div class="code-tabs-header">
+          <button class="tab-btn active" onclick="switchTab(event, 'code-srp')">SRP (Java)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-ocp')">OCP (Python)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-lsp')">LSP (Java)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-isp')">ISP (Python)</button>
+          <button class="tab-btn" onclick="switchTab(event, 'code-dip')">DIP (Java)</button>
+        </div>
+
+        <!-- SRP -->
+        <div class="code-panel active" id="code-srp">
+          <pre><code><span class="comment">// ANTES: Clase con múltiples responsabilidades (Negocio + Guardar BD + Enviar Email)</span>
+<span class="keyword">public class</span> <span class="type">UsuarioService</span> {
+    <span class="keyword">public void</span> <span class="method">registrarUsuario</span>(<span class="type">Usuario</span> user) {
+        <span class="comment">// Lógica de BD...</span>
+        <span class="type">System</span>.out.<span class="method">println</span>(<span class="string">"Guardando en MySQL..."</span>);
+        <span class="comment">// Enviar email...</span>
+        <span class="type">System</span>.out.<span class="method">println</span>(<span class="string">"Enviando correo..."</span>);
+    }
+}
+
+<span class="comment">// REFACTORIZADO (SRP): Clases desacopladas</span>
+<span class="keyword">public class</span> <span class="type">UsuarioRepository</span> {
+    <span class="keyword">public void</span> <span class="method">guardar</span>(<span class="type">Usuario</span> u) { <span class="comment">/* Lógica BD */</span> }
+}
+<span class="keyword">public class</span> <span class="type">NotificadorEmail</span> {
+    <span class="keyword">public void</span> <span class="method">enviarWelcome</span>(<span class="type">Usuario</span> u) { <span class="comment">/* Lógica Email */</span> }
+}</code></pre>
+        </div>
+
+        <!-- OCP -->
+        <div class="code-panel" id="code-ocp">
+          <pre><code><span class="comment"># ANTES: Violación de OCP (modificar la clase ante un nuevo tipo de reporte)</span>
+<span class="keyword">class</span> <span class="type">GeneradorReportes</span>:
+    <span class="keyword">def</span> <span class="method">generar</span>(self, datos, formato):
+        <span class="keyword">if</span> formato == <span class="string">"PDF"</span>:
+            self.<span class="method">_pdf</span>(datos)
+        <span class="keyword">elif</span> formato == <span class="string">"HTML"</span>:
+            self.<span class="method">_html</span>(datos) <span class="comment"># Si añades Excel, debes MODIFICAR esta clase.</span>
+
+<span class="comment"># REFACTORIZADO (OCP): Abierto a extensión, cerrado a modificación</span>
+<span class="keyword">class</span> <span class="type">ReporteFormato</span>:
+    <span class="keyword">def</span> <span class="method">render</span>(self, datos): <span class="keyword">pass</span>
+
+<span class="keyword">class</span> <span class="type">ReportePDF</span>(<span class="type">ReporteFormato</span>):
+    <span class="keyword">def</span> <span class="method">render</span>(self, datos): <span class="type">print</span>(<span class="string">"Generando PDF"</span>)
+
+<span class="keyword">class</span> <span class="type">ReporteExcel</span>(<span class="type">ReporteFormato</span>): <span class="comment"># Se extiende sin tocar las clases existentes</span>
+    <span class="keyword">def</span> <span class="method">render</span>(self, datos): <span class="type">print</span>(<span class="string">"Generando Excel"</span>)</code></pre>
+        </div>
+
+        <!-- LSP -->
+        <div class="code-panel" id="code-lsp">
+          <pre><code><span class="comment">// ANTES: Avestruz hereda de Ave pero no vuela (lanza excepción rompiendo polimorfismo)</span>
+<span class="keyword">public class</span> <span class="type">Ave</span> {
+    <span class="keyword">public void</span> <span class="method">volar</span>() { <span class="type">System</span>.out.<span class="method">println</span>(<span class="string">"Volando..."</span>); }
+}
+<span class="keyword">public class</span> <span class="type">Avestruz</span> <span class="keyword">extends</span> <span class="type">Ave</span> {
+    <span class="annotation">@Override</span>
+    <span class="keyword">public void</span> <span class="method">volar</span>() { <span class="keyword">throw new</span> <span class="type">UnsupportedOperationException</span>(<span class="string">"No puedo volar"</span>); }
+}
+
+<span class="comment">// REFACTORIZADO (LSP): Modularidad jerárquica limpia</span>
+<span class="keyword">public class</span> <span class="type">Ave</span> { <span class="comment">/* Características generales */</span> }
+<span class="keyword">public class</span> <span class="type">AveVoladora</span> <span class="keyword">extends</span> <span class="type">Ave</span> {
+    <span class="keyword">public void</span> <span class="method">volar</span>() { <span class="comment">/* Volando */</span> }
+}
+<span class="keyword">public class</span> <span class="type">Avestruz</span> <span class="keyword">extends</span> <span class="type">Ave</span> { <span class="comment">/* Solo camina */</span> }</code></pre>
+        </div>
+
+        <!-- ISP -->
+        <div class="code-panel" id="code-isp">
+          <pre><code><span class="comment"># ANTES: Interfaz "gorda" que fuerza a una Impresora simple a programar un FAX</span>
+<span class="keyword">class</span> <span class="type">SuperDispositivo</span>:
+    <span class="keyword">def</span> <span class="method">imprimir</span>(self): <span class="keyword">pass</span>
+    <span class="keyword">def</span> <span class="method">escanear</span>(self): <span class="keyword">pass</span>
+    <span class="keyword">def</span> <span class="method">enviar_fax</span>(self): <span class="keyword">pass</span>
+
+<span class="comment"># REFACTORIZADO (ISP): Interfaces específicas segregadas</span>
+<span class="keyword">class</span> <span class="type">Impresora</span>:
+    <span class="keyword">def</span> <span class="method">imprimir</span>(self): <span class="keyword">pass</span>
+
+<span class="keyword">class</span> <span class="type">Escaner</span>:
+    <span class="keyword">def</span> <span class="method">escanear</span>(self): <span class="keyword">pass</span>
+
+<span class="keyword">class</span> <span class="type">ImpresoraBasica</span>(<span class="type">Impresora</span>):
+    <span class="keyword">def</span> <span class="method">imprimir</span>(self): <span class="type">print</span>(<span class="string">"Imprimiendo en papel"</span>)</code></pre>
+        </div>
+
+        <!-- DIP -->
+        <div class="code-panel" id="code-dip">
+          <pre><code><span class="comment">// ANTES: Clase de alto nivel acoplada rígidamente a una base de datos específica (MySQL)</span>
+<span class="keyword">public class</span> <span class="type">GestorPedido</span> {
+    <span class="keyword">private</span> <span class="type">MySQLConnection</span> db = <span class="keyword">new</span> <span class="type">MySQLConnection</span>(); <span class="comment">// Dependencia directa</span>
+    <span class="keyword">public void</span> <span class="method">guardar</span>() { db.<span class="method">insert</span>(); }
+}
+
+<span class="comment">// REFACTORIZADO (DIP): Ambos dependen de abstracciones (Interfaces)</span>
+<span class="keyword">public interface</span> <span class="type">Database</span> {
+    <span class="keyword">void</span> <span class="method">save</span>();
+}
+<span class="keyword">public class</span> <span class="type">GestorPedido</span> {
+    <span class="keyword">private</span> <span class="type">Database</span> db;
+    <span class="keyword">public</span> <span class="type">GestorPedido</span>(<span class="type">Database</span> db) { <span class="keyword">this</span>.db = db; } <span class="comment">// Inyección</span>
+    <span class="keyword">public void</span> <span class="method">guardar</span>() { db.<span class="method">save</span>(); }
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Modulo 4: Quiz -->
+    <section class="topic-section" id="quiz">
+      <h2 class="section-title">4. Cuestionario de Autoevaluación</h2>
+      <p class="intro-paragraph">
+        Evalúa tu comprensión de la lógica y la aplicación práctica de los principios SOLID:
+      </p>
+
+      <div class="quiz-container">
+        
+        <!-- Pregunta 1 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q1.</span> Si modificas una clase heredada y descubres que rompe por completo el polimorfismo de la aplicación (por ejemplo, arrojando excepciones inesperadas ante métodos de la superclase), ¿qué principio estás violando?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="a">
+              <span>SRP (Responsabilidad Única)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="b">
+              <span>LSP (Sustitución de Liskov)</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q1" value="c">
+              <span>DIP (Inversión de Dependencias)</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q2.</span> ¿Cuál es el enfoque correcto para cumplir con el principio de Inversión de Dependencias (DIP)?</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="a">
+              <span>Instanciar directamente las conexiones de base de datos concretas dentro de los controladores Web.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="b">
+              <span>Asegurar que los módulos de alto nivel y bajo nivel no dependan entre sí directamente, sino que ambos se acoplen a abstracciones (interfaces o clases abstractas).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q2" value="c">
+              <span>Escribir todo el código en un único archivo modular.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q3.</span> Para aplicar el principio Open/Closed (OCP) de manera efectiva, el mecanismo de programación preferido en la orientación a objetos es:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="a">
+              <span>El uso de bloques condicionales anidados (If-Else / Switch).</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="b">
+              <span>El polimorfismo mediante herencia o interfaces, permitiendo inyectar nuevos comportamientos sin modificar el código original.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q3" value="c">
+              <span>El uso de variables globales de configuración.</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question">
+          <h4><span class="q-num">Q4.</span> El principio de Segregación de Interfaces (ISP) aconseja que:</h4>
+          <div class="quiz-options">
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="a">
+              <span>Es mejor diseñar interfaces masivas con decenas de métodos para concentrar todas las firmas de software en un solo lugar.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="b">
+              <span>Los clientes no deberían ser forzados a depender de interfaces o métodos que no utilizan. Es mejor diseñar interfaces específicas y pequeñas.</span>
+            </label>
+            <label class="quiz-option">
+              <input type="radio" name="q4" value="c">
+              <span>No se deben utilizar interfaces en absoluto.</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="quiz-actions">
+          <button class="submit-btn" id="submit-quiz-btn">Verificar Respuestas</button>
+          
+          <div class="quiz-results-summary" id="quiz-results">
+            <span>Calificación:</span>
+            <span class="score-badge" id="score-text">0/4</span>
+            <span id="feedback-text"></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <div>
+        <p class="accent-footer">Diseño y Arquitectura de Software</p>
+        <p>Departamento de Ingeniería de Sistemas</p>
+      </div>
+      <div>
+        <p>Material de Clase - UNIBE 2026</p>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    /* ==========================================
+       Sidebar Drawer & Backdrop Logic
+       ========================================== */
+    const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+    const sidebarNav = document.getElementById('sidebar-nav');
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    function toggleMenu() {
+      sidebarNav.classList.toggle('open');
+      menuOverlay.classList.toggle('open');
+    }
+
+    mobileMenuToggle.addEventListener('click', toggleMenu);
+    menuOverlay.addEventListener('click', toggleMenu);
+
+    const navLinks = document.querySelectorAll('.sidebar-menu a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        sidebarNav.classList.remove('open');
+        menuOverlay.classList.remove('open');
+      });
+    });
+
+    /* ==========================================
+       Reading Progress Indicator
+       ========================================== */
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('reading-progress').style.width = scrolled + '%';
+    });
+
+    /* ==========================================
+       Active Link Observer on Scroll
+       ========================================== */
+    const sections = document.querySelectorAll('.topic-section, header.hero-section');
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.2
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('id');
+          navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${id}`) {
+              link.classList.add('active');
+            }
+          });
+        }
+      });
+    }, observerOptions);
+
+    sections.forEach(section => observer.observe(section));
+
+    /* ==========================================
+       Interactive SOLID Sheets Data & Logic
+       ========================================== */
+    const solidData = {
+      srp: {
+        title: "SRP - Single Responsibility Principle",
+        meta: "Principio de Responsabilidad Única",
+        desc: "Cada clase, módulo o función debe encargarse de un único aspecto de la lógica del sistema. Esto simplifica su comprensión, facilita las pruebas unitarias y minimiza la posibilidad de romper funcionalidades no relacionadas cuando se realizan cambios.",
+        pros: ["Código altamente cohesivo.", "Facilidad de mantenimiento y pruebas unitarias.", "Menor riesgo de conflictos en fusiones (merges) de git."],
+        cons: ["Clases gigantes ('God Objects') con miles de líneas.", "La clase importa librerías de múltiples capas (BD, email, UI)."],
+        visual: `
+          <div class="flow-step highlight">Clase: UsuarioRepository (Guarda BD)</div>
+          <div class="flow-arrow">⇅ (Cohesión)</div>
+          <div class="flow-step highlight">Clase: NotificadorEmail (Envía correos)</div>
+          <div style="font-size:0.75rem; color:var(--color-primary); text-align:center; margin-top:8px;">★ Cada clase tiene 1 sola responsabilidad clara</div>
+        `
+      },
+      ocp: {
+        title: "OCP - Open/Closed Principle",
+        meta: "Principio Abierto / Cerrado",
+        desc: "El comportamiento de una entidad de software debe estar abierto a la extensión (permitiendo añadir nuevas funciones) pero cerrado a la modificación (sin alterar el código fuente ya existente y verificado). Se logra principalmente mediante abstracción y polimorfismo.",
+        pros: ["Previene regresiones y bugs en código de producción estable.", "Estructura altamente extensible para futuros requerimientos.", "Cumplimiento de la estabilidad modular."],
+        cons: ["Código plagado de condicionales anidados (If-Else / Switch) para resolver tipos de datos dinámicos.", "Modificar código viejo cada vez que se agrega un caso nuevo."],
+        visual: `
+          <div class="flow-step">Clase Client ➔ Llama a Interfaz/Abstracción</div>
+          <div class="flow-arrow">▼</div>
+          <div class="flow-step highlight">&lt;&lt;interface&gt;&gt; Forma</div>
+          <div class="flow-arrow">▼ (Extendido por)</div>
+          <div style="display:flex; gap:10px; width:100%; justify-content:center;">
+            <div class="flow-step" style="width:45%; font-size:0.65rem;">Círculo</div>
+            <div class="flow-step" style="width:45%; font-size:0.65rem;">Cuadrado</div>
+          </div>
+        `
+      },
+      lsp: {
+        title: "LSP - Liskov Substitution Principle",
+        meta: "Principio de Sustitución de Liskov",
+        desc: "Formulado por Barbara Liskov. Si una clase S es una subclase de T, entonces los objetos de tipo T pueden ser reemplazados con objetos de tipo S sin alterar las propiedades deseables del programa. Significa que las subclases deben respetar el contrato implícito de sus padres.",
+        pros: ["Garantiza el correcto funcionamiento del polimorfismo.", "Permite reutilizar abstracciones con seguridad lógica.", "Simplifica la jerarquía de herencia."],
+        cons: ["Subclases que anulan métodos de padres arrojando 'UnsupportedOperationException'.", "Comprobar el tipo real de clase con 'instanceof' antes de llamar a un método."],
+        visual: `
+          <div class="flow-step">Base: Vehiculo (acelerar())</div>
+          <div class="flow-arrow">▼</div>
+          <div style="display:flex; gap:10px; width:100%; justify-content:center;">
+            <div class="flow-step highlight" style="width:45%; font-size:0.65rem;">Auto (acelera)</div>
+            <div class="flow-step highlight" style="width:45%; font-size:0.65rem;">Moto (acelera)</div>
+          </div>
+          <div style="font-size:0.72rem; color:var(--color-primary); text-align:center; margin-top:8px;">✓ Ambos pueden sustituir a Vehiculo de forma segura</div>
+        `
+      },
+      isp: {
+        title: "ISP - Interface Segregation Principle",
+        meta: "Principio de Segregación de Interfaces",
+        desc: "Es mejor tener muchas interfaces específicas cliente-servidor que una sola interfaz general o 'gorda'. Los clientes no deben verse obligados a implementar métodos que no necesitan o no utilizan.",
+        pros: ["Reduce el acoplamiento innecesario.", "Previene que los cambios en métodos de interfaces afecten a clases irrelevantes.", "Interfaces muy fáciles de implementar."],
+        cons: ["Clases que implementan métodos vacíos solo para cumplir con la interfaz.", "Interfaces gigantescas con más de 15 firmas de métodos distintos."],
+        visual: `
+          <div class="flow-step highlight">&lt;&lt;interface&gt;&gt; Impresora (imprimir())</div>
+          <div class="flow-arrow">➕</div>
+          <div class="flow-step highlight">&lt;&lt;interface&gt;&gt; Fax (enviarFax())</div>
+          <div style="font-size:0.75rem; color:var(--color-primary); text-align:center; margin-top:8px;">★ Interfaces pequeñas e independientes</div>
+        `
+      },
+      dip: {
+        title: "DIP - Dependency Inversion Principle",
+        meta: "Principio de Inversión de Dependencias",
+        desc: "Las clases de alto nivel (lógica de negocio) no deben depender de las clases de bajo nivel (detalles de persistencia, red o infraestructura). Ambas deben depender de abstracciones. Además, las abstracciones no deben depender de los detalles, sino los detalles de las abstracciones.",
+        pros: ["Permite desacoplar y cambiar motores de BD, APIs de pago o servicios con cero esfuerzo.", "Facilidad para mockear y testear el comportamiento del dominio.", "Arquitecturas modulares e inyectables."],
+        cons: ["Declarar conexiones concretas de MySQL o Stripe directamente en la lógica del negocio.", "Dificultad extrema de realizar pruebas unitarias aisladas."],
+        visual: `
+          <div class="flow-step">Servicio Alto Nivel (Negocio)</div>
+          <div class="flow-arrow">▼ (Depende de abstracción)</div>
+          <div class="flow-step highlight">&lt;&lt;interface&gt;&gt; PaymentGateway</div>
+          <div class="flow-arrow">▲ (Detalle de bajo nivel implementa)</div>
+          <div class="flow-step">Concreto: Stripe / PayPal API</div>
+        `
+      }
+    };
+
+    function selectSolid(key) {
+      // Toggle button active class
+      document.querySelectorAll('.solid-tabs button').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const targetBtn = Array.from(document.querySelectorAll('.solid-tabs button'))
+                             .find(b => b.getAttribute('onclick').includes(key));
+      if (targetBtn) targetBtn.classList.add('active');
+
+      const data = solidData[key];
+
+      // Update text sheet with quick fade animation
+      const sheet = document.getElementById('solid-sheet-content');
+      sheet.style.animation = 'none';
+      sheet.offsetHeight; /* Trigger reflow */
+      sheet.style.animation = 'fadeIn 0.3s ease';
+
+      document.getElementById('solid-title').innerText = data.title;
+      document.getElementById('solid-meta').innerText = data.meta;
+      document.getElementById('solid-desc').innerText = data.desc;
+
+      // Update pros
+      const prosContainer = document.getElementById('solid-pros');
+      prosContainer.innerHTML = '';
+      data.pros.forEach(pro => {
+        const li = document.createElement('li');
+        li.innerText = pro;
+        prosContainer.appendChild(li);
+      });
+
+      // Update cons
+      const consContainer = document.getElementById('solid-cons');
+      consContainer.innerHTML = '';
+      data.cons.forEach(con => {
+        const li = document.createElement('li');
+        li.innerText = con;
+        consContainer.appendChild(li);
+      });
+
+      // Update schematic visual
+      document.getElementById('solid-visual').innerHTML = data.visual;
+    }
+
+    // Default load SRP
+    selectSolid('srp');
+
+    /* ==========================================
+       Code Tabs Switching Logic
+       ========================================== */
+    function switchTab(event, panelId) {
+      const container = event.target.closest('.code-comparator');
+      
+      container.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      
+      container.querySelectorAll('.code-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      event.target.classList.add('active');
+      document.getElementById(panelId).classList.add('active');
+    }
+
+    /* ==========================================
+       Quiz Interaction & Scoring Logic
+       ========================================== */
+    const correctAnswers = {
+      q1: 'b',
+      q2: 'b',
+      q3: 'b',
+      q4: 'b'
+    };
+
+    const optionLabels = document.querySelectorAll('.quiz-option');
+    optionLabels.forEach(label => {
+      label.addEventListener('click', () => {
+        const radio = label.querySelector('input[type="radio"]');
+        const qName = radio.name;
+        
+        document.querySelectorAll(`input[name="${qName}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        
+        label.classList.add('selected');
+        radio.checked = true;
+      });
+    });
+
+    const submitQuizBtn = document.getElementById('submit-quiz-btn');
+    const quizResultsDiv = document.getElementById('quiz-results');
+    const scoreText = document.getElementById('score-text');
+    const feedbackText = document.getElementById('feedback-text');
+
+    submitQuizBtn.addEventListener('click', () => {
+      let score = 0;
+      const totalQuestions = 4;
+      let allAnswered = true;
+
+      // Validate completeness
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        if (!selectedOption) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert("Por favor, responde todas las preguntas del cuestionario antes de verificar.");
+        return;
+      }
+
+      // Check grading
+      for (let i = 1; i <= totalQuestions; i++) {
+        const selectedOption = document.querySelector(`input[name="q${i}"]:checked`);
+        const userValue = selectedOption.value;
+        const correctValue = correctAnswers[`q${i}`];
+        
+        document.querySelectorAll(`input[name="q${i}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('correct', 'incorrect');
+        });
+
+        if (userValue === correctValue) {
+          score++;
+          selectedOption.closest('.quiz-option').classList.add('correct');
+        } else {
+          selectedOption.closest('.quiz-option').classList.add('incorrect');
+          document.querySelector(`input[name="q${i}"][value="${correctValue}"]`).closest('.quiz-option').classList.add('correct');
+        }
+      }
+
+      // Display results badge
+      scoreText.innerText = `${score} / ${totalQuestions}`;
+      quizResultsDiv.style.display = 'flex';
+
+      if (score === totalQuestions) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Excelente! Has dominado los cinco principios SOLID.";
+        feedbackText.style.color = 'var(--color-success)';
+      } else if (score >= 2) {
+        scoreText.className = 'score-badge pass';
+        feedbackText.innerText = "¡Buen trabajo! Repasa los conceptos de Sustitución de Liskov e Inversión de Dependencias.";
+        feedbackText.style.color = 'var(--color-accent)';
+      } else {
+        scoreText.className = 'score-badge fail';
+        feedbackText.innerText = "Te recomendamos revisar detenidamente las fichas y los diagramas estructurales.";
+        feedbackText.style.color = 'var(--color-danger)';
+      }
+
+      submitQuizBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+</body>
+</html>
