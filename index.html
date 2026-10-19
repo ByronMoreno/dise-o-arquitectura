@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Portal Académico del Curso: Diseño y Arquitectura de Software - UNIBE (Período 2026). Contenido estructurado de las Semanas 1 a 6: Fundamentos, UML, Dinámica C4, SOLID/GRASP, Patrones GoF y Examen Parcial I.">
+  <title>Diseño y Arquitectura de Software | UNIBE - Portal Académico</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(59, 130, 246, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Glows */
+    .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 45px;
+      width: 100%;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.5));
+      border: 1px solid var(--border-light);
+      border-radius: 24px;
+      padding: 50px 40px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 300px; height: 300px;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.2) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .uni-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(59, 130, 246, 0.15);
+      color: #60a5fa;
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      padding: 6px 14px;
+      border-radius: 30px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero-title {
+      font-size: 2.8rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 40%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 800px;
+      margin-bottom: 24px;
+    }
+    .hero-info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      border-top: 1px solid var(--border-light);
+      padding-top: 20px;
+      font-size: 0.88rem;
+    }
+    .hero-info-item strong { color: var(--text-bright); display: block; margin-bottom: 2px; }
+    .hero-info-item span { color: var(--text-muted); }
+
+    /* Learning Outcomes (RDA) */
+    .rda-section {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .section-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .rda-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .rda-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 24px;
+      border-left: 4px solid var(--color-primary);
+    }
+    .rda-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .rda-text {
+      font-size: 0.94rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Weeks Grid */
+    .weeks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+    }
+    .week-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 18px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .week-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-glow);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.3);
+    }
+    .week-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .week-num {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+    }
+    .wn-1 { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+    .wn-2 { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; }
+    .wn-3 { background: rgba(6, 182, 212, 0.15); color: #67e8f9; }
+    .wn-4 { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
+    .wn-5 { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+    .wn-6 { background: rgba(245, 158, 11, 0.15); color: #fde68a; }
+
+    .week-unit {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .week-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      line-height: 1.3;
+    }
+    .week-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      flex-grow: 1;
+    }
+    .week-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 1px solid var(--border-light);
+      padding-top: 16px;
+    }
+    .btn-module {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 14px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 600;
+      transition: all 0.2s ease;
+    }
+    .btn-theory {
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      border: 1px solid var(--border-light);
+    }
+    .btn-theory:hover {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+    .btn-practice {
+      background: rgba(6, 182, 212, 0.08);
+      color: var(--color-accent);
+      border: 1px solid rgba(6, 182, 212, 0.25);
+    }
+    .btn-practice:hover {
+      background: var(--color-accent);
+      color: #000;
+    }
+
+    footer {
+      border-top: 1px solid var(--border-light);
+      padding: 30px 24px;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: auto;
+    }
+
+    @media (max-width: 768px) {
+      .hero-banner { padding: 30px 20px; }
+      .hero-title { font-size: 2rem; }
+      .weeks-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <div class="container">
+
+    <!-- Header / Hero -->
+    <header class="hero-banner">
+      <div class="uni-badge">Universidad Iberoamericana del Ecuador &middot; UNIBE</div>
+      <h1 class="hero-title">Diseño y Arquitectura de Software</h1>
+      <p class="hero-desc">
+        Portal académico interactivo oficial. Este entorno de aprendizaje comprende las unidades teóricas, talleres prácticos de ingeniería con PlantUML, laboratorios de refactorización orientada a objetos en Java / Spring Boot y el simulador de evaluación del Primer Parcial.
+      </p>
+      
+      <div class="hero-info-grid">
+        <div class="hero-info-item">
+          <strong>Carrera y Nivel</strong>
+          <span>Carrera de Software &middot; Nivel 5</span>
+        </div>
+        <div class="hero-info-item">
+          <strong>Período Académico</strong>
+          <span>2026-2026 &middot; Modalidad Híbrida</span>
+        </div>
+        <div class="hero-info-item">
+          <strong>Docente Responsable</strong>
+          <span>Moreno Moreno Byron Rodrigo</span>
+        </div>
+        <div class="hero-info-item">
+          <strong>Horas de Aprendizaje</strong>
+          <span>144 Horas (96 Teoría ACD &middot; 48 Práctica APE)</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Resultados de Aprendizaje Evaluados -->
+    <section class="rda-section">
+      <h2 class="section-title">🎯 Resultados de Aprendizaje Evaluados (Primer Parcial)</h2>
+      <div class="rda-grid">
+        <div class="rda-card" style="border-left-color: #3b82f6;">
+          <div class="rda-tag" style="color: #60a5fa;">RDA1 &middot; Semanas 1</div>
+          <p class="rda-text">
+            <strong>Fundamentos y Calidad:</strong> Comprende los fundamentos del diseño de software y los atributos de calidad (ISO/IEC 25010) involucrados en el desarrollo de sistemas informáticos empresariales.
+          </p>
+        </div>
+        <div class="rda-card" style="border-left-color: #06b6d4;">
+          <div class="rda-tag" style="color: #67e8f9;">RDA2 &middot; Semanas 2 y 3</div>
+          <p class="rda-text">
+            <strong>Modelado Orientado a Objetos:</strong> Modela soluciones de software mediante notación formal UML (Casos de uso, Clases, Secuencia, Estados) y documentación contextual mediante el Modelo C4.
+          </p>
+        </div>
+        <div class="rda-card" style="border-left-color: #8b5cf6;">
+          <div class="rda-tag" style="color: #c4b5fd;">RDA7 &middot; Semanas 4 y 5</div>
+          <p class="rda-text">
+            <strong>SOLID, GRASP y Patrones GoF:</strong> Aplica atributos de calidad, principios SOLID, patrones GRASP y patrones de diseño GoF con Inyección de Dependencias para mejorar la mantenibilidad y calidad del software.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Semanas 1 a 6 -->
+    <section class="rda-section">
+      <h2 class="section-title">📚 Contenido por Semanas (Semanas 1 a 6)</h2>
+
+      <div class="weeks-grid">
+
+        <!-- Semana 1 -->
+        <article class="week-card">
+          <div class="week-header">
+            <span class="week-num wn-1">Semana 1</span>
+            <span class="week-unit">Unidad 1</span>
+          </div>
+          <h3 class="week-title">Fundamentos de Diseño y Atributos de Calidad</h3>
+          <p class="week-desc">
+            Ciclo del diseño de software. Requisitos funcionales vs no funcionales. Historias de usuario INVEST y criterios de aceptación Gherkin BDD. Modularidad, cohesión y acoplamiento. Atributos de calidad ISO 25010 y trade-offs.
+          </p>
+          <div class="week-links">
+            <a href="Semana 1/Semana 1.0 - Fundamentos de Diseño y Atributos de Calidad.html" class="btn-module btn-theory">
+              <span>📖 Clase Teórica 1.0 (Fundamentos)</span>
+              <span>&rarr;</span>
+            </a>
+            <a href="Semana 1/Semana 1.2 - Diseño Avanzado, Mantenibilidad, Robustez y Calidad.html" class="btn-module btn-theory" style="border-left: 3px solid var(--color-accent);">
+              <span>🎓 Clase Avanzada 1.2 (Virginia Tech / UNSW / Kansas)</span>
+              <span>&rarr;</span>
+            </a>
+            <a href="Semana 1/Semana 1.1 - Taller de Requisitos y Atributos de Calidad.html" class="btn-module btn-practice">
+              <span>📝 Taller Práctico APE 1.1</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Semana 2 -->
+        <article class="week-card">
+          <div class="week-header">
+            <span class="week-num wn-2">Semana 2</span>
+            <span class="week-unit">Unidad 1</span>
+          </div>
+          <h3 class="week-title">Modelado Estructural UML y Casos de Uso</h3>
+          <p class="week-desc">
+            UML 2.5 estructural. Diagramas de Casos de Uso con especificación textual formal, relaciones <code>&lt;&lt;include&gt;&gt;</code> y <code>&lt;&lt;extend&gt;&gt;</code>. Diagramas de Clases, multiplicidades, Agregación débil vs Composición fuerte en PlantUML.
+          </p>
+          <div class="week-links">
+            <a href="Semana 2/Semana 2.0 - Modelado UML Estructural y Casos de Uso.html" class="btn-module btn-theory">
+              <span>📖 Clase Teórica 2.0</span>
+              <span>&rarr;</span>
+            </a>
+            <a href="Semana 2/Semana 2.1 - Taller Práctico UML Casos de Uso y Clases.html" class="btn-module btn-practice">
+              <span>📝 Taller Práctico UML 1</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Semana 3 -->
+        <article class="week-card">
+          <div class="week-header">
+            <span class="week-num wn-3">Semana 3</span>
+            <span class="week-unit">Unidad 1</span>
+          </div>
+          <h3 class="week-title">Modelado Dinámico y Arquitectura C4</h3>
+          <p class="week-desc">
+            Diagramas de Secuencia (líneas de vida, sincronía y fragmentos alt/loop). Máquinas de Estados y Diagramas de Actividades con carriles. Introducción al Modelo C4 de Simon Brown (Nivel 1 Contexto y Nivel 2 Contenedores).
+          </p>
+          <div class="week-links">
+            <a href="Semana 3/Semana 3.0 - Modelado Dinámico y Modelo C4.html" class="btn-module btn-theory">
+              <span>📖 Clase Teórica 3.0</span>
+              <span>&rarr;</span>
+            </a>
+            <a href="Semana 3/Semana 3.1 - Taller Práctico Diagramas de Secuencia y C4.html" class="btn-module btn-practice">
+              <span>📝 Taller Práctico UML 2</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Semana 4 -->
+        <article class="week-card">
+          <div class="week-header">
+            <span class="week-num wn-4">Semana 4</span>
+            <span class="week-unit">Unidad 2</span>
+          </div>
+          <h3 class="week-title">Principios SOLID, GRASP y Clean Code</h3>
+          <p class="week-desc">
+            Principios SOLID (SRP, OCP, LSP, ISP, DIP). Patrones GRASP de asignación de responsabilidades. Filosofías Clean Code (KISS, DRY, YAGNI). Detección sistemática de Code Smells y el cuadrante de deuda técnica de Martin Fowler.
+          </p>
+          <div class="week-links">
+            <a href="Semana 4/Semana 4.0 - Principios SOLID, GRASP y Clean Code.html" class="btn-module btn-theory">
+              <span>📖 Clase Teórica 4.0</span>
+              <span>&rarr;</span>
+            </a>
+            <a href="Semana 4/Semana 4.1 - Laboratorio de Refactorización y Code Smells.html" class="btn-module btn-practice">
+              <span>📝 Laboratorio Refactorización</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Semana 5 -->
+        <article class="week-card">
+          <div class="week-header">
+            <span class="week-num wn-5">Semana 5</span>
+            <span class="week-unit">Unidad 2</span>
+          </div>
+          <h3 class="week-title">Patrones de Diseño GoF e Inyección IoC</h3>
+          <p class="week-desc">
+            Patrones Creacionales (Factory Method, Singleton, Builder), Estructurales (Adapter, Facade, Decorator) y de Comportamiento (Strategy, Observer). Inversión de Control (IoC) y contenedores de Inyección de Dependencias.
+          </p>
+          <div class="week-links">
+            <a href="Semana 5/Semana 5.0 - Patrones de Diseño GoF e Inyección de Dependencias.html" class="btn-module btn-theory">
+              <span>📖 Clase Teórica 5.0</span>
+              <span>&rarr;</span>
+            </a>
+            <a href="Semana 5/Semana 5.1 - Taller Práctico de Implementación de Patrones GoF.html" class="btn-module btn-practice">
+              <span>📝 Taller Práctico Patrones GoF</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+        <!-- Semana 6 -->
+        <article class="week-card" style="border-color: rgba(245, 158, 11, 0.4);">
+          <div class="week-header">
+            <span class="week-num wn-6">Semana 6</span>
+            <span class="week-unit" style="color:#fbbf24;">Evaluación Parcial I</span>
+          </div>
+          <h3 class="week-title">Evaluación Integral del Primer Parcial</h3>
+          <p class="week-desc">
+            Guía de preparación integral autónoma y simulador interactivo oficial del examen parcial con 10 preguntas teórico-prácticas ponderadas sobre 10.0 puntos, temporizador de 45 minutos y enunciado de laboratorio aplicado en IDE.
+          </p>
+          <div class="week-links">
+            <a href="Semana 6/Semana 6.0 - Guía de Preparación y Repaso Primer Parcial.html" class="btn-module btn-theory">
+              <span>📖 Guía de Repaso 6.0</span>
+              <span>&rarr;</span>
+            </a>
+            <a href="Semana 6/Semana 6.1 - Simulador y Examen Parcial I.html" class="btn-module btn-practice" style="background:rgba(245, 158, 11, 0.15); border-color:#f59e0b; color:#fbbf24;">
+              <span>📝 Simulador de Examen Parcial I</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+
+  </div>
+
+  <footer>
+    <p>Universidad Iberoamericana del Ecuador (UNIBE) &middot; Carrera de Software &middot; Período 2026-2026</p>
+    <p style="margin-top:6px; font-size:0.78rem;">Diseño y Arquitectura de Software &middot; Elaborado por: Byron Rodrigo Moreno Moreno</p>
+  </footer>
+
+</body>
+</html>

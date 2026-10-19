@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 2.1: Taller Práctico de Modelado UML - Diagrama de Casos de Uso y Modelo de Dominio de Clases en PlantUML / draw.io (RDA2) | UNIBE.">
+  <title>Semana 2.1: Taller UML 1 - Casos de Uso y Clases | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(59, 130, 246, 0.2);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(6, 182, 212, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 40px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 40px;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .hero-desc { font-size: 1rem; color: var(--text-muted); line-height: 1.6; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+      overflow: hidden; font-family: var(--font-mono); margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 14px; font-size: 0.8rem; color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 16px; color: #e2e8f0; font-size: 0.84rem; line-height: 1.5; overflow-x: auto; }
+
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-light);
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 4px; width: 18px; height: 18px; accent-color: var(--color-primary); cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Taller Práctico UML 1</div>
+      <h2>Semana 2.1</h2>
+      <p>Modelado del Dominio</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#enunciado" class="active">📋 Enunciado del Proyecto</a></li>
+      <li><a href="#puml-casos">👤 Diagrama de Casos de Uso</a></li>
+      <li><a href="#puml-clases">📦 Diagrama de Clases</a></li>
+      <li><a href="#rubrica">📊 Rúbrica de Evaluación</a></li>
+      <li><a href="Semana 2.0 - Modelado UML Estructural y Casos de Uso.html">⬅ Clase Teórica 2.0</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA2
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="enunciado">
+      <div style="margin-bottom:10px;">
+        <span style="background:rgba(139,92,246,0.15); color:#c4b5fd; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">TALLER PRÁCTICO APE-02</span>
+      </div>
+      <h1 class="hero-title">Taller UML 1: Casos de Uso y Modelo de Dominio</h1>
+      <p class="hero-desc">
+        En este taller práctico modelarás la solución estructural para el núcleo del sistema institucional utilizando notación formal UML 2.5 y código PlantUML verificable.
+      </p>
+    </header>
+
+    <!-- Dominio -->
+    <section class="card">
+      <h2 class="card-title">🏛️ Dominio del Proyecto: Sistema de Gestión Académica y Matrículas (SIGA)</h2>
+      <p style="color:var(--text-muted); line-height:1.7;">
+        El sistema debe permitir que los <strong>Estudiantes</strong> consulten asignaturas habilitadas, verifiquen prerrequisitos (obligatorio antes de confirmar la inscripción), registren su matrícula ordinaria o extraordinaria, y realicen el pago de aranceles mediante tarjeta de crédito o transferencia bancaria validada por el ERP financiero. Asimismo, los <strong>Docentes</strong> registran notas de parciales y asistencia, mientras que el <strong>Coordinador de Carrera</strong> aprueba convalidaciones especiales.
+      </p>
+    </section>
+
+    <!-- PlantUML Casos de Uso -->
+    <section class="card" id="puml-casos">
+      <h2 class="card-title">👤 Entregable 1: Diagrama de Casos de Uso en PlantUML</h2>
+      <p style="color:var(--text-muted); margin-bottom:12px;">
+        Copia este script en <a href="https://www.planttext.com/" target="_blank" style="color:var(--color-accent);">PlantText</a> o en la extensión PlantUML de VS Code para renderizar el diagrama:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>casos_de_uso_siga.puml</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+skinparam monochrome false
+
+actor "Estudiante" as est
+actor "Docente" as doc
+actor "Coordinador Académico" as coord
+actor "Pasarela de Pagos Externa" as pasarela &lt;&lt;Sistema&gt;&gt;
+
+rectangle "Sistema de Gestión Académica (SIGA)" {
+    usecase "CU01: Consultar Asignaturas Habilitadas" as CU01
+    usecase "CU02: Matricular Asignaturas" as CU02
+    usecase "CU03: Validar Prerrequisitos Académicos" as CU03
+    usecase "CU04: Realizar Pago en Línea" as CU04
+    usecase "CU05: Aplicar Beca o Descuento" as CU05
+    usecase "CU06: Registrar Calificaciones" as CU06
+    usecase "CU07: Aprobar Matrícula Especial" as CU07
+}
+
+est --&gt; CU01
+est --&gt; CU02
+doc --&gt; CU06
+coord --&gt; CU07
+
+CU02 .--&gt; CU03 : &lt;&lt;include&gt;&gt;
+CU04 .--&gt; CU02 : &lt;&lt;extend&gt;&gt;
+CU05 .--&gt; CU04 : &lt;&lt;extend&gt;&gt;
+CU04 --&gt; pasarela
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <!-- PlantUML Clases -->
+    <section class="card" id="puml-clases">
+      <h2 class="card-title">📦 Entregable 2: Diagrama de Clases del Modelo de Dominio</h2>
+      <div class="code-container">
+        <div class="code-header">
+          <span>modelo_dominio_siga.puml</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>@startuml
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #0f172a
+    BorderColor #8b5cf6
+    FontColor #f1f5f9
+    ArrowColor #38bdf8
+}
+
+abstract class Usuario {
+    # id: Long
+    # cedula: String
+    # nombres: String
+    # apellidos: String
+    # email: String
+    + getNombreCompleto(): String
+}
+
+class Estudiante {
+    - codigoBanner: String
+    - semestreActual: Integer
+    + tieneDeudas(): Boolean
+}
+
+class Docente {
+    - especialidad: String
+    - horasContratadas: Integer
+}
+
+class Matricula {
+    - numeroOrden: String
+    - fechaRegistro: LocalDateTime
+    - estado: String
+    - valorTotal: BigDecimal
+    + calcularTotal(): BigDecimal
+}
+
+class ItemMatricula {
+    - id: Long
+    - arancel: BigDecimal
+    - vecesCursada: Integer
+}
+
+class Paralelo {
+    - id: Long
+    - aula: String
+    - cupoMaximo: Integer
+    - cupoDisponible: Integer
+    + reservarCupo(): Boolean
+}
+
+class Asignatura {
+    - codigo: String
+    - nombre: String
+    - creditos: Integer
+    + verificarPrerrequisito(est: Estudiante): Boolean
+}
+
+Usuario &lt;|-- Estudiante
+Usuario &lt;|-- Docente
+
+Estudiante "1" -- "0..*" Matricula : Solicita &gt;
+Matricula "1" *-- "1..*" ItemMatricula : Contiene &gt;
+ItemMatricula "0..*" -- "1" Paralelo : En &gt;
+Paralelo "0..*" -- "1" Asignatura : Dicta &gt;
+Docente "1" -- "0..*" Paralelo : Asignado &gt;
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <!-- Rúbrica -->
+    <section class="card" id="rubrica">
+      <h2 class="card-title">📊 Rúbrica de Calificación Taller UML 1 (10.0 Pts)</h2>
+      
+      <div class="checklist-item">
+        <input type="checkbox" id="r1" onchange="calcUmlScore()">
+        <div>
+          <label for="r1" style="font-weight:600; color:#fff;">1. Notación Formal de Casos de Uso (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Uso correcto de actores dentro/fuera del límite, semántica estricta de <code>&lt;&lt;include&gt;&gt;</code> y <code>&lt;&lt;extend&gt;&gt;</code> sin invertir las flechas.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="r2" onchange="calcUmlScore()">
+        <div>
+          <label for="r2" style="font-weight:600; color:#fff;">2. Especificación Textual Formal (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Redacción exhaustiva de precondiciones, flujo básico paso a paso, al menos 2 flujos alternativos y postcondiciones comprobables.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="r3" onchange="calcUmlScore()">
+        <div>
+          <label for="r3" style="font-weight:600; color:#fff;">3. Relaciones y Multiplicidad en Clases (3.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Diferenciación exacta entre Agregación y Composición, multiplicidades en ambos extremos y modelado de herencia / abstracción.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="r4" onchange="calcUmlScore()">
+        <div>
+          <label for="r4" style="font-weight:600; color:#fff;">4. Código PlantUML / draw.io Ejecutable (2.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Sintaxis limpia sin errores de compilación, layout legible y estilos aplicados acordes al estándar institucional.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <button class="copy-btn" style="padding:10px 20px; font-size:0.9rem;" onclick="calcUmlScore()">Calcular Puntuación</button>
+        <div id="umlScoreDisplay" style="font-size:1.2rem; font-weight:700; color:var(--color-accent);">Puntaje: 0.0 / 10.0</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    function calcUmlScore() {
+      const scores = [2.5, 2.5, 3.0, 2.0];
+      let sum = 0;
+      for (let i = 1; i <= 4; i++) {
+        if (document.getElementById('r' + i).checked) {
+          sum += scores[i - 1];
+        }
+      }
+      document.getElementById('umlScoreDisplay').innerText = `Puntaje: ${sum.toFixed(1)} / 10.0`;
+    }
+  </script>
+</body>
+</html>

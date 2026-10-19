@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 4: Principios SOLID, Patrones GRASP, Clean Code y Detección de Code Smells (RDA7). SRP, OCP, LSP, ISP, DIP, patrones de asignación de responsabilidades y deuda técnica.">
+  <title>Semana 4: Principios SOLID, GRASP y Clean Code | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(139, 92, 246, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #8b5cf6;
+      --color-secondary: #3b82f6;
+      --color-accent: #c084fc;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+    .progress-bar-container { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.3); z-index: 101; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(139, 92, 246, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(139, 92, 246, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 45px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 45px; position: relative;
+    }
+    .hero-title {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 40%, #c4b5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;
+    }
+    .hero-desc { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; max-width: 850px; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .card-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+
+    .section-header { border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+    .section-title { font-size: 1.75rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
+    .section-title span.number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; background: rgba(139, 92, 246, 0.2);
+      color: var(--color-primary); font-size: 0.95rem; font-weight: 700;
+    }
+    .section-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+      overflow: hidden; font-family: var(--font-mono); margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 16px; display: flex; justify-content: space-between;
+      align-items: center; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 18px; color: #e2e8f0; font-size: 0.85rem; line-height: 1.55; overflow-x: auto; }
+
+    .custom-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px;
+      overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #fff; padding: 12px 16px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 16px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    .quiz-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(20, 30, 50, 0.7));
+      border: 1px solid var(--border-glow); border-radius: 16px; padding: 30px;
+    }
+    .quiz-question { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+    .quiz-q-title { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 12px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-light);
+      padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .quiz-option.selected { border-color: var(--color-primary); background: rgba(139, 92, 246, 0.15); }
+    .quiz-option.correct { border-color: var(--color-success); background: rgba(16, 185, 129, 0.2); }
+    .quiz-option.incorrect { border-color: var(--color-danger); background: rgba(239, 68, 68, 0.2); }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño y Arquitectura</div>
+      <h2>Semana 4</h2>
+      <p>SOLID, GRASP y Clean Code</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#solid" class="active">🛡️ 1. Principios SOLID</a></li>
+      <li><a href="#grasp">🧠 2. Patrones GRASP</a></li>
+      <li><a href="#clean-code">✨ 3. Clean Code, KISS & DRY</a></li>
+      <li><a href="#smells">🦨 4. Code Smells & Deuda</a></li>
+      <li><a href="#refactoring">🔧 5. Técnicas de Refactorización</a></li>
+      <li><a href="#quiz">🧪 6. Cuestionario Teórico</a></li>
+      <li><a href="Semana 4.1 - Laboratorio de Refactorización y Code Smells.html">📝 Laboratorio Refactorización ↗</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA7
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="solid">
+      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+        <span style="background:rgba(139,92,246,0.15); color:#c4b5fd; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">UNIDAD 2: CALIDAD Y REFACTORIZACIÓN</span>
+        <span style="background:rgba(16,185,129,0.15); color:#34d399; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">RDA7: MANTENIBILIDAD &amp; SOLID</span>
+      </div>
+      <h1 class="hero-title">Principios SOLID, GRASP, Clean Code y Detección de Deuda Técnica</h1>
+      <p class="hero-desc">
+        El código mal diseñado no colapsa inmediatamente: se degrada lentamente acumulando fricción, bugs colaterales y altos costos de mantenimiento. En esta semana profundizamos en los 5 principios SOLID de Robert C. Martin, los 9 patrones GRASP de asignación de responsabilidades de Craig Larman y el diagnóstico sistemático de Code Smells para transformar código frágil en software empresarial sostenible.
+      </p>
+    </header>
+
+    <!-- Section 1: SOLID -->
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">1</span> Los Cinco Principios SOLID</h2>
+        <p class="section-subtitle">Pilares para crear software orientado a objetos tolerante al cambio</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card" style="border-left:4px solid var(--color-primary);">
+          <h3 class="card-title">1. SRP: Single Responsibility Principle</h3>
+          <p class="card-text">
+            <em>"Una clase debe tener una sola razón para cambiar."</em>
+            <br><br>
+            <strong>Violación común:</strong> La clase <code>Factura</code> calcula aranceles, se conecta a PostgreSQL para guardarse a sí misma y genera el HTML del comprobante.
+            <br><strong>Solución:</strong> Dividir en <code>Factura</code> (modelo de datos), <code>FacturaRepository</code> (persistencia) y <code>FacturaPdfGenerator</code> (renderizado).
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-secondary);">
+          <h3 class="card-title">2. OCP: Open/Closed Principle</h3>
+          <p class="card-text">
+            <em>"Las entidades de software deben estar abiertas para su extensión, pero cerradas para su modificación."</em>
+            <br><br>
+            <strong>Violación común:</strong> Un bloque <code>switch(tipoDescuento)</code> que debe modificarse cada vez que la universidad crea un nuevo tipo de beca.
+            <br><strong>Solución:</strong> Declarar una interfaz <code>EstrategiaDescuento</code> e implementar clases concretas (<code>BecaAcademica</code>, <code>DescuentoDeportivo</code>).
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-accent);">
+          <h3 class="card-title">3. LSP: Liskov Substitution Principle</h3>
+          <p class="card-text">
+            <em>"Los subtipos deben ser sustituibles por sus tipos base sin alterar la correctitud del programa." (Barbara Liskov)</em>
+            <br><br>
+            <strong>Violación clásica:</strong> La clase <code>Cuadrado</code> hereda de <code>Rectangulo</code>, pero al invocar <code>setAlto(10)</code> modifica forzosamente el ancho, rompiendo los invariantes esperados por el cliente.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-warning);">
+          <h3 class="card-title">4. ISP: Interface Segregation Principle</h3>
+          <p class="card-text">
+            <em>"Los clientes no deben ser forzados a depender de interfaces con métodos que no utilizan."</em>
+            <br><br>
+            <strong>Violación común:</strong> Una interfaz obesa (Fat Interface) <code>Trabajador</code> con métodos <code>dictarClase()</code>, <code>cobrarMatricula()</code> y <code>mantenerServidores()</code> obligando a clases a dejar métodos con <code>throw new UnsupportedOperationException()</code>.
+          </p>
+        </div>
+      </div>
+
+      <!-- DIP -->
+      <div class="card" style="margin-top:20px; border-left:4px solid var(--color-success);">
+        <h3 class="card-title">5. DIP: Dependency Inversion Principle</h3>
+        <p class="card-text">
+          <em>"Los módulos de alto nivel no deben depender de módulos de bajo nivel. Ambos deben depender de abstracciones. Las abstracciones no deben depender de los detalles; los detalles deben depender de las abstracciones."</em>
+        </p>
+        <div class="code-container">
+          <div class="code-header">
+            <span>Ejemplo Java: Inversión de Dependencias Correcta</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code>// 1. Abstracción (Puerto)
+public interface NotificadorService {
+    void enviarMensaje(String destinatario, String contenido);
+}
+
+// 2. Módulo de Bajo Nivel (Detalle / Adaptador)
+@Service
+public class SmtpEmailService implements NotificadorService {
+    public void enviarMensaje(String destinatario, String contenido) {
+        // Lógica de conexión SMTP con TLS...
+    }
+}
+
+// 3. Módulo de Alto Nivel (Lógica de Negocio / Core)
+@Service
+public class MatriculaService {
+    private final NotificadorService notificador; // Depende de la interfaz, NO de SmtpEmailService
+
+    @Autowired // Inyección por constructor
+    public MatriculaService(NotificadorService notificador) {
+        this.notificador = notificador;
+    }
+
+    public void confirmarMatricula(Estudiante est) {
+        // Reglas de negocio...
+        notificador.enviarMensaje(est.getEmail(), "Tu matrícula ha sido confirmada.");
+    }
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: GRASP -->
+    <section class="card" id="grasp">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> Patrones GRASP (Craig Larman)</h2>
+        <p class="section-subtitle">Guías fundamentales para asignar responsabilidades a clases y objetos</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Patrón GRASP</th>
+            <th>Problema que Resuelve</th>
+            <th>Principio de Asignación de Responsabilidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Experto en Información (Information Expert)</strong></td>
+            <td>¿Cuál es el principio general para asignar responsabilidades a los objetos?</td>
+            <td>Asignar la responsabilidad a la clase que posee la <strong>información necesaria</strong> para realizarla (ej. el total de una factura lo calcula <code>Factura</code> porque conoce sus líneas y aranceles).</td>
+          </tr>
+          <tr>
+            <td><strong>Creador (Creator)</strong></td>
+            <td>¿Quién debe ser responsable de instanciar un nuevo objeto?</td>
+            <td>La clase <code>A</code> debe crear a <code>B</code> si <code>A</code> contiene, agrega fuertemente, registra o usa intensivamente a <code>B</code> (ej. <code>Matricula</code> crea <code>DetalleMatricula</code>).</td>
+          </tr>
+          <tr>
+            <td><strong>Controlador (Controller)</strong></td>
+            <td>¿Quién debe recibir y coordinar las peticiones del sistema que vienen de la UI?</td>
+            <td>Un objeto que representa el caso de uso global (ej. <code>MatriculaController</code>), evitando que la UI se acople directamente a la base de datos o lógica profunda.</td>
+          </tr>
+          <tr>
+            <td><strong>Bajo Acoplamiento (Low Coupling)</strong></td>
+            <td>¿Cómo dar soporte a una baja dependencia y alta reutilización?</td>
+            <td>Asignar responsabilidades de modo que la cantidad de clases asociadas sea mínima.</td>
+          </tr>
+          <tr>
+            <td><strong>Alta Cohesión (High Cohesion)</strong></td>
+            <td>¿Cómo mantener los objetos focalizados, comprensibles y manejables?</td>
+            <td>Mantener clases pequeñas donde todos los métodos colaboren estrechamente en un mismo objetivo conceptual.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 3: Clean Code & Principios -->
+    <section class="card" id="clean-code">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">3</span> Filosofías Clean Code: KISS, DRY y YAGNI</h2>
+        <p class="section-subtitle">Simplicidad pragmática y legibilidad del código</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">💋 KISS</div>
+          <p class="card-text">
+            <strong>Keep It Simple, Stupid:</strong> La mayoría de los sistemas funcionan mejor si se mantienen simples en lugar de complejos. Evitar la sobreingeniería y las jerarquías de herencia artificialmente profundas.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">🌵 DRY</div>
+          <p class="card-text">
+            <strong>Don't Repeat Yourself:</strong> Toda pieza de conocimiento o lógica de negocio debe tener una representación única, inequívoca y autoritativa dentro del sistema. Evitar copiar y pegar bloques de código.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">🚀 YAGNI</div>
+          <p class="card-text">
+            <strong>You Aren't Gonna Need It:</strong> No construyas funcionalidades basadas en especulaciones de "quizás lo usemos en el futuro". Construye solo lo que los requerimientos actuales exigen.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Code Smells y Deuda Técnica -->
+    <section class="card" id="smells">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">4</span> Taxonomía de Code Smells y Deuda Técnica</h2>
+        <p class="section-subtitle">Identificando síntomas de descomposición del diseño</p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3 class="card-title" style="color:var(--color-danger);">Categorías de Code Smells (Martin Fowler)</h3>
+          <ul class="card-text" style="display:flex; flex-direction:column; gap:8px; padding-left:20px;">
+            <li><strong>Bloaters (Hinchazones):</strong> <em>Long Method</em> (&gt; 50 líneas), <em>Large Class</em> (&gt; 500 líneas), <em>Long Parameter List</em> (&gt; 4 parámetros), <em>Primitive Obsession</em>.</li>
+            <li><strong>OO Abusers:</strong> <em>Switch Statements</em> repetidos (falta de polimorfismo), <em>Refused Bequest</em> (heredar pero lanzar excepción en métodos del padre).</li>
+            <li><strong>Change Preventers:</strong> <em>Divergent Change</em> (una clase cambia por 3 razones distintas), <em>Shotgun Surgery</em> (un pequeño cambio requiere tocar 10 archivos).</li>
+            <li><strong>Couplers (Acopladores):</strong> <em>Feature Envy</em> (un método usa más los datos de otra clase que los de la suya propia), <em>Inappropriate Intimacy</em>.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="card-title" style="color:var(--color-warning);">El Cuadrante de la Deuda Técnica (Fowler)</h3>
+          <table class="custom-table">
+            <thead>
+              <tr><th></th><th>Prudente</th><th>Temeraria</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Deliberada</strong></td>
+                <td>"Debemos salir a producción hoy; pagaremos la refactorización el próximo sprint."</td>
+                <td>"No tenemos tiempo para hacer pruebas unitarias ni diseño formal; ¡saquen código ya!"</td>
+              </tr>
+              <tr>
+                <td><strong>Inadvertida</strong></td>
+                <td>"Ahora que el sistema opera, entendemos cuál debió ser el diseño correcto."</td>
+                <td>"¿Qué es la arquitectura en capas y por qué el SQL no debe ir en el frontend?"</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Quiz -->
+    <section class="card" id="quiz">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">5</span> Cuestionario de Principios SOLID y GRASP</h2>
+        <p class="section-subtitle">Comprueba tu capacidad de detectar violaciones arquitectónicas</p>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-question" data-q="1">
+          <div class="quiz-q-title">1. Si una clase concreta hereda de una clase base y al implementar un método lanza "UnsupportedOperationException", ¿qué principio SOLID se está violando directamente?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="s1" value="a"> Principio de Responsabilidad Única (SRP).</label>
+            <label class="quiz-option"><input type="radio" name="s1" value="b"> Principio de Sustitución de Liskov (LSP).</label>
+            <label class="quiz-option"><input type="radio" name="s1" value="c"> Principio de Inversión de Dependencias (DIP).</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="2">
+          <div class="quiz-q-title">2. ¿Qué patrón GRASP recomienda asignar una responsabilidad a la clase que tiene la información necesaria para cumplirla?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="s2" value="a"> Experto en Información (Information Expert).</label>
+            <label class="quiz-option"><input type="radio" name="s2" value="b"> Controlador (Controller).</label>
+            <label class="quiz-option"><input type="radio" name="s2" value="c"> Fabricación Pura (Pure Fabrication).</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="3">
+          <div class="quiz-q-title">3. Cuando un método de la clase A invoca continuamente múltiples getters de la clase B para realizar cálculos internos de B, ¿qué Code Smell se evidencia?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="s3" value="a"> Shotgun Surgery.</label>
+            <label class="quiz-option"><input type="radio" name="s3" value="b"> Feature Envy (Envidia de Funcionalidad).</label>
+            <label class="quiz-option"><input type="radio" name="s3" value="c"> Dead Code.</label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+          <button class="btn-submit" onclick="gradeSolidQuiz()">Verificar Calificación</button>
+          <div id="solidFeedback" style="display:none; font-weight:600; padding:10px 16px; border-radius:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('progressBar').style.width = ((winScroll / height) * 100) + '%';
+    });
+
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const r = this.querySelector('input[type="radio"]');
+        document.querySelectorAll(`input[name="${r.name}"]`).forEach(radio => {
+          radio.closest('.quiz-option').classList.remove('selected');
+        });
+        r.checked = true;
+        this.classList.add('selected');
+      });
+    });
+
+    function gradeSolidQuiz() {
+      const ans = { s1: 'b', s2: 'a', s3: 'b' };
+      let score = 0;
+      let total = 3;
+      for (let k in ans) {
+        if (!document.querySelector(`input[name="${k}"]:checked`)) {
+          alert('Por favor selecciona una respuesta para cada pregunta.');
+          return;
+        }
+      }
+      for (let k in ans) {
+        const sel = document.querySelector(`input[name="${k}"]:checked`);
+        document.querySelectorAll(`input[name="${k}"]`).forEach(input => {
+          const p = input.closest('.quiz-option');
+          p.classList.remove('correct', 'incorrect');
+          if (input.value === ans[k]) p.classList.add('correct');
+          else if (input.checked) p.classList.add('incorrect');
+        });
+        if (sel.value === ans[k]) score++;
+      }
+      const fb = document.getElementById('solidFeedback');
+      fb.style.display = 'block';
+      if (score === total) {
+        fb.style.background = 'rgba(16, 185, 129, 0.2)'; fb.style.color = '#34d399';
+        fb.innerText = `🎉 ¡Brillante! ${score}/${total} respuestas correctas. Comprendes con solidez SOLID y GRASP.`;
+      } else {
+        fb.style.background = 'rgba(245, 158, 11, 0.2)'; fb.style.color = '#fde68a';
+        fb.innerText = `⚠️ Calificación: ${score}/${total}. Revisa los conceptos resaltados en rojo.`;
+      }
+    }
+  </script>
+</body>
+</html>

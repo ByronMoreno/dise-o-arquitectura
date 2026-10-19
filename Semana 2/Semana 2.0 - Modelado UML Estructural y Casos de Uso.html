@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 2: Modelado Estructural y Casos de Uso en UML (RDA2). Casos de Uso con especificación textual formal, relaciones include/extend, Diagramas de Clases, multiplicidades, agregación, composición y PlantUML.">
+  <title>Semana 2: Modelado UML y Casos de Uso | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(59, 130, 246, 0.2);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+    .progress-bar-container { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.3); z-index: 101; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-secondary)); }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(6, 182, 212, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 45px;
+      min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 45px;
+      position: relative;
+    }
+    .hero-title {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 40%, #c4b5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;
+    }
+    .hero-desc { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; max-width: 850px; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      transition: all var(--transition-speed);
+    }
+    .card:hover { border-color: var(--border-glow); }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .card-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+
+    .section-header { border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+    .section-title { font-size: 1.75rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
+    .section-title span.number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; background: rgba(139, 92, 246, 0.2);
+      color: var(--color-secondary); font-size: 0.95rem; font-weight: 700;
+    }
+    .section-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
+
+    .code-container {
+      background: #0b1120;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 18px; color: #e2e8f0; font-size: 0.85rem; line-height: 1.55; overflow-x: auto; }
+
+    .custom-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px;
+      overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #fff; padding: 12px 16px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 16px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    /* Quiz styles */
+    .quiz-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(20, 30, 50, 0.7));
+      border: 1px solid var(--border-glow); border-radius: 16px; padding: 30px;
+    }
+    .quiz-question { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+    .quiz-q-title { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 12px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-light);
+      padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .quiz-option.selected { border-color: var(--color-primary); background: rgba(59, 130, 246, 0.15); }
+    .quiz-option.correct { border-color: var(--color-success); background: rgba(16, 185, 129, 0.2); }
+    .quiz-option.incorrect { border-color: var(--color-danger); background: rgba(239, 68, 68, 0.2); }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+      .hero-title { font-size: 1.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño y Arquitectura</div>
+      <h2>Semana 2</h2>
+      <p>Modelado Estructural y Casos de Uso</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#intro" class="active">📐 1. Introducción a UML</a></li>
+      <li><a href="#casos-uso">👤 2. Casos de Uso y Relaciones</a></li>
+      <li><a href="#especificacion">📝 3. Especificación Textual</a></li>
+      <li><a href="#clases">📦 4. Diagramas de Clases</a></li>
+      <li><a href="#relaciones">🔗 5. Multiplicidad y Composición</a></li>
+      <li><a href="#plantuml">⚙️ 6. Guía PlantUML</a></li>
+      <li><a href="#quiz">🧪 7. Cuestionario Práctico</a></li>
+      <li><a href="Semana 2.1 - Taller Práctico UML Casos de Uso y Clases.html">📝 Taller Práctico Semana 2 ↗</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA2
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="intro">
+      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+        <span style="background:rgba(59,130,246,0.15); color:#60a5fa; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">UNIDAD 1</span>
+        <span style="background:rgba(16,185,129,0.15); color:#34d399; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">RDA2: MODELADO ORIENTADO A OBJETOS</span>
+      </div>
+      <h1 class="hero-title">Modelado Estructural y de Comportamiento con UML</h1>
+      <p class="hero-desc">
+        UML (Unified Modeling Language) es el estándar formal de la industria para visualizar, especificar, construir y documentar los artefactos de un sistema de software. Esta semana dominamos los dos diagramas estructurales y de límites cardinales: Diagramas de Casos de Uso con especificación textual formal y Diagramas de Clases con semántica estricta de relaciones.
+      </p>
+    </header>
+
+    <!-- Section 1: Intro UML -->
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">1</span> El Lenguaje de Modelado Unificado (UML 2.5)</h2>
+        <p class="section-subtitle">Taxonomía de diagramas estructurales vs de comportamiento</p>
+      </div>
+      <div class="grid-2" style="margin-top:16px;">
+        <div>
+          <h3 style="color:var(--color-primary); font-size:1.1rem; margin-bottom:8px;">Estructurales (Estáticos)</h3>
+          <p class="card-text">
+            Representan la organización física o lógica de los elementos del software sin considerar el tiempo:
+            <br>• <strong>Diagrama de Clases:</strong> Entidades, métodos, atributos y vínculos.
+            <br>• <strong>Diagrama de Componentes:</strong> Módulos y artefactos empaquetados.
+            <br>• <strong>Diagrama de Despliegue:</strong> Nodos físicos, contenedores y hardware.
+          </p>
+        </div>
+        <div>
+          <h3 style="color:var(--color-secondary); font-size:1.1rem; margin-bottom:8px;">De Comportamiento (Dinámicos)</h3>
+          <p class="card-text">
+            Capturan la ejecución temporal, intercambio de mensajes y transiciones de estado:
+            <br>• <strong>Diagrama de Casos de Uso:</strong> Frontera del sistema y metas de los actores.
+            <br>• <strong>Diagrama de Secuencia:</strong> Mensajes cronológicos entre instancias.
+            <br>• <strong>Diagrama de Estados y Actividades:</strong> Ciclos de vida y flujos de trabajo.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Casos de Uso -->
+    <section class="card" id="casos-uso">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> Diagramas de Casos de Uso y sus Relaciones</h2>
+        <p class="section-subtitle">Frontera del sistema, Actores primarios/secundarios y dependencias</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Elemento / Relación</th>
+            <th>Notación Gráfica</th>
+            <th>Semántica y Regla de Uso</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Actor</strong></td>
+            <td>Figura de palo (Stickman) o clase <code>&lt;&lt;actor&gt;&gt;</code></td>
+            <td>Rol que interactúa con el sistema (Usuario humano, cron job o API externa).</td>
+          </tr>
+          <tr>
+            <td><strong>Límite del Sistema</strong></td>
+            <td>Rectángulo rotulado con el nombre del software</td>
+            <td>Encapsula los casos de uso dentro del alcance del desarrollo; los actores quedan fuera.</td>
+          </tr>
+          <tr>
+            <td><strong>Inclusión (<code>&lt;&lt;include&gt;&gt;</code>)</strong></td>
+            <td>Línea discontinua con flecha abierta hacia el caso incluido</td>
+            <td><strong>Obligatorio:</strong> El caso base SIEMPRE invoca al caso incluido para completarse (ej. <em>Matricular Materia &rarr; &lt;&lt;include&gt;&gt; &rarr; Validar Prerrequisitos</em>).</td>
+          </tr>
+          <tr>
+            <td><strong>Extensión (<code>&lt;&lt;extend&gt;&gt;</code>)</strong></td>
+            <td>Línea discontinua con flecha desde el caso extensor al caso base</td>
+            <td><strong>Opcional / Condicional:</strong> El caso base puede ejecutarse sin la extensión; esta solo se dispara si se cumple una condición o punto de extensión (ej. <em>Pagar con Descuento Especial &rarr; &lt;&lt;extend&gt;&gt; &rarr; Pagar Matrícula</em>).</td>
+          </tr>
+          <tr>
+            <td><strong>Generalización</strong></td>
+            <td>Flecha continua con punta de triángulo hueco</td>
+            <td>Herencia entre actores (ej. <em>Docente</em> y <em>Estudiante</em> heredan de <em>Usuario</em>) o entre casos de uso especializados.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 3: Especificación Textual Formal -->
+    <section class="card" id="especificacion">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">3</span> Especificación Textual Formal de Casos de Uso</h2>
+        <p class="section-subtitle">El diagrama muestra el mapa; la especificación textual contiene la ingeniería</p>
+      </div>
+
+      <p class="card-text" style="margin-bottom:14px;">
+        Un diagrama de casos de uso sin especificación textual carece de valor prescriptivo. Toda organización profesional utiliza plantillas estandarizadas:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>Plantilla Estándar: Caso de Uso CU-03 (Registro de Asignaturas)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code><strong>ID:</strong> CU-03
+<strong>Nombre:</strong> Matricular Asignaturas del Período Académico
+<strong>Actor Principal:</strong> Estudiante
+<strong>Actores Secundarios:</strong> Sistema de Gestión Financiera (ERP), Servicio de Correo
+<strong>Precondiciones:</strong>
+  1. El estudiante ha autenticado sus credenciales en el portal institucional.
+  2. El período ordinario de matrícula se encuentra en estado ABIERTO.
+<strong>Flujo Principal (Camino Básico):</strong>
+  1. El estudiante ingresa a la sección "Matrícula Ordinaria".
+  2. El sistema consulta y despliega la oferta académica habilitada según la malla curricular.
+  3. El estudiante selecciona las asignaturas y los paralelos de su preferencia.
+  4. El sistema ejecuta el caso &lt;&lt;include&gt;&gt; CU-04 "Validar Prerrequisitos y Co-requisitos".
+  5. El sistema calcula los créditos y el valor arancelario total a cancelar.
+  6. El estudiante confirma la selección de materias.
+  7. El sistema reserva los cupos en los paralelos y emite la orden de liquidación en estado PENDIENTE.
+  8. El caso de uso finaliza exitosamente.
+<strong>Flujos Alternativos / Excepciones:</strong>
+  4a. Cruce de Horario Detectado:
+      - El sistema alerta el solapamiento entre dos asignaturas seleccionadas.
+      - El estudiante debe desmarcar una de las dos asignaturas para reanudar el flujo en el paso 3.
+  4b. Prerrequisito No Aprobado:
+      - El sistema bloquea la materia y notifica el código del prerrequisito adeudado.
+<strong>Postcondiciones:</strong>
+  - Los cupos del estudiante se descuentan del aforo máximo disponible.
+  - Se genera un registro de auditoría con la fecha, hora e IP de la transacción.</code></pre>
+      </div>
+    </section>
+
+    <!-- Section 4: Diagramas de Clases -->
+    <section class="card" id="clases">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">4</span> Diagramas de Clases: Estructura y Visibilidad</h2>
+        <p class="section-subtitle">Entidades de dominio, operaciones y contratos orientados a objetos</p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3 class="card-title">Anatomía de una Clase UML</h3>
+          <p class="card-text">
+            Consta de 3 compartimentos obligatorios:
+            <br>1. <strong>Nombre de la clase:</strong> En negrita centrado. Si es abstracta, va en <em>cursiva</em> o con <code>&lt;&lt;abstract&gt;&gt;</code>.
+            <br>2. <strong>Atributos:</strong> <code>visibilidad nombre : tipo = valorPorDefecto</code>
+            <br>3. <strong>Operaciones / Métodos:</strong> <code>visibilidad nombre(param: tipo) : tipoRetorno</code>
+          </p>
+          <div style="margin-top:14px; background:rgba(255,255,255,0.03); padding:12px; border-radius:8px; font-family:var(--font-mono); font-size:0.85rem;">
+            <strong>Modificadores de Acceso UML:</strong><br>
+            • <code>+</code> Público (Public)<br>
+            • <code>-</code> Privado (Private)<br>
+            • <code>#</code> Protegido (Protected)<br>
+            • <code>~</code> Paquete (Package / Default)
+          </div>
+        </div>
+
+        <div>
+          <h3 class="card-title">Modelo de Dominio vs Diagrama de Diseño</h3>
+          <p class="card-text">
+            • <strong>Modelo de Dominio (Conceptual):</strong> Representa conceptos del mundo real del negocio. No incluye tipos de datos de programación, métodos auxiliares ni tecnologías como ORM o controladores HTTP.
+            <br><br>
+            • <strong>Diagrama de Clases de Diseño (Implementación):</strong> Contiene la especificación exacta de clases de software con tipos estrictos (<code>UUID</code>, <code>BigDecimal</code>), getters, setters, interfaces y patrones de diseño aplicados.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Relaciones y Multiplicidades -->
+    <section class="card" id="relaciones">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">5</span> Relaciones entre Clases: Agregación vs Composición</h2>
+        <p class="section-subtitle">Diferenciación crucial para la integridad del ciclo de vida de los objetos</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="border-left:4px solid var(--color-warning);">
+          <h3 class="card-title">⚪ Agregación (Vínculo Débil / "Tiene Un")</h3>
+          <p class="card-text">
+            Se representa con un <strong>rombo hueco/blanco</strong> en el lado del contenedor.
+            <br><br>
+            <strong>Ciclo de vida independiente:</strong> La parte puede existir sin el todo. Si se destruye el contenedor, los elementos contenidos sobreviven.
+            <br><br>
+            <em>Ejemplo:</em> Una <code>Universidad</code> y sus <code>Profesores</code>. Si la universidad cierra, los profesores siguen existiendo y pueden trabajar en otra institución.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-danger);">
+          <h3 class="card-title">⚫ Composición (Vínculo Fuerte / "Compuesto De")</h3>
+          <p class="card-text">
+            Se representa con un <strong>rombo lleno/negro</strong> en el lado del contenedor.
+            <br><br>
+            <strong>Ciclo de vida dependiente:</strong> La parte no tiene sentido de existencia fuera del todo. La destrucción del contenedor elimina en cascada todas sus partes.
+            <br><br>
+            <em>Ejemplo:</em> Una <code>Factura</code> y sus <code>LineasDetalle</code>, o una <code>Matrícula</code> y sus <code>RegistrosDeMateria</code>.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: PlantUML -->
+    <section class="card" id="plantuml">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">6</span> Código PlantUML Listo para Renderizar</h2>
+        <p class="section-subtitle">Automatización de diagramas como código (Diagrams as Code)</p>
+      </div>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>PlantUML: Diagrama de Clases del Sistema Académico</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar PlantUML</button>
+        </div>
+        <pre><code>@startuml
+skinparam classAttributeIconSize 0
+skinparam monochrome false
+skinparam class {
+    BackgroundColor #0f172a
+    BorderColor #3b82f6
+    FontColor #f1f5f9
+    ArrowColor #06b6d4
+}
+
+abstract class Persona {
+    # id: UUID
+    # identificacion: String
+    # nombreCompleto: String
+    # emailInstitucional: String
+    + getEmail(): String
+}
+
+class Estudiante {
+    - codigoMatricula: String
+    - promedioAcumulado: Double
+    + solicitarInscripcion(asignatura: Asignatura): Boolean
+}
+
+class Docente {
+    - tituloAcademico: String
+    - horasSemanales: Integer
+    + registrarCalificacion(estudiante: Estudiante, nota: Double): Void
+}
+
+class Matricula {
+    - id: UUID
+    - fechaCreacion: LocalDateTime
+    - estado: EstadoMatricula
+    - totalAranceles: BigDecimal
+    + calcularTotal(): BigDecimal
+    + confirmarPago(): Void
+}
+
+class DetalleMatricula {
+    - id: UUID
+    - costoMateria: BigDecimal
+    - calificacionFinal: Double
+}
+
+class Asignatura {
+    - codigo: String
+    - nombre: String
+    - creditos: Integer
+    + validarCupo(): Boolean
+}
+
+enum EstadoMatricula {
+    PENDIENTE
+    PAGADA
+    CANCELADA
+}
+
+Persona &lt;|-- Estudiante : Generalización
+Persona &lt;|-- Docente : Generalización
+Estudiante "1" -- "0..*" Matricula : Realiza &gt;
+Matricula "1" *-- "1..*" DetalleMatricula : Composición (Fuerte)
+DetalleMatricula "0..*" -- "1" Asignatura : Asocia &gt;
+Matricula ..&gt; EstadoMatricula : Usa
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <!-- Section 7: Quiz -->
+    <section class="card" id="quiz">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">7</span> Cuestionario Práctico de Modelado UML</h2>
+        <p class="section-subtitle">Verifica tus conocimientos en Casos de Uso y Diagramas de Clases</p>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-question" data-q="1">
+          <div class="quiz-q-title">1. En un diagrama de casos de uso, si un caso "Registrar Pago" solo se ejecuta cuando el cliente elige pagar con tarjeta de crédito en lugar de efectivo, ¿cuál es la relación correcta?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="u1" value="a"> El caso base incluye con &lt;&lt;include&gt;&gt; a "Registrar Pago con Tarjeta".</label>
+            <label class="quiz-option"><input type="radio" name="u1" value="b"> "Registrar Pago con Tarjeta" extiende con &lt;&lt;extend&gt;&gt; al caso base "Registrar Pago".</label>
+            <label class="quiz-option"><input type="radio" name="u1" value="c"> Son dos casos independientes sin ningún tipo de relación.</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="2">
+          <div class="quiz-q-title">2. ¿Qué distingue a una relación de Composición frente a una de Agregación en UML?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="u2" value="a"> En la composición la parte tiene un ciclo de vida dependiente del todo y se representa con un rombo relleno/negro.</label>
+            <label class="quiz-option"><input type="radio" name="u2" value="b"> En la composición las clases son siempre abstractas y no tienen atributos.</label>
+            <label class="quiz-option"><input type="radio" name="u2" value="c"> La agregación destruye automáticamente a los objetos secundarios al morir el principal.</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="3">
+          <div class="quiz-q-title">3. ¿Qué símbolo UML indica que un atributo u operación es 'Protegido' (Protected)?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="u3" value="a"> El símbolo menos (-)</label>
+            <label class="quiz-option"><input type="radio" name="u3" value="b"> El símbolo numeral (#)</label>
+            <label class="quiz-option"><input type="radio" name="u3" value="c"> La virgulilla (~)</label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+          <button class="btn-submit" onclick="gradeUmlQuiz()">Evaluar Respuestas</button>
+          <div id="umlQuizFeedback" style="display:none; font-weight:600; padding:10px 16px; border-radius:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('progressBar').style.width = ((winScroll / height) * 100) + '%';
+    });
+
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const r = this.querySelector('input[type="radio"]');
+        document.querySelectorAll(`input[name="${r.name}"]`).forEach(radio => {
+          radio.closest('.quiz-option').classList.remove('selected');
+        });
+        r.checked = true;
+        this.classList.add('selected');
+      });
+    });
+
+    function gradeUmlQuiz() {
+      const ans = { u1: 'b', u2: 'a', u3: 'b' };
+      let score = 0;
+      let total = 3;
+      for (let k in ans) {
+        const sel = document.querySelector(`input[name="${k}"]:checked`);
+        if (!sel) {
+          alert('Por favor responde todas las preguntas.');
+          return;
+        }
+      }
+      for (let k in ans) {
+        const sel = document.querySelector(`input[name="${k}"]:checked`);
+        document.querySelectorAll(`input[name="${k}"]`).forEach(input => {
+          const p = input.closest('.quiz-option');
+          p.classList.remove('correct', 'incorrect');
+          if (input.value === ans[k]) p.classList.add('correct');
+          else if (input.checked) p.classList.add('incorrect');
+        });
+        if (sel.value === ans[k]) score++;
+      }
+      const fb = document.getElementById('umlQuizFeedback');
+      fb.style.display = 'block';
+      if (score === total) {
+        fb.style.background = 'rgba(16, 185, 129, 0.2)'; fb.style.color = '#34d399';
+        fb.innerText = `🎉 ¡Perfecto! ${score}/${total} preguntas correctas. Dominas el modelado estructural.`;
+      } else {
+        fb.style.background = 'rgba(245, 158, 11, 0.2)'; fb.style.color = '#fde68a';
+        fb.innerText = `⚠️ Puntuación: ${score}/${total}. Revisa los conceptos marcados en rojo.`;
+      }
+    }
+  </script>
+</body>
+</html>

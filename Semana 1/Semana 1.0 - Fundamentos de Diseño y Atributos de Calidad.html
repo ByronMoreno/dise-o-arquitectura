@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 1: Fundamentos del Diseño de Software y Atributos de Calidad (RDA1). Proceso de diseño, requisitos funcionales/no funcionales, historias de usuario con Gherkin, modularidad, cohesión, acoplamiento y atributos ISO 25010.">
+  <title>Semana 1: Fundamentos de Diseño y Calidad | UNIBE</title>
+  
+  <!-- Google Fonts: Outfit & Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(59, 130, 246, 0.2);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-primary-rgb: 59, 130, 246;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* Ambient background glows */
+    .bg-glow-1 {
+      position: fixed;
+      top: -20%;
+      left: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    .bg-glow-2 {
+      position: fixed;
+      bottom: -20%;
+      right: -10%;
+      width: 50vw;
+      height: 50vw;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(0,0,0,0) 70%);
+      z-index: -2;
+      pointer-events: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Reading Progress */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      height: 4px;
+      background: rgba(0, 0, 0, 0.3);
+      z-index: 101;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+      transition: width 0.1s ease;
+    }
+
+    /* Sidebar Navigation */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      transition: transform var(--transition-speed) ease;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .course-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-accent);
+      background: rgba(6, 182, 212, 0.12);
+      padding: 4px 10px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    .sidebar-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-bright);
+    }
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 18px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+    }
+    .sidebar-menu li a.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+    }
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-light);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sidebar-footer a {
+      color: var(--color-accent);
+      text-decoration: none;
+    }
+
+    /* Mobile Nav */
+    .top-nav {
+      display: none;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(15px);
+      border-bottom: 1px solid var(--border-light);
+      padding: 14px 20px;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 99;
+    }
+    .menu-btn {
+      background: none;
+      border: none;
+      color: var(--text-main);
+      cursor: pointer;
+      font-size: 1.4rem;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 45px;
+    }
+
+    /* Hero Section */
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 45px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .hero-section::after {
+      content: '';
+      position: absolute;
+      top: -50px; right: -50px;
+      width: 250px; height: 250px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-meta {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .hero-badge {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 5px 12px;
+      border-radius: 6px;
+    }
+    .badge-unit { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-rda { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .hero-title {
+      font-size: 2.5rem;
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 40%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 16px;
+    }
+    .hero-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 850px;
+    }
+
+    /* Content Cards & Sections */
+    .content-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .section-header {
+      border-bottom: 1px solid var(--border-light);
+      padding-bottom: 12px;
+    }
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .section-title span.number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--color-primary);
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .section-subtitle {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 20px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+      transition: all var(--transition-speed) ease;
+      position: relative;
+    }
+    .card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-glow);
+      transform: translateY(-2px);
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-text {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Callout Alerts */
+    .alert-box {
+      border-radius: 12px;
+      padding: 18px 22px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      margin: 10px 0;
+    }
+    .alert-info {
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #bfdbfe;
+    }
+    .alert-warning {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: #fde68a;
+    }
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: #a7f3d0;
+    }
+
+    /* Tables */
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+    }
+    .custom-table th {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text-bright);
+      padding: 12px 16px;
+      font-weight: 600;
+      text-align: left;
+      font-size: 0.88rem;
+    }
+    .custom-table td {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-light);
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      vertical-align: top;
+    }
+    .custom-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+      color: var(--text-main);
+    }
+
+    /* Code Blocks */
+    .code-container {
+      background: #0b1120;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33;
+      padding: 8px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: none;
+      color: #cbd5e1;
+      padding: 4px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code {
+      display: block;
+      padding: 18px;
+      color: #e2e8f0;
+      font-size: 0.86rem;
+      line-height: 1.6;
+      overflow-x: auto;
+    }
+
+    /* Comparison Tabs */
+    .tab-header {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .tab-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: var(--color-primary);
+      border-color: var(--color-primary);
+      color: #fff;
+    }
+    .tab-pane {
+      display: none;
+    }
+    .tab-pane.active {
+      display: block;
+    }
+
+    /* Interactive Quiz */
+    .quiz-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(20, 30, 50, 0.7));
+      border: 1px solid var(--border-glow);
+      border-radius: 16px;
+      padding: 30px;
+    }
+    .quiz-question {
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .quiz-q-title {
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: var(--text-bright);
+      margin-bottom: 12px;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border-light);
+      padding: 10px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+    .quiz-option:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .quiz-option.selected {
+      border-color: var(--color-primary);
+      background: rgba(59, 130, 246, 0.15);
+    }
+    .quiz-option.correct {
+      border-color: var(--color-success);
+      background: rgba(16, 185, 129, 0.2);
+    }
+    .quiz-option.incorrect {
+      border-color: var(--color-danger);
+      background: rgba(239, 68, 68, 0.2);
+    }
+    .quiz-action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+    }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: #fff;
+      border: none;
+      padding: 10px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.92rem;
+      transition: transform 0.2s;
+    }
+    .btn-submit:hover { transform: scale(1.02); }
+    .quiz-feedback {
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); }
+      .main-content { margin-left: 0; padding: 24px 16px; margin-top: 55px; }
+      .top-nav { display: flex; }
+      .progress-bar-container { left: 0; }
+      .hero-title { font-size: 1.85rem; }
+      .hero-section { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Mobile Top Nav -->
+  <div class="top-nav">
+    <div style="font-weight:700; font-size:0.95rem;">UNIBE · Software</div>
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="Abrir menú">☰</button>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño y Arquitectura</div>
+      <h2>Semana 1</h2>
+      <p>Fundamentos y Atributos de Calidad</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#intro" class="active">📌 1. Fundamentos del Diseño</a></li>
+      <li><a href="#proceso">🔄 2. El Proceso de Diseño</a></li>
+      <li><a href="#requisitos">📋 3. Requisitos y User Stories</a></li>
+      <li><a href="#pilares">🧱 4. Modularidad y Acoplamiento</a></li>
+      <li><a href="#calidad">⭐ 5. Atributos ISO 25010</a></li>
+      <li><a href="#casos">💥 6. Casos Reales y Trade-offs</a></li>
+      <li><a href="#quiz">🧪 7. Cuestionario Diagnóstico</a></li>
+      <li><a href="Semana 1.2 - Diseño Avanzado, Mantenibilidad, Robustez y Calidad.html">🎓 Clase Avanzada 1.2 (Univ. Ext.) ↗</a></li>
+      <li><a href="Semana 1.1 - Taller de Requisitos y Atributos de Calidad.html">📝 Taller Práctico Semana 1 ↗</a></li>
+      <li><a href="../index.html">🏠 Volver al Portal del Curso</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <span>UNIBE · Período 2026</span>
+      <a href="#">RDA1</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Hero Header -->
+    <header class="hero-section" id="intro">
+      <div class="hero-meta">
+        <span class="hero-badge badge-unit">Unidad 1: Fundamentos del Diseño</span>
+        <span class="hero-badge badge-rda">RDA1: Comprensión y Calidad</span>
+        <span style="color:var(--text-muted); font-size:0.8rem;">Sesión Teórica &middot; 4 Horas</span>
+      </div>
+      <h1 class="hero-title">Fundamentos del Diseño de Software y Atributos de Calidad</h1>
+      <p class="hero-desc">
+        El desarrollo de software profesional no consiste únicamente en escribir código que funcione hoy, sino en concebir estructuras capaces de evolucionar, tolerar fallos y responder con eficiencia bajo condiciones cambiantes. Esta semana sienta las bases conceptuales que transforman requerimientos ambiguos en especificaciones rigurosas y arquitecturas robustas.
+      </p>
+    </header>
+
+    <!-- Section 1: Fundamentos -->
+    <section class="content-section">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">1</span> ¿Qué es el Diseño de Software?</h2>
+        <p class="section-subtitle">Diferenciación conceptual: Codificación, Diseño de Software y Arquitectura</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title" style="color: #60a5fa;">💻 Codificación</div>
+          <p class="card-text">
+            Es la traducción a sintaxis ejecutable de una solución predefinida. Se centra en algoritmos locales, tipos de datos, control de flujo y optimización de instrucciones inmediatas.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: #34d399;">📐 Diseño de Software</div>
+          <p class="card-text">
+            Define la descomposición en módulos, interfaces, clases y la asignación precisa de responsabilidades. Resuelve <strong>cómo</strong> colaboran las partes del sistema para cumplir los requerimientos funcionales y de calidad.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color: #a78bfa;">🏛️ Arquitectura de Software</div>
+          <p class="card-text">
+            Engloba las <strong>decisiones estratégicas fundamentales</strong> que son costosas de cambiar: selección de estilos (monolito, microservicios), particionamiento de subsistemas, contratos de red y persistencia.
+          </p>
+        </div>
+      </div>
+
+      <div class="alert-box alert-info">
+        <div>💡</div>
+        <div>
+          <strong>Cita clave de Grady Booch:</strong> <em>"Toda arquitectura es diseño, pero no todo diseño es arquitectura. La arquitectura representa las decisiones de diseño trascendentales que moldean un sistema."</em>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: El Proceso de Diseño -->
+    <section class="content-section" id="proceso">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> El Ciclo del Proceso de Diseño</h2>
+        <p class="section-subtitle">De la necesidad de negocio al artefacto verificable</p>
+      </div>
+
+      <p class="card-text" style="font-size:1rem; line-height:1.7;">
+        El diseño no es un acto espontáneo ni monolítico. Es un proceso iterativo de refinamiento sucesivo donde la abstracción desciende gradualmente desde la intención del cliente hasta la especificación de componentes:
+      </p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title">1. Diseño Conceptual / Alto Nivel</h3>
+          <ul class="card-text" style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+            <li>Identificación de límites del sistema y actores.</li>
+            <li>Particionamiento en subsistemas o módulos lógicos.</li>
+            <li>Selección preliminar de tecnologías y patrones arquitectónicos.</li>
+            <li>Matriz de compensaciones (trade-offs) entre atributos de calidad.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3 class="card-title">2. Diseño Detallado / Bajo Nivel</h3>
+          <ul class="card-text" style="padding-left: 20px; display:flex; flex-direction:column; gap:8px;">
+            <li>Definición de clases, atributos, métodos y firmas de tipos.</li>
+            <li>Especificación formal de interfaces y contratos REST / RPC.</li>
+            <li>Esquema relacional o no relacional de base de datos.</li>
+            <li>Estrategia de gestión de transacciones y excepciones.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Requisitos -->
+    <section class="content-section" id="requisitos">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">3</span> Requisitos Funcionales vs No Funcionales</h2>
+        <p class="section-subtitle">Especificación rigurosa con Historias de Usuario, INVEST y Gherkin BDD</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Dimensión</th>
+            <th>Requisitos Funcionales (RF)</th>
+            <th>Requisitos No Funcionales (RNF / Atributos)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>¿Qué define?</strong></td>
+            <td><strong>Qué hace</strong> el sistema: acciones, cálculos, flujos de negocio.</td>
+            <td><strong>Cómo se comporta</strong> el sistema: restricciones de rendimiento, seguridad, disponibilidad.</td>
+          </tr>
+          <tr>
+            <td><strong>Ejemplo típico</strong></td>
+            <td>"El sistema debe permitir transferir saldo entre dos cuentas bancarias."</td>
+            <td>"La transacción debe confirmarse en menos de 800 ms bajo una concurrencia de 5,000 req/s."</td>
+          </tr>
+          <tr>
+            <td><strong>Mecanismo de captura</strong></td>
+            <td>Historias de Usuario (User Stories), Casos de Uso UML.</td>
+            <td>Escenarios de Atributos de Calidad, Árboles de Utilidad (Utility Trees).</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Subsección Historias de Usuario -->
+      <div class="card">
+        <h3 class="card-title">Formato Estándar de Historias de Usuario e INVEST</h3>
+        <p class="card-text" style="margin-bottom:14px;">
+          Toda Historia de Usuario debe responder a la terna <code>Como [Rol], Quiero [Acción], Para [Beneficio de negocio]</code> y cumplir con el acrónimo <strong>INVEST</strong>:
+        </p>
+        <div class="grid-3" style="font-size:0.85rem; margin-bottom:16px;">
+          <div><strong>I</strong>ndependent (Independiente)</div>
+          <div><strong>N</strong>egotiable (Negociable)</div>
+          <div><strong>V</strong>aluable (Valiosa)</div>
+          <div><strong>E</strong>stimable (Estimable)</div>
+          <div><strong>S</strong>mall (Pequeña / Acotada)</div>
+          <div><strong>T</strong>estable (Verificable)</div>
+        </div>
+
+        <h4 style="color:var(--color-accent); font-size:0.95rem; margin-bottom:8px;">Criterios de Aceptación con Gherkin (Given-When-Then / BDD)</h4>
+        <div class="code-container">
+          <div class="code-header">
+            <span>Escenario Gherkin: Transferencia con saldo insuficiente</span>
+            <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+          </div>
+          <pre><code><strong>Scenario:</strong> Intento de transferencia bancaria sin fondos suficientes
+  <strong>Given (Dado que)</strong> el cliente "Carlos" tiene un saldo disponible de $50.00 en su cuenta corriente
+  <strong>And (Y)</strong> la cuenta receptora "987654321" está en estado ACTIVA
+  <strong>When (Cuando)</strong> el cliente solicita transferir $100.00 a la cuenta receptora
+  <strong>Then (Entonces)</strong> el sistema debe rechazar la transacción con el código "ERR_INSUFFICIENT_FUNDS"
+  <strong>And (Y)</strong> el saldo de la cuenta de "Carlos" debe permanecer intacto en $50.00
+  <strong>And (Y)</strong> se debe registrar un evento de auditoría de transacción fallida en menos de 200 ms</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Pilares del Diseño Modular -->
+    <section class="content-section" id="pilares">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">4</span> Pilares del Diseño Modular</h2>
+        <p class="section-subtitle">Modularidad, Abstracción, Cohesión y Acoplamiento</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-primary);">🧱 Cohesión (Maximizar)</h3>
+          <p class="card-text">
+            Mide qué tan estrechamente relacionadas y enfocadas están las responsabilidades internas de un módulo.
+          </p>
+          <div style="margin-top:12px; font-size:0.85rem; display:flex; flex-direction:column; gap:6px;">
+            <div style="color:#ef4444;">❌ <strong>Cohesión Coincidente / Lógica:</strong> Métodos agrupados sin relación (ej. clase <code>Utils</code> o <code>Helper</code> con 2000 líneas).</div>
+            <div style="color:#f59e0b;">⚠️ <strong>Cohesión Temporal / Procedimental:</strong> Cosas agrupadas porque ocurren al mismo tiempo.</div>
+            <div style="color:#10b981;">✅ <strong>Cohesión Funcional:</strong> Cada módulo ejecuta una sola tarea bien delimitada (ej. <code>CryptoPasswordHasher</code>).</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-secondary);">🔗 Acoplamiento (Minimizar)</h3>
+          <p class="card-text">
+            Mide el grado de interdependencia entre dos o más módulos. Un alto acoplamiento genera el efecto dominó (ripple effect).
+          </p>
+          <div style="margin-top:12px; font-size:0.85rem; display:flex; flex-direction:column; gap:6px;">
+            <div style="color:#ef4444;">❌ <strong>Acoplamiento de Contenido:</strong> Un módulo accede y modifica directamente la memoria o variables privadas de otro.</div>
+            <div style="color:#f59e0b;">⚠️ <strong>Acoplamiento de Control:</strong> Un módulo le pasa banderas (flags/booleans) a otro para decirle qué camino de ejecución tomar.</div>
+            <div style="color:#10b981;">✅ <strong>Acoplamiento de Datos:</strong> Los módulos interactúan exclusivamente a través de parámetros tipados e interfaces públicas.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: Atributos de Calidad ISO 25010 -->
+    <section class="content-section" id="calidad">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">5</span> Atributos de Calidad de Software (ISO/IEC 25010)</h2>
+        <p class="section-subtitle">Características no funcionales determinantes para la arquitectura empresarial</p>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-title">⚡ Rendimiento</div>
+          <p class="card-text">
+            Capacidad del sistema de responder dentro de umbrales estrictos de tiempo. Se mide en:
+            <br>• <strong>Latencia / Response Time:</strong> p95 &lt; 200 ms.
+            <br>• <strong>Throughput:</strong> Transacciones por segundo (TPS).
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">📈 Escalabilidad</div>
+          <p class="card-text">
+            Habilidad de absorber mayores cargas sin degradar la experiencia:
+            <br>• <strong>Vertical:</strong> Más CPU / RAM (límite físico).
+            <br>• <strong>Horizontal:</strong> Más nodos / réplicas sin estado (stateless).
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">🛡️ Disponibilidad</div>
+          <p class="card-text">
+            Porcentaje de tiempo que el sistema está operativo y accesible.
+            <br>• <strong>99.9% ("Tres nueves"):</strong> 8.76 h downtime/año.
+            <br>• <strong>99.99% ("Cuatro nueves"):</strong> 52.6 min downtime/año.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">🔧 Mantenibilidad</div>
+          <p class="card-text">
+            Grado de facilidad con que el software puede ser modificado, corregido o adaptado a nuevos requerimientos sin introducir fallos colaterales (Modularidad, Testabilidad, Analizabilidad).
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">🔒 Seguridad</div>
+          <p class="card-text">
+            Protección de la información frente a accesos no autorizados. Pilares CIA: Confidencialidad, Integridad y Disponibilidad, además de Autenticación, Autorización y Trazabilidad.
+          </p>
+        </div>
+        <div class="card">
+          <div class="card-title">🧩 Resiliencia</div>
+          <p class="card-text">
+            Capacidad de tolerar fallos parciales en componentes internos o externos (servicios de terceros, bases de datos) y recuperarse con degradación controlada (Graceful Degradation).
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Casos de Estudio y Trade-offs -->
+    <section class="content-section" id="casos">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">6</span> Casos Reales de la Industria y Análisis de Trade-offs</h2>
+        <p class="section-subtitle">Cuando el diseño falla: lecciones arquitectónicas</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-danger);">🚨 El Colapso de Knight Capital (2012)</h3>
+          <p class="card-text">
+            <strong>Pérdida:</strong> $440 millones de dólares en 45 minutos.
+            <br><strong>Causa técnica:</strong> Reutilización imprudente de código muerto (dead code) dentro de un componente monolítico. Al desplegar una nueva funcionalidad en 7 de 8 servidores, el octavo servidor ejecutó el código legado no probado, inundando el mercado de órdenes bursátiles erróneas.
+            <br><strong>Lección de diseño:</strong> Aislamiento de componentes, observabilidad en tiempo real y eliminación rigurosa de código obsoleto.
+          </p>
+        </div>
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-success);">🛡️ Netflix y la Resiliencia Activa (Chaos Monkey)</h3>
+          <p class="card-text">
+            <strong>Enfoque:</strong> Probar la resiliencia en producción de manera continua.
+            <br><strong>Técnica:</strong> Diseñaron su sistema bajo la premisa de que "todo componente puede y va a fallar". Crearon procesos automáticos que destruyen servidores e introducen latencia artificialmente para verificar que el sistema degrade sus funciones con elegancia sin caerse.
+            <br><strong>Lección de diseño:</strong> Diseñar para la falla desde el día 1 mediante Circuit Breakers y desacoplamiento asíncrono.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Cuestionario Diagnóstico -->
+    <section class="content-section" id="quiz">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">7</span> Cuestionario Diagnóstico Interactivo</h2>
+        <p class="section-subtitle">Valida tu comprensión de los conceptos clave de la Semana 1</p>
+      </div>
+
+      <div class="quiz-card">
+        <!-- Pregunta 1 -->
+        <div class="quiz-question" data-q="1">
+          <div class="quiz-q-title">1. ¿Cuál de las siguientes afirmaciones describe con mayor precisión la diferencia entre Arquitectura y Diseño de Software?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="q1" value="a"> La arquitectura se limita a elegir el lenguaje de programación, mientras que el diseño genera el código fuente.</label>
+            <label class="quiz-option"><input type="radio" name="q1" value="b"> La arquitectura abarca las decisiones estructurales globales y costosas de cambiar; el diseño define la organización modular interna e interfaces detalladas.</label>
+            <label class="quiz-option"><input type="radio" name="q1" value="c"> Son exactamente lo mismo y se usan de manera indistinta en ingeniería de software profesional.</label>
+          </div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="quiz-question" data-q="2">
+          <div class="quiz-q-title">2. En el marco de la modularidad, ¿cuál es el objetivo ideal para un sistema mantenible?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="q2" value="a"> Alto acoplamiento y baja cohesión.</label>
+            <label class="quiz-option"><input type="radio" name="q2" value="b"> Alta cohesión y bajo acoplamiento.</label>
+            <label class="quiz-option"><input type="radio" name="q2" value="c"> Ninguna cohesión para permitir que cualquier clase llame a cualquier otra libremente.</label>
+          </div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="quiz-question" data-q="3">
+          <div class="quiz-q-title">3. Un sistema bancario requiere que las transacciones se sincronicen en menos de 500 ms con una disponibilidad del 99.99%. ¿Qué tipo de requisito representa esto?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="q3" value="a"> Requisito Funcional (RF).</label>
+            <label class="quiz-option"><input type="radio" name="q3" value="b"> Requisito No Funcional / Atributo de Calidad (RNF).</label>
+            <label class="quiz-option"><input type="radio" name="q3" value="c"> Regla de interfaz de usuario cosmética.</label>
+          </div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="quiz-question" data-q="4">
+          <div class="quiz-q-title">4. En la formulación de criterios de aceptación con Gherkin BDD, ¿cuál es la secuencia canónica?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="q4" value="a"> Given (Dado que) &rarr; When (Cuando) &rarr; Then (Entonces).</label>
+            <label class="quiz-option"><input type="radio" name="q4" value="b"> If (Si) &rarr; Then (Entonces) &rarr; Else (Sino).</label>
+            <label class="quiz-option"><input type="radio" name="q4" value="c"> Try (Intentar) &rarr; Catch (Capturar) &rarr; Finally (Finalmente).</label>
+          </div>
+        </div>
+
+        <div class="quiz-action-bar">
+          <button class="btn-submit" onclick="gradeQuiz()">Verificar Respuestas</button>
+          <div class="quiz-feedback" id="quizFeedback"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Reading progress bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+    });
+
+    // Mobile sidebar toggle
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+    }
+
+    // Copy code button
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = originalText; }, 2000);
+      });
+    }
+
+    // Radio button UI selection
+    document.querySelectorAll('.quiz-option').forEach(option => {
+      option.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        const name = radio.name;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+          r.closest('.quiz-option').classList.remove('selected');
+        });
+        radio.checked = true;
+        this.classList.add('selected');
+      });
+    });
+
+    // Grade Quiz
+    function gradeQuiz() {
+      const answers = { q1: 'b', q2: 'b', q3: 'b', q4: 'a' };
+      let correct = 0;
+      let total = 4;
+      let allAnswered = true;
+
+      for (let key in answers) {
+        const selected = document.querySelector(`input[name="${key}"]:checked`);
+        if (!selected) {
+          allAnswered = false;
+          break;
+        }
+      }
+
+      if (!allAnswered) {
+        alert('Por favor selecciona una respuesta para cada pregunta antes de evaluar.');
+        return;
+      }
+
+      for (let key in answers) {
+        const selected = document.querySelector(`input[name="${key}"]:checked`);
+        const options = document.querySelectorAll(`input[name="${key}"]`);
+        options.forEach(opt => {
+          const parent = opt.closest('.quiz-option');
+          parent.classList.remove('correct', 'incorrect');
+          if (opt.value === answers[key]) {
+            parent.classList.add('correct');
+          } else if (opt.checked) {
+            parent.classList.add('incorrect');
+          }
+        });
+        if (selected.value === answers[key]) correct++;
+      }
+
+      const feedback = document.getElementById('quizFeedback');
+      feedback.style.display = 'block';
+      if (correct === total) {
+        feedback.style.background = 'rgba(16, 185, 129, 0.2)';
+        feedback.style.color = '#34d399';
+        feedback.innerHTML = `🎉 ¡Excelente! Obtuviste ${correct}/${total}. Dominas los fundamentos de la Semana 1.`;
+      } else {
+        feedback.style.background = 'rgba(245, 158, 11, 0.2)';
+        feedback.style.color = '#fde68a';
+        feedback.innerHTML = `⚠️ Obtuviste ${correct}/${total}. Revisa los conceptos marcados en rojo para consolidar tu aprendizaje.`;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 4.1: Laboratorio Práctico de Refactorización de Código Legado aplicando SOLID y GRASP (RDA7). Diagnóstico de malos olores, reestructuración paso a paso y lista de cotejo de Code Review.">
+  <title>Semana 4.1: Laboratorio de Refactorización | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(139, 92, 246, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #8b5cf6;
+      --color-secondary: #3b82f6;
+      --color-accent: #c084fc;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(139, 92, 246, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(139, 92, 246, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 40px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 40px;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .hero-desc { font-size: 1rem; color: var(--text-muted); line-height: 1.6; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    .custom-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px;
+      overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #fff; padding: 12px 14px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 14px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+      overflow: hidden; font-family: var(--font-mono); margin: 12px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 14px; font-size: 0.8rem; color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 16px; color: #e2e8f0; font-size: 0.84rem; line-height: 1.5; overflow-x: auto; }
+
+    /* Diff Comparison */
+    .diff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 1000px) { .diff-grid { grid-template-columns: 1fr; } }
+
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-light);
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 4px; width: 18px; height: 18px; accent-color: var(--color-primary); cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Laboratorio APE-04</div>
+      <h2>Semana 4.1</h2>
+      <p>Refactorización y Smells</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#caso" class="active">🦨 Código Legado (Smells)</a></li>
+      <li><a href="#diagnostico">🩺 Diagnóstico de Olores</a></li>
+      <li><a href="#comparativa">⚖️ Antes vs Después</a></li>
+      <li><a href="#checklist">✅ Code Review Checklist</a></li>
+      <li><a href="Semana 4.0 - Principios SOLID, GRASP y Clean Code.html">⬅ Clase Teórica 4.0</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA7
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="caso">
+      <div style="margin-bottom:10px;">
+        <span style="background:rgba(139,92,246,0.15); color:#c4b5fd; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">LABORATORIO DE REFACTORIZACIÓN</span>
+      </div>
+      <h1 class="hero-title">Laboratorio: Detección de Code Smells y Refactorización SOLID</h1>
+      <p class="hero-desc">
+        En este laboratorio técnico reestructuramos un módulo monolítico y acoplado (God Class) perteneciente al núcleo transaccional, aplicando sistemáticamente principios SOLID y patrones GRASP para restaurar su mantenibilidad.
+      </p>
+    </header>
+
+    <!-- Código Legado -->
+    <section class="card">
+      <h2 class="card-title">🦨 1. El Código Legado: "InscripcionManager.java"</h2>
+      <p style="color:var(--text-muted); margin-bottom:12px;">
+        Inspecciona el siguiente fragmento real. Observa cómo mezcla SQL JDBC, lógica de validación, envío de correos, formateo y cálculo de becas con condicionales rígidos:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span style="color:#f87171;">❌ InscripcionManager.java (Antipatrón God Class / Violación de SRP, OCP, DIP)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>public class InscripcionManager {
+    // Mal olor: Conexión estricta a base de datos dentro de la lógica
+    public void procesarInscripcion(String estudianteId, List&lt;String&gt; materiasIds, String tipoBeca) {
+        Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/siga", "admin", "1234");
+        
+        // Mal olor: Long Method y cálculos repetitivos
+        double total = 0;
+        for (String id : materiasIds) {
+            PreparedStatement ps = conn.prepareStatement("SELECT costo, cupo FROM materias WHERE id = ?");
+            ps.setString(1, id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                if (rs.getInt("cupo") &lt;= 0) {
+                    throw new RuntimeException("Sin cupo");
+                }
+                total += rs.getDouble("costo");
+            }
+        }
+
+        // Mal olor: Switch Statement / Violación de OCP (Open/Closed)
+        if (tipoBeca.equals("ACADEMICA")) {
+            total = total * 0.70;
+        } else if (tipoBeca.equals("DEPORTIVA")) {
+            total = total * 0.80;
+        } else if (tipoBeca.equals("EMPLEADO")) {
+            total = total * 0.50;
+        }
+
+        // Mal olor: Acoplamiento de persistencia directa
+        PreparedStatement insert = conn.prepareStatement("INSERT INTO matriculas VALUES (?, ?)");
+        insert.setString(1, estudianteId);
+        insert.setDouble(2, total);
+        insert.executeUpdate();
+
+        // Mal olor: Acoplamiento de infraestructura / Sin inyección
+        SmtpTransport.sendEmail("admin@unibe.edu.ec", "Matrícula procesada: $" + total);
+    }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- Diagnóstico -->
+    <section class="card" id="diagnostico">
+      <h2 class="card-title">🩺 2. Matriz de Diagnóstico de Code Smells</h2>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Mal Olor (Code Smell)</th>
+            <th>Principio Violado</th>
+            <th>Técnica de Refactorización a Aplicar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>God Class / Large Class</strong></td>
+            <td>SRP (Single Responsibility)</td>
+            <td><strong>Extract Class:</strong> Separar en Controlador, Servicio de Negocio y Repositorio.</td>
+          </tr>
+          <tr>
+            <td><strong>Switch / Conditional Complexity</strong></td>
+            <td>OCP (Open/Closed)</td>
+            <td><strong>Replace Conditional with Polymorphism (Strategy Pattern):</strong> Crear jerarquía de cálculo de becas.</td>
+          </tr>
+          <tr>
+            <td><strong>Hardcoded SMTP Dependency</strong></td>
+            <td>DIP (Dependency Inversion)</td>
+            <td><strong>Extract Interface &amp; Inversion of Control:</strong> Inyectar <code>NotificadorService</code> por constructor.</td>
+          </tr>
+          <tr>
+            <td><strong>Primitive Obsession</strong></td>
+            <td>Information Expert (GRASP)</td>
+            <td><strong>Preserve Whole Object / Value Object:</strong> Encapsular valores monetarios en <code>Money</code> o <code>BigDecimal</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Comparativa Antes / Después -->
+    <section class="card" id="comparativa">
+      <h2 class="card-title">⚖️ 3. Código Refactorizado: Aplicando SOLID &amp; Clean Code</h2>
+
+      <div class="diff-grid">
+        <div class="code-container">
+          <div class="code-header"><span style="color:#38bdf8;">1. Estrategia de Descuento (OCP)</span></div>
+          <pre><code>public interface PoliticaDescuento {
+    BigDecimal aplicar(BigDecimal total);
+}
+
+@Component("ACADEMICA")
+public class DescuentoAcademico implements PoliticaDescuento {
+    public BigDecimal aplicar(BigDecimal total) {
+        return total.multiply(new BigDecimal("0.70"));
+    }
+}
+
+@Component("DEPORTIVA")
+public class DescuentoDeportivo implements PoliticaDescuento {
+    public BigDecimal aplicar(BigDecimal total) {
+        return total.multiply(new BigDecimal("0.80"));
+    }
+}</code></pre>
+        </div>
+
+        <div class="code-container">
+          <div class="code-header"><span style="color:#34d399;">2. Servicio Desacoplado (SRP &amp; DIP)</span></div>
+          <pre><code>@Service
+public class InscripcionService {
+    private final MateriaRepository materiaRepo;
+    private final MatriculaRepository matriculaRepo;
+    private final NotificadorService notificador;
+    private final Map&lt;String, PoliticaDescuento&gt; politicas;
+
+    @Autowired // Inyección por constructor
+    public InscripcionService(MateriaRepository mRepo,
+                              MatriculaRepository matRepo,
+                              NotificadorService notif,
+                              Map&lt;String, PoliticaDescuento&gt; pols) {
+        this.materiaRepo = mRepo;
+        this.matriculaRepo = matRepo;
+        this.notificador = notif;
+        this.politicas = pols;
+    }
+
+    @Transactional
+    public Matricula registrar(String estudianteId, List&lt;String&gt; materiasIds, String beca) {
+        List&lt;Materia&gt; materias = materiaRepo.findAllById(materiasIds);
+        materias.forEach(Materia::validarCupoDisponible);
+
+        BigDecimal subtotal = materias.stream()
+            .map(Materia::getCosto)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        PoliticaDescuento estrategia = politicas.getOrDefault(beca, t -&gt; t);
+        BigDecimal total = estrategia.aplicar(subtotal);
+
+        Matricula mat = matriculaRepo.save(new Matricula(estudianteId, total));
+        notificador.enviar("admin@unibe.edu.ec", "Matrícula confirmada");
+        return mat;
+    }
+}</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist Code Review -->
+    <section class="card" id="checklist">
+      <h2 class="card-title">✅ 4. Lista de Cotejo para la Revisión de Código (Code Review) - 10 Pts</h2>
+      
+      <div class="checklist-item">
+        <input type="checkbox" id="v1" onchange="calcReviewScore()">
+        <div>
+          <label for="v1" style="font-weight:600; color:#fff;">1. Responsabilidad Única SRP (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Las clases están modularizadas: el servicio no contiene código SQL directo ni llamadas de bajo nivel de transporte.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="v2" onchange="calcReviewScore()">
+        <div>
+          <label for="v2" style="font-weight:600; color:#fff;">2. Principio Open/Closed OCP (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Se reemplazaron los bloques de <code>if-else</code> o <code>switch</code> por polimorfismo mediante el patrón Strategy o interfaces extensibles.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="v3" onchange="calcReviewScore()">
+        <div>
+          <label for="v3" style="font-weight:600; color:#fff;">3. Inversión de Dependencias DIP (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">El servicio depende de interfaces (<code>MateriaRepository</code>, <code>NotificadorService</code>) y recibe las instancias por constructor sin instanciar con <code>new</code>.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="v4" onchange="calcReviewScore()">
+        <div>
+          <label for="v4" style="font-weight:600; color:#fff;">4. Clean Code, Nomenclatura y Manejo de Excepciones (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Uso de <code>BigDecimal</code> para dinero, nombres expresivos de variables y métodos pequeños (&lt; 25 líneas).</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <button class="copy-btn" style="padding:10px 20px; font-size:0.9rem;" onclick="calcReviewScore()">Calcular Evaluación</button>
+        <div id="reviewScoreDisplay" style="font-size:1.2rem; font-weight:700; color:var(--color-accent);">Calificación: 0.0 / 10.0</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    function calcReviewScore() {
+      let sum = 0;
+      for (let i = 1; i <= 4; i++) {
+        if (document.getElementById('v' + i).checked) sum += 2.5;
+      }
+      document.getElementById('reviewScoreDisplay').innerText = `Calificación: ${sum.toFixed(1)} / 10.0`;
+    }
+  </script>
+</body>
+</html>

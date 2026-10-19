@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 1.2: Diseño Avanzado de Software, Mantenibilidad, Robustez y Calidad (RDA1). Basado en materiales de Virginia Tech (CS 3704), UNSW (COMP1531), Universidad de Kansas (EECS 811) y UNLaM. Curva de costo de modularidad, 7 niveles de cohesión, 6 niveles de acoplamiento y taxonomía ISO 25010.">
+  <title>Semana 1.2: Diseño Avanzado, Mantenibilidad y Robustez | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.72);
+      --bg-card-hover: rgba(30, 41, 59, 0.92);
+      --border-glow: rgba(59, 130, 246, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 290px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(6, 182, 212, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+    .progress-bar-container { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.3); z-index: 101; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(6, 182, 212, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 45px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.5));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 45px; position: relative;
+    }
+    .hero-title {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 40%, #93c5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; line-height: 1.2;
+    }
+    .hero-desc { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; max-width: 880px; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; transition: all var(--transition-speed); }
+    .card:hover { border-color: var(--border-glow); }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .card-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+
+    .section-header { border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+    .section-title { font-size: 1.75rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
+    .section-title span.number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; background: rgba(59, 130, 246, 0.2);
+      color: var(--color-primary); font-size: 0.95rem; font-weight: 700;
+    }
+    .section-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
+
+    .custom-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px;
+      overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.85); color: #fff; padding: 12px 16px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 16px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+      overflow: hidden; font-family: var(--font-mono); margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 16px; display: flex; justify-content: space-between;
+      align-items: center; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 16px; color: #e2e8f0; font-size: 0.84rem; line-height: 1.55; overflow-x: auto; }
+
+    /* SVG Chart Styles */
+    .chart-container {
+      background: #090e1a; border: 1px solid var(--border-light); border-radius: 14px;
+      padding: 24px; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      margin: 16px 0;
+    }
+
+    .level-badge {
+      display: inline-block; padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; margin-right: 6px;
+    }
+    .lvl-worst { background: rgba(239, 68, 68, 0.15); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+    .lvl-mid { background: rgba(245, 158, 11, 0.15); color: #fde68a; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .lvl-best { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* Interactive Quiz */
+    .quiz-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(20, 30, 50, 0.7));
+      border: 1px solid var(--border-glow); border-radius: 16px; padding: 30px;
+    }
+    .quiz-question { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+    .quiz-q-title { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 12px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-light);
+      padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .quiz-option.selected { border-color: var(--color-primary); background: rgba(59, 130, 246, 0.15); }
+    .quiz-option.correct { border-color: var(--color-success); background: rgba(16, 185, 129, 0.2); }
+    .quiz-option.incorrect { border-color: var(--color-danger); background: rgba(239, 68, 68, 0.2); }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+      .hero-title { font-size: 1.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño Avanzado</div>
+      <h2>Semana 1.2</h2>
+      <p>Modularidad, Mantenibilidad y Calidad</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#intro" class="active">🏛️ 1. Design Engineering</a></li>
+      <li><a href="#curva-costo">📉 2. Curva de Costo Modular</a></li>
+      <li><a href="#cohesion-7">🎯 3. Los 7 Niveles de Cohesión</a></li>
+      <li><a href="#acoplamiento-6">🔗 4. Los 6 Niveles de Acoplamiento</a></li>
+      <li><a href="#mantenibilidad">🛡️ 5. Mantenibilidad &amp; Robustez</a></li>
+      <li><a href="#taxonomia-calidad">⭐ 6. Taxonomía de Calidad Dual</a></li>
+      <li><a href="#quiz">🧪 7. Cuestionario de Dominio</a></li>
+      <li><a href="#referencias">📚 8. Referencias Universitarias</a></li>
+      <li><a href="Semana 1.0 - Fundamentos de Diseño y Atributos de Calidad.html">⬅ Clase Teórica 1.0</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA1
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- Hero -->
+    <header class="hero-section" id="intro">
+      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+        <span style="background:rgba(59,130,246,0.15); color:#60a5fa; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">MATERIAL COMPLEMENTARIO AVANZADO</span>
+        <span style="background:rgba(6,182,212,0.15); color:#67e8f9; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">UNIDAD 1 &middot; RDA1</span>
+      </div>
+      <h1 class="hero-title">Ingeniería del Diseño, Modularidad, Mantenibilidad y Robustez</h1>
+      <p class="hero-desc">
+        Este módulo profundiza en los fundamentos matemáticos y conceptuales del diseño de software a partir de las cátedras de <strong>Virginia Tech (CS 3704)</strong>, <strong>University of New South Wales (COMP1531)</strong>, <strong>University of Kansas (EECS 811)</strong> y la <strong>UNLaM</strong>. Analizamos la curva de costo de modularidad, el espectro completo de cohesión y acoplamiento, y los factores que dictan la robustez del software a largo plazo.
+      </p>
+    </header>
+
+    <!-- Section 1: Design Engineering -->
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">1</span> ¿Qué es Design Engineering? (Virginia Tech &amp; SlideServe)</h2>
+        <p class="section-subtitle">El proceso estructurado de transformar requisitos en una solución verificable</p>
+      </div>
+
+      <p class="card-text" style="line-height:1.7;">
+        De acuerdo con la cátedra <em>CS 3704 Intermediate Software Design</em> de <strong>Virginia Tech (Dr. Bob Edmison)</strong>, la <strong>Ingeniería del Diseño</strong> es:
+      </p>
+
+      <div style="background:rgba(59,130,246,0.08); border-left:4px solid var(--color-primary); padding:16px 20px; border-radius:8px; margin:14px 0; font-size:1rem; color:#dbeafe;">
+        <em>"El proceso sistemático de toma de decisiones sobre <strong>CÓMO</strong> implementar soluciones de software para satisfacer los requisitos, abarcando el conjunto de conceptos, principios y prácticas que conducen al desarrollo de sistemas de alta calidad."</em>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card" style="border-left:4px solid var(--color-accent);">
+          <h3 class="card-title">Abstracción para Gestionar la Complejidad</h3>
+          <p class="card-text">
+            La mente humana sólo puede retener aproximadamente 7±2 elementos simultáneos (Ley de Miller). La abstracción permite suprimir detalles secundarios para razonar sobre el problema:
+            <br>• <strong>Alto nivel:</strong> Declaraciones semánticas globales como <em>"Procesar Matrícula"</em> o <em>"Liquidar Arancel"</em>.
+            <br>• <strong>Bajo nivel:</strong> Algoritmos específicos, estructuras de datos en memoria y sentencias SQL.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-secondary);">
+          <h3 class="card-title">Refinamiento Progresivo (Top-Down)</h3>
+          <p class="card-text">
+            Estrategia de diseño descendente que revela gradualmente los detalles técnicos a medida que el diseño madura:
+            <br>1. <strong>Diseño Arquitectónico:</strong> Estructura del sistema, subsistemas, protocolos y componentes principales.
+            <br>2. <strong>Diseño Detallado:</strong> Clases, firmas de interfaces, tipos de retorno, manejo de transacciones y persistencia.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Curva de Costo y Modularidad -->
+    <section class="card" id="curva-costo">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> Modularidad y la Curva de Costo del Software (Virginia Tech)</h2>
+        <p class="section-subtitle">Evitando los peligros de la inframodularidad y la sobremodularidad</p>
+      </div>
+
+      <p class="card-text" style="line-height:1.7;">
+        La modularidad divide un problema grande en componentes independientes (*divide and conquer*). Sin embargo, existe una relación matemática fundamental documentada por Roger Pressman y analizada en Virginia Tech:
+      </p>
+
+      <!-- SVG Chart -->
+      <div class="chart-container">
+        <svg viewBox="0 0 700 320" style="width:100%; max-width:680px; height:auto; font-family:var(--font-sans);">
+          <!-- Grid lines -->
+          <line x1="80" y1="260" x2="650" y2="260" stroke="#334155" stroke-width="2"/>
+          <line x1="80" y1="40" x2="80" y2="260" stroke="#334155" stroke-width="2"/>
+          
+          <!-- Axis labels -->
+          <text x="360" y="295" fill="#94a3b8" font-size="13" text-anchor="middle" font-weight="600">Número de Módulos (M) &rarr;</text>
+          <text x="25" y="150" fill="#94a3b8" font-size="13" text-anchor="middle" font-weight="600" transform="rotate(-90 25 150)">Costo de Desarrollo &rarr;</text>
+
+          <!-- Curve 1: Costo individual por módulo (decrece) -->
+          <path d="M 100 60 Q 220 220 640 245" fill="none" stroke="#ef4444" stroke-width="3" stroke-dasharray="5,5"/>
+          <text x="490" y="235" fill="#f87171" font-size="12" font-weight="600">Costo de Desarrollo por Módulo</text>
+
+          <!-- Curve 2: Costo de integración e interfaces (crece) -->
+          <path d="M 100 245 Q 400 230 640 60" fill="none" stroke="#3b82f6" stroke-width="3" stroke-dasharray="5,5"/>
+          <text x="490" y="90" fill="#60a5fa" font-size="12" font-weight="600">Costo de Integración e Interfaces</text>
+
+          <!-- Curve 3: Costo total (U-curve) -->
+          <path d="M 100 120 Q 340 320 640 120" fill="none" stroke="#10b981" stroke-width="4"/>
+          <text x="360" y="160" fill="#34d399" font-size="14" font-weight="800">Costo Total del Software (Mínimo Óptimo)</text>
+
+          <!-- Optimal point marker -->
+          <circle cx="360" cy="220" r="6" fill="#10b981"/>
+          <line x1="360" y1="220" x2="360" y2="260" stroke="#10b981" stroke-width="2" stroke-dasharray="3,3"/>
+          <text x="360" y="250" fill="#34d399" font-size="11" text-anchor="middle">M Óptimo</text>
+
+          <!-- Zones -->
+          <rect x="85" y="45" width="160" height="40" fill="rgba(239, 68, 68, 0.15)" rx="6"/>
+          <text x="165" y="70" fill="#fca5a5" font-size="11" text-anchor="middle" font-weight="700">Inframodularidad (Monolito Dios)</text>
+
+          <rect x="475" y="45" width="165" height="40" fill="rgba(245, 158, 11, 0.15)" rx="6"/>
+          <text x="557" y="70" fill="#fde68a" font-size="11" text-anchor="middle" font-weight="700">Sobremodularidad (Caos Nano)</text>
+        </svg>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="border-left:4px solid var(--color-danger);">
+          <h3 class="card-title">Peligro 1: Inframodularidad (Undermodularity)</h3>
+          <p class="card-text">
+            Pocos módulos gigantescos (*God Modules*). Cada módulo es inmenso y complejo, extremadamente difícil de testear, con miles de líneas y acoplamiento espagueti interno.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-warning);">
+          <h3 class="card-title">Peligro 2: Sobremodularidad (Overmodularity)</h3>
+          <p class="card-text">
+            Fragmentar el sistema en millones de clases microscópicas o microservicios innecesarios (*Nano-services*). El costo de comunicarse, integrar, depurar trazas de red y serializar datos supera con creces el beneficio de la descomposición.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: 7 Niveles de Cohesión -->
+    <section class="card" id="cohesion-7">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">3</span> Los 7 Niveles de Cohesión (Univ. de Kansas &amp; Saiedian)</h2>
+        <p class="section-subtitle">Taxonomía de peor a mejor: evaluando qué tan estrechamente ligadas están las partes de un módulo</p>
+      </div>
+
+      <p class="card-text" style="margin-bottom:14px;">
+        La investigación seminal de Stevens, Myers y Constantine, adoptada en el currículo de la <strong>Universidad de Kansas (EECS 811)</strong>, clasifica la cohesión en 7 niveles rigurosos:
+      </p>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Nivel de Cohesión</th>
+            <th>Calidad</th>
+            <th>Definición y Síntomas</th>
+            <th>Ejemplo Práctico en Código</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Coincidente</strong></td>
+            <td><span class="level-badge lvl-worst">Peor</span></td>
+            <td>Elementos agrupados de forma completamente aleatoria o accidental sin relación semántica.</td>
+            <td>Una clase <code>MiscelaneoHelper</code> que valida un email, comprueba la memoria RAM e imprime un PDF.</td>
+          </tr>
+          <tr>
+            <td><strong>2. Lógica</strong></td>
+            <td><span class="level-badge lvl-worst">Muy Baja</span></td>
+            <td>Elementos agrupados porque pertenecen a la misma categoría general de operaciones, seleccionadas por una bandera.</td>
+            <td>Un método <code>imprimirReporte(int tipo)</code> que imprime facturas, listas de asistencia o balances contables según el entero pasado.</td>
+          </tr>
+          <tr>
+            <td><strong>3. Temporal</strong></td>
+            <td><span class="level-badge lvl-mid">Baja</span></td>
+            <td>Elementos agrupados exclusivamente porque se ejecutan en el mismo momento temporal.</td>
+            <td>Una función <code>iniciarSistema()</code> que abre la base de datos, limpia logs, carga estilos visuales y suena un pitido de bienvenida.</td>
+          </tr>
+          <tr>
+            <td><strong>4. Procedimental</strong></td>
+            <td><span class="level-badge lvl-mid">Media-Baja</span></td>
+            <td>Elementos agrupados porque deben ejecutarse en un orden o secuencia fija paso a paso.</td>
+            <td>Una clase que lee un archivo, valida su cabecera y notifica al usuario por WhatsApp en una sola rutina indivisible.</td>
+          </tr>
+          <tr>
+            <td><strong>5. Comunicacional</strong></td>
+            <td><span class="level-badge lvl-mid">Media-Alta</span></td>
+            <td>Las funciones operan sobre la <strong>misma estructura de datos</strong> o producen la misma salida.</td>
+            <td>Una clase <code>EstudianteRecordManager</code> con métodos para calcular promedio, consultar materias aprobadas y verificar mora financiera sobre el objeto <code>Estudiante</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>6. Secuencial</strong></td>
+            <td><span class="level-badge lvl-best">Alta</span></td>
+            <td>La salida o resultado de una operación constituye directamente la <strong>entrada de la siguiente</strong> (tubería / pipeline).</td>
+            <td><code>Compilador</code>: Análisis Léxico &rarr; Análisis Sintáctico &rarr; Generación de Bytecode.</td>
+          </tr>
+          <tr>
+            <td><strong>7. Funcional</strong></td>
+            <td><span class="level-badge lvl-best">Ideal</span></td>
+            <td>El módulo realiza <strong>exactamente una sola tarea de negocio bien delimitada</strong> y nada más.</td>
+            <td><code>CryptoPasswordHasher.hash(rawPassword)</code> o <code>ValidadorPrerrequisitoAcademico.validar(estudiante, materia)</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 4: 6 Niveles de Acoplamiento -->
+    <section class="card" id="acoplamiento-6">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">4</span> Los 6 Niveles de Acoplamiento (Univ. de Kansas &amp; Saiedian)</h2>
+        <p class="section-subtitle">Taxonomía de peor a mejor: midiendo el grado de dependencia entre módulos</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Nivel de Acoplamiento</th>
+            <th>Calidad</th>
+            <th>Mecanismo de Interacción</th>
+            <th>Impacto en Mantenibilidad</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. De Contenido (Content / Pathological)</strong></td>
+            <td><span class="level-badge lvl-worst">El Peor</span></td>
+            <td>Un módulo modifica directamente variables privadas o código en memoria de otro módulo sin pasar por interfaces públicas.</td>
+            <td>Peligro crítico: rompe por completo el encapsulamiento. Cualquier cambio interno rompe a los consumidores.</td>
+          </tr>
+          <tr>
+            <td><strong>2. Común (Common / Global)</strong></td>
+            <td><span class="level-badge lvl-worst">Muy Malo</span></td>
+            <td>Varios módulos leen y escriben sobre la <strong>misma variable global o bloque de memoria compartida</strong>.</td>
+            <td>Efecto dominó: imposible rastrear qué hilo o función corrompió el estado global.</td>
+          </tr>
+          <tr>
+            <td><strong>3. De Control (Control Coupling)</strong></td>
+            <td><span class="level-badge lvl-mid">Deficiente</span></td>
+            <td>Un módulo le envía a otro una bandera (*flag* booleana o código) que <strong>dicta la lógica de control interna</strong> del receptor.</td>
+            <td>El invocador necesita conocer los caminos de ejecución internos del invocado (inversión indebida de control).</td>
+          </tr>
+          <tr>
+            <td><strong>4. De Marca / Sello (Stamp Coupling)</strong></td>
+            <td><span class="level-badge lvl-mid">Aceptable pero mejorable</span></td>
+            <td>Se pasa una <strong>estructura de datos compuesta completa</strong> (ej. el objeto <code>Estudiante</code> con 25 campos) cuando la función sólo necesita 1 campo (ej. su <code>email</code>).</td>
+            <td>Acopla la función a campos irrelevantes de la estructura de datos.</td>
+          </tr>
+          <tr>
+            <td><strong>5. De Datos (Data Coupling)</strong></td>
+            <td><span class="level-badge lvl-best">Ideal</span></td>
+            <td>Los módulos interactúan pasándose <strong>únicamente parámetros atómicos y tipados estrictos</strong> (ej. <code>id</code>, <code>monto</code>).</td>
+            <td>Máxima reusabilidad, fácil de testear con datos sintéticos y cero dependencias ocultas.</td>
+          </tr>
+          <tr>
+            <td><strong>6. Sin Acoplamiento / Mensajería Asíncrona</strong></td>
+            <td><span class="level-badge lvl-best">Superior</span></td>
+            <td>Los módulos no se conocen directamente; se comunican mediante publicación/suscripción de eventos inmutables a través de un broker (ej. RabbitMQ/Kafka).</td>
+            <td>Desacoplamiento temporal y espacial absoluto.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 5: Mantenibilidad & Robustez -->
+    <section class="card" id="mantenibilidad">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">5</span> Mantenibilidad y Robustez a Largo Plazo (UNSW COMP1531)</h2>
+        <p class="section-subtitle">Por qué las decisiones de diseño dictan el 80% del costo total de propiedad (TCO)</p>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <h3 class="card-title" style="color:var(--color-primary);">🔧 Mantenibilidad (Maintainability)</h3>
+          <p class="card-text">
+            Según los cursos de ingeniería de software de la <strong>UNSW (University of New South Wales)</strong>, la mantenibilidad no es una propiedad abstracta; se mide por el tiempo y esfuerzo requeridos para:
+            <br>• Localizar y corregir un defecto (MTTR: *Mean Time to Repair*).
+            <br>• Incorporar una nueva regla de negocio sin efectos colaterales imprevistos.
+            <br>• Adaptar el sistema a nuevas plataformas de infraestructura.
+          </p>
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:12px; margin-top:12px; font-size:0.88rem;">
+            <strong>Métricas de Mantenibilidad de Chidamber &amp; Kemerer:</strong>
+            <br>• <strong>CBO (Coupling Between Object Classes):</strong> Con cuántas otras clases está acoplada una clase. (Ideal: &lt; 5).
+            <br>• <strong>LCOM (Lack of Cohesion in Methods):</strong> Mide si los métodos comparten los mismos atributos. (Ideal: bajo o 0).
+          </div>
+        </div>
+
+        <div>
+          <h3 class="card-title" style="color:var(--color-success);">🛡️ Robustez (Robustness)</h3>
+          <p class="card-text">
+            Es la capacidad del software de mantenerse en operación estable ante:
+            <br>• Datos de entrada inválidos, corruptos o maliciosos.
+            <br>• Interrupción transitoria de servicios externos (bases de datos, pasarelas de pago, APIs de terceros).
+            <br>• Errores de hardware o agotamiento temporal de recursos de red.
+          </p>
+          <div style="background:rgba(255,255,255,0.03); border-radius:8px; padding:12px; margin-top:12px; font-size:0.88rem;">
+            <strong>Patrones de Diseño para la Robustez:</strong>
+            <br>• <strong>Validación Temprana (Fail-Fast):</strong> Rechazar entradas inválidas en la frontera antes de alterar el estado.
+            <br>• <strong>Degradación Elegante (Graceful Degradation):</strong> Si falla el motor de recomendaciones, el catálogo universitario sigue cargando.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 6: Taxonomía Dual de Calidad -->
+    <section class="card" id="taxonomia-calidad">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">6</span> Taxonomía Dual de Atributos de Calidad</h2>
+        <p class="section-subtitle">Diferenciando atributos en tiempo de desarrollo vs atributos en tiempo de ejecución</p>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="border-top:3px solid var(--color-primary);">
+          <h3 class="card-title">🛠️ Atributos en Tiempo de Desarrollo (Estructurales)</h3>
+          <p class="card-text" style="margin-bottom:12px;">Visibles para los ingenieros y arquitectos durante el ciclo de vida del código:</p>
+          <ul class="card-text" style="display:flex; flex-direction:column; gap:8px; padding-left:18px;">
+            <li><strong>Mantenibilidad:</strong> Facilidad de análisis, modificación y refactorización.</li>
+            <li><strong>Testabilidad:</strong> Facilidad para aislar componentes con Mocks/Stubs y ejecutar pruebas unitarias deterministas.</li>
+            <li><strong>Modificabilidad:</strong> Costo temporal y monetario de agregar nuevas características.</li>
+            <li><strong>Reusabilidad:</strong> Grado en que los módulos pueden reutilizarse en otros sistemas o contextos.</li>
+            <li><strong>Portabilidad:</strong> Capacidad de ejecutarse en distintos sistemas operativos o nubes sin cambios en el código.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="border-top:3px solid var(--color-accent);">
+          <h3 class="card-title">⚡ Atributos en Tiempo de Ejecución (Operacionales)</h3>
+          <p class="card-text" style="margin-bottom:12px;">Visibles para los usuarios y operadores cuando el sistema está desplegado:</p>
+          <ul class="card-text" style="display:flex; flex-direction:column; gap:8px; padding-left:18px;">
+            <li><strong>Rendimiento:</strong> Latencia en percentiles (p95 &lt; 200 ms) y tasa de transacciones por segundo (TPS).</li>
+            <li><strong>Escalabilidad:</strong> Capacidad de absorber aumentos de carga agregando réplicas sin estado (*stateless*).</li>
+            <li><strong>Disponibilidad:</strong> Uptime anual (porcentaje de tiempo operativo, ej. 99.95%).</li>
+            <li><strong>Seguridad:</strong> Autenticación robusta, autorización RBAC y cifrado de datos en reposo y en tránsito.</li>
+            <li><strong>Resiliencia:</strong> Tolerancia a fallos con recuperación automática y aislamiento de averías.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Quiz -->
+    <section class="card" id="quiz">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">7</span> Cuestionario de Evaluación Avanzada</h2>
+        <p class="section-subtitle">Comprueba tu dominio de modularidad, cohesión y acoplamiento según estándares académicos</p>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-question" data-q="1">
+          <div class="quiz-q-title">1. Según la curva de costo de modularidad estudiada en Virginia Tech, ¿qué ocurre si un sistema se descompone en un número excesivamente alto de módulos microscópicos (sobremodularidad)?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="adv1" value="a"> El costo total de desarrollo cae a cero porque cada clase es muy pequeña.</label>
+            <label class="quiz-option"><input type="radio" name="adv1" value="b"> El costo de integración, comunicación y gestión de interfaces se dispara, incrementando el costo total del software.</label>
+            <label class="quiz-option"><input type="radio" name="adv1" value="c"> El sistema se convierte automáticamente en una arquitectura monolítica.</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="2">
+          <div class="quiz-q-title">2. Un método en Java recibe un parámetro booleano 'boolean aplicarDescuento' y en su interior ejecuta dos flujos de negocio completamente distintos según el valor de esa bandera. ¿Qué tipo de acoplamiento representa?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="adv2" value="a"> Acoplamiento de Control (Control Coupling).</label>
+            <label class="quiz-option"><input type="radio" name="adv2" value="b"> Acoplamiento de Datos (Data Coupling).</label>
+            <label class="quiz-option"><input type="radio" name="adv2" value="c"> Acoplamiento de Contenido.</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="3">
+          <div class="quiz-q-title">3. En la taxonomía de 7 niveles de cohesión de la Universidad de Kansas, ¿cuál es el nivel más alto y deseable?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="adv3" value="a"> Cohesión Lógica.</label>
+            <label class="quiz-option"><input type="radio" name="adv3" value="b"> Cohesión Coincidente.</label>
+            <label class="quiz-option"><input type="radio" name="adv3" value="c"> Cohesión Funcional.</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="4">
+          <div class="quiz-q-title">4. Si una función solo necesita enviar un correo al estudiante y en lugar de recibir 'String email' recibe el objeto completo 'Estudiante' (que incluye cédula, notas y fotos), ¿qué nivel de acoplamiento se está produciendo?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="adv4" value="a"> Acoplamiento de Marca / Sello (Stamp Coupling).</label>
+            <label class="quiz-option"><input type="radio" name="adv4" value="b"> Acoplamiento Común.</label>
+            <label class="quiz-option"><input type="radio" name="adv4" value="c"> Desacoplamiento asíncrono.</label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+          <button class="btn-submit" onclick="gradeAdvQuiz()">Calificar Respuestas</button>
+          <div id="advFeedback" style="display:none; font-weight:600; padding:10px 16px; border-radius:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 8: Referencias -->
+    <section class="card" id="referencias">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">8</span> Referencias Bibliográficas y Cátedras Universitarias</h2>
+        <p class="section-subtitle">Fuentes académicas internacionales consultadas para este módulo</p>
+      </div>
+
+      <ul style="display:flex; flex-direction:column; gap:12px; padding-left:20px; font-size:0.92rem; color:var(--text-muted); line-height:1.6;">
+        <li>
+          <strong style="color:#fff;">Virginia Tech (CS 3704):</strong> Dr. Bob Edmison, <em>Intermediate Software Design — Design Engineering, Modularity, Abstraction &amp; SOLID</em>, Spring 2025.
+        </li>
+        <li>
+          <strong style="color:#fff;">University of New South Wales (UNSW COMP1531):</strong> <em>Software Design: Maintainability &amp; Robustness</em>. Decisión de código y ciclo de vida del producto.
+        </li>
+        <li>
+          <strong style="color:#fff;">University of Kansas (EECS 811):</strong> Dr. Hossein Saiedian &amp; R. Fairley, <em>Software Design — Modern Large-Scale Software Programming: Cohesion and Coupling Chapter 7</em>.
+        </li>
+        <li>
+          <strong style="color:#fff;">Universidad Nacional de La Matanza (UNLaM):</strong> <em>Diseño de Software (3648) — Resumen de la Unidad 1: Fundamentos y Modularidad</em>.
+        </li>
+        <li>
+          <strong style="color:#fff;">SlideServe:</strong> Sydney Beard, <em>Software Design Process: Architectural vs Detailed Design &amp; Cohesion</em>.
+        </li>
+        <li>
+          <strong style="color:#fff;">ISO/IEC 25010:</strong> <em>Systems and software engineering — Systems and software Quality Requirements and Evaluation (SQuaRE) — System and software quality models</em>.
+        </li>
+      </ul>
+    </section>
+
+  </main>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('progressBar').style.width = ((winScroll / height) * 100) + '%';
+    });
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const r = this.querySelector('input[type="radio"]');
+        document.querySelectorAll(`input[name="${r.name}"]`).forEach(radio => {
+          radio.closest('.quiz-option').classList.remove('selected');
+        });
+        r.checked = true;
+        this.classList.add('selected');
+      });
+    });
+
+    function gradeAdvQuiz() {
+      const ans = { adv1: 'b', adv2: 'a', adv3: 'c', adv4: 'a' };
+      let score = 0;
+      let total = 4;
+      for (let k in ans) {
+        if (!document.querySelector(`input[name="${k}"]:checked`)) {
+          alert('Por favor responde todas las preguntas del cuestionario.');
+          return;
+        }
+      }
+      for (let k in ans) {
+        const sel = document.querySelector(`input[name="${k}"]:checked`);
+        document.querySelectorAll(`input[name="${k}"]`).forEach(input => {
+          const p = input.closest('.quiz-option');
+          p.classList.remove('correct', 'incorrect');
+          if (input.value === ans[k]) p.classList.add('correct');
+          else if (input.checked) p.classList.add('incorrect');
+        });
+        if (sel.value === ans[k]) score++;
+      }
+      const fb = document.getElementById('advFeedback');
+      fb.style.display = 'block';
+      if (score === total) {
+        fb.style.background = 'rgba(16, 185, 129, 0.2)'; fb.style.color = '#34d399';
+        fb.innerText = `🎉 ¡Perfecto! ${score}/${total} respuestas correctas. Dominas los niveles teóricos y matemáticos de la Semana 1.`;
+      } else {
+        fb.style.background = 'rgba(245, 158, 11, 0.2)'; fb.style.color = '#fde68a';
+        fb.innerText = `⚠️ Calificación: ${score}/${total}. Revisa los conceptos marcados en rojo.`;
+      }
+    }
+  </script>
+</body>
+</html>

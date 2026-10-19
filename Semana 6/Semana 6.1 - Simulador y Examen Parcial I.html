@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 6.1: Simulador Oficial y Examen Parcial I Teórico-Práctico (RDA1, RDA2, RDA7). Cuestionario interactivo con temporizador, calificación automática sobre 10.0 y enunciado del laboratorio de diseño en IDE.">
+  <title>Semana 6.1: Simulador y Examen Parcial I | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(245, 158, 11, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #f59e0b;
+      --color-secondary: #3b82f6;
+      --color-accent: #fbbf24;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(245, 158, 11, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(245, 158, 11, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 40px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 40px; position: relative;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .hero-desc { font-size: 1rem; color: var(--text-muted); line-height: 1.6; }
+
+    /* Sticky Timer Bar */
+    .timer-bar {
+      position: sticky; top: 15px; z-index: 90;
+      background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px);
+      border: 1px solid var(--border-glow); border-radius: 12px; padding: 14px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    .timer-display { font-family: var(--font-mono); font-size: 1.3rem; font-weight: 700; color: var(--color-accent); }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    /* Question Card */
+    .exam-q {
+      margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border-light);
+    }
+    .exam-q-title { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 12px; line-height: 1.5; }
+    .exam-options { display: flex; flex-direction: column; gap: 8px; }
+    .exam-opt {
+      background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-light);
+      padding: 12px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: flex-start; gap: 10px; transition: all 0.2s;
+    }
+    .exam-opt:hover { background: rgba(255, 255, 255, 0.06); }
+    .exam-opt.selected { border-color: var(--color-primary); background: rgba(245, 158, 11, 0.12); }
+    .exam-opt.correct { border-color: var(--color-success); background: rgba(16, 185, 129, 0.2); }
+    .exam-opt.incorrect { border-color: var(--color-danger); background: rgba(239, 68, 68, 0.2); }
+    .q-explanation {
+      margin-top: 10px; padding: 10px 14px; border-radius: 6px; font-size: 0.85rem;
+      background: rgba(255, 255, 255, 0.04); border-left: 3px solid var(--color-accent); display: none;
+    }
+
+    .btn-finish {
+      background: linear-gradient(135deg, var(--color-primary), #d97706);
+      color: #000; border: none; padding: 12px 28px; border-radius: 8px;
+      font-weight: 700; font-size: 1rem; cursor: pointer; transition: transform 0.2s;
+    }
+    .btn-finish:hover { transform: scale(1.02); }
+
+    .score-banner {
+      display: none; padding: 24px; border-radius: 12px; margin-top: 24px; text-align: center;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Primer Parcial</div>
+      <h2>Semana 6.1</h2>
+      <p>Simulador y Examen</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#instrucciones" class="active">📌 Instrucciones</a></li>
+      <li><a href="#teoria">📝 Parte 1: Teórica (10 Pts)</a></li>
+      <li><a href="#practica">💻 Parte 2: Caso Práctico</a></li>
+      <li><a href="Semana 6.0 - Guía de Preparación y Repaso Primer Parcial.html">⬅ Guía de Repaso 6.0</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; Primer Parcial
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="instrucciones">
+      <div style="margin-bottom:10px;">
+        <span style="background:rgba(245,158,11,0.15); color:#fde68a; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">EXAMEN PARCIAL I OFICIAL</span>
+      </div>
+      <h1 class="hero-title">Evaluación Integral del Primer Parcial: Unidades 1 y 2</h1>
+      <p class="hero-desc">
+        Este simulador reproduce las condiciones formales de evaluación institucional de la UNIBE para los resultados de aprendizaje RDA1, RDA2 y RDA7. Consta de una sección teórica interactiva de 10 preguntas de opción múltiple ponderada y un caso práctico de modelado y refactorización en IDE.
+      </p>
+    </header>
+
+    <!-- Timer Sticky Bar -->
+    <div class="timer-bar">
+      <div>
+        <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:600;">Tiempo Restante del Examen</div>
+        <div class="timer-display" id="timeRemaining">45:00</div>
+      </div>
+      <button class="btn-finish" onclick="submitExam()">Entregar y Calificar Examen</button>
+    </div>
+
+    <!-- Resultados Banner -->
+    <div class="score-banner" id="scoreBanner">
+      <h2 style="font-size:1.8rem; margin-bottom:8px;" id="finalScoreTitle">Calificación: 0.0 / 10.0</h2>
+      <p id="finalScoreDesc" style="color:var(--text-muted);"></p>
+    </div>
+
+    <!-- Parte 1: Teórica -->
+    <section class="card" id="teoria">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid var(--border-light); padding-bottom:10px;">
+        <h2 class="card-title" style="margin:0;">📝 Parte 1: Cuestionario de Fundamentos, UML y Principios (10 Preguntas)</h2>
+        <span style="color:var(--color-accent); font-weight:600; font-size:0.9rem;">1.0 Punto cada una</span>
+      </div>
+
+      <!-- P1 -->
+      <div class="exam-q" data-qid="1">
+        <div class="exam-q-title">1. En el contexto de un Sistema de Matrículas en UML, durante el análisis se determina que 'Validar Prerrequisitos' es obligatorio para completar la transacción, mientras que 'Realizar Pago en Línea' es un paso optativo que depende del canal seleccionado. ¿Cuál es la representación correcta de estas relaciones?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq1" value="a"> 'Matricular Asignatura' tiene una relación &lt;&lt;extend&gt;&gt; hacia 'Validar Prerrequisitos' y &lt;&lt;include&gt;&gt; desde 'Realizar Pago en Línea'.</label>
+          <label class="exam-opt"><input type="radio" name="eq1" value="b"> 'Matricular Asignatura' tiene una relación &lt;&lt;include&gt;&gt; hacia 'Validar Prerrequisitos', y una relación &lt;&lt;extend&gt;&gt; desde 'Realizar Pago en Línea'.</label>
+          <label class="exam-opt"><input type="radio" name="eq1" value="c"> Ambos son casos de uso hijos mediante herencia/generalización.</label>
+        </div>
+        <div class="q-explanation" id="exp1"><strong>Justificación:</strong> La relación <code>&lt;&lt;include&gt;&gt;</code> modela comportamiento obligatorio compartido, mientras que <code>&lt;&lt;extend&gt;&gt;</code> modela extensiones condicionales u optativas orientadas hacia el caso base.</div>
+      </div>
+
+      <!-- P2 -->
+      <div class="exam-q" data-qid="2">
+        <div class="exam-q-title">2. ¿Qué ocurre conceptualmente con las instancias de la clase 'DetalleMatricula' si se destruye la instancia padre 'Matricula' bajo una relación de Composición en UML?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq2" value="a"> Las instancias de 'DetalleMatricula' se eliminan en cascada porque su ciclo de vida depende exclusivamente del objeto compuesto.</label>
+          <label class="exam-opt"><input type="radio" name="eq2" value="b"> Las instancias de 'DetalleMatricula' continúan existiendo de manera huérfana en memoria.</label>
+          <label class="exam-opt"><input type="radio" name="eq2" value="c"> Se transforman automáticamente en instancias de tipo Asignatura.</label>
+        </div>
+        <div class="q-explanation" id="exp2"><strong>Justificación:</strong> La composición (rombo negro) denota pertenencia existencial fuerte: las partes no tienen significado de existencia fuera del contenedor.</div>
+      </div>
+
+      <!-- P3 -->
+      <div class="exam-q" data-qid="3">
+        <div class="exam-q-title">3. En un diagrama de secuencia, ¿qué fragmento combinado permite ejecutar un bloque repetitivo condicionado (equivalente a un bucle for o while)?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq3" value="a"> alt</label>
+          <label class="exam-opt"><input type="radio" name="eq3" value="b"> loop</label>
+          <label class="exam-opt"><input type="radio" name="eq3" value="c"> opt</label>
+        </div>
+        <div class="q-explanation" id="exp3"><strong>Justificación:</strong> El fragmento <code>loop</code> en UML 2.5 itera un subconjunto de mensajes mientras la guarda entre corchetes sea verdadera.</div>
+      </div>
+
+      <!-- P4 -->
+      <div class="exam-q" data-qid="4">
+        <div class="exam-q-title">4. En el Modelo C4 de arquitectura de software, ¿cuál es el nivel que descompone el sistema en aplicaciones web, APIs backend, brokers de eventos y bases de datos con sus respectivos protocolos de comunicación?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq4" value="a"> Nivel 1: Diagrama de Contexto del Sistema.</label>
+          <label class="exam-opt"><input type="radio" name="eq4" value="b"> Nivel 2: Diagrama de Contenedores.</label>
+          <label class="exam-opt"><input type="radio" name="eq4" value="c"> Nivel 4: Diagrama de Código.</label>
+        </div>
+        <div class="q-explanation" id="exp4"><strong>Justificación:</strong> El Nivel 2 (Contenedores) muestra las unidades de despliegue/ejecución y la topología técnica de comunicación.</div>
+      </div>
+
+      <!-- P5 -->
+      <div class="exam-q" data-qid="5">
+        <div class="exam-q-title">5. Si una clase de servicio contiene un bloque switch(tipoUsuario) con 6 casos distintos para calcular tarifas arancelarias, y cada vez que la universidad crea un nuevo tipo de usuario es necesario editar y recompilar esa clase, ¿qué principio SOLID se está violando directamente?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq5" value="a"> Principio Open/Closed (OCP).</label>
+          <label class="exam-opt"><input type="radio" name="eq5" value="b"> Principio de Segregación de Interfaces (ISP).</label>
+          <label class="exam-opt"><input type="radio" name="eq5" value="c"> Principio de Sustitución de Liskov (LSP).</label>
+        </div>
+        <div class="q-explanation" id="exp5"><strong>Justificación:</strong> OCP exige que el software esté abierto a la extensión (nuevas clases polimórficas) pero cerrado a la modificación de clases existentes ya probadas.</div>
+      </div>
+
+      <!-- P6 -->
+      <div class="exam-q" data-qid="6">
+        <div class="exam-q-title">6. ¿Qué patrón de asignación de responsabilidades GRASP estipula que una clase central como 'Matricula' debe ser quien instancie a 'DetalleMatricula' porque la contiene y utiliza directamente?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq6" value="a"> Controlador (Controller).</label>
+          <label class="exam-opt"><input type="radio" name="eq6" value="b"> Creador (Creator).</label>
+          <label class="exam-opt"><input type="radio" name="eq6" value="c"> Polimorfismo.</label>
+        </div>
+        <div class="q-explanation" id="exp6"><strong>Justificación:</strong> El patrón GRASP Creator asigna la creación del objeto B a la clase A cuando A contiene fuertemente o registra a B.</div>
+      </div>
+
+      <!-- P7 -->
+      <div class="exam-q" data-qid="7">
+        <div class="exam-q-title">7. Cuando un desarrollador crea clases con nombres genéricos como 'GeneralUtility', 'DataHelper' o 'CommonFunctions' acumulando más de 2500 líneas con métodos no relacionados, ¿qué principio de diseño modular se está vulnerando críticamente?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq7" value="a"> Cohesión Funcional (se genera baja cohesión coincidente).</label>
+          <label class="exam-opt"><input type="radio" name="eq7" value="b"> Acoplamiento de Datos.</label>
+          <label class="exam-opt"><input type="radio" name="eq7" value="c"> Abstracción declarativa.</label>
+        </div>
+        <div class="q-explanation" id="exp7"><strong>Justificación:</strong> Las clases cajón de sastre representan la peor forma de cohesión (coincidente), violando directamente la modularidad y el principio SRP.</div>
+      </div>
+
+      <!-- P8 -->
+      <div class="exam-q" data-qid="8">
+        <div class="exam-q-title">8. ¿Cuál es el patrón de diseño creacional GoF óptimo para construir un objeto complejo con múltiples atributos opcionales garantizando la inmutabilidad de la instancia final?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq8" value="a"> Singleton</label>
+          <label class="exam-opt"><input type="radio" name="eq8" value="b"> Builder</label>
+          <label class="exam-opt"><input type="radio" name="eq8" value="c"> Prototype</label>
+        </div>
+        <div class="q-explanation" id="exp8"><strong>Justificación:</strong> El patrón Builder separa la construcción paso a paso de la representación inmutable, evitando constructores telescópicos.</div>
+      </div>
+
+      <!-- P9 -->
+      <div class="exam-q" data-qid="9">
+        <div class="exam-q-title">9. Necesitas intercambiar en tiempo de ejecución el algoritmo de cálculo de aranceles (Pregrado, Posgrado, Beca Deportiva) sin que el servicio de matrícula dependa de las clases concretas. ¿Qué patrón GoF implementa esta solución?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq9" value="a"> Strategy</label>
+          <label class="exam-opt"><input type="radio" name="eq9" value="b"> Decorator</label>
+          <label class="exam-opt"><input type="radio" name="eq9" value="c"> Facade</label>
+        </div>
+        <div class="q-explanation" id="exp9"><strong>Justificación:</strong> Strategy define una familia de algoritmos intercambiables encapsulados bajo una interfaz común.</div>
+      </div>
+
+      <!-- P10 -->
+      <div class="exam-q" data-qid="10">
+        <div class="exam-q-title">10. ¿Por qué el principio de Inversión de Dependencias (DIP) y la Inyección de Dependencias por Constructor constituyen la mejor práctica frente al uso del operador 'new' dentro de los servicios de negocio?</div>
+        <div class="exam-options">
+          <label class="exam-opt"><input type="radio" name="eq10" value="a"> Porque el operador new está prohibido en los estándares de Java 17 y 21.</label>
+          <label class="exam-opt"><input type="radio" name="eq10" value="b"> Porque desacopla el núcleo de las implementaciones concretas de infraestructura, permitiendo testing unitario con Mocks y facilitando la mantenibilidad.</label>
+          <label class="exam-opt"><input type="radio" name="eq10" value="c"> Porque reduce a la mitad el tamaño del archivo ejecutable JAR.</label>
+        </div>
+        <div class="q-explanation" id="exp10"><strong>Justificación:</strong> DIP asegura que los servicios de dominio dependan de abstracciones, haciéndolos independientes de bases de datos o servicios externos para pruebas y evolución.</div>
+      </div>
+
+    </section>
+
+    <!-- Parte 2: Práctica -->
+    <section class="card" id="practica">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> Parte Práctica: Caso de Laboratorio en IDE (10 Pts)</h2>
+        <p class="section-subtitle">Resolución de modelado y refactorización orientada a objetos</p>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.03); border-radius:10px; padding:18px; margin-top:14px;">
+        <h3 style="color:#fff; font-size:1.15rem; margin-bottom:8px;">Enunciado del Caso: "Motor de Facturación y Matrícula"</h3>
+        <p style="color:var(--text-muted); line-height:1.7;">
+          La universidad requiere refactorizar el submódulo de aprobación de matrícula. Se proporciona un archivo fuente monolítico con malos olores (God Class).
+          <br><br>
+          <strong>Entregables requeridos en la plataforma virtual:</strong>
+          <br>1. <strong>Diagrama UML (PlantUML):</strong> Diagrama de Clases del diseño propuesto aplicando SRP, OCP y patrón Strategy para los descuentos.
+          <br>2. <strong>Código Fuente Refactorizado en Java:</strong> Interfaces limpias, inyección por constructor y uso de <code>BigDecimal</code>.
+          <br>3. <strong>Pruebas Unitarias JUnit 5:</strong> Mínimo 2 pruebas unitarias que verifiquen el cálculo correcto de al menos dos estrategias de descuento.
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Timer Countdown (45 mins)
+    let totalSeconds = 45 * 60;
+    const timerEl = document.getElementById('timeRemaining');
+    const timerInterval = setInterval(() => {
+      if (totalSeconds <= 0) {
+        clearInterval(timerInterval);
+        submitExam();
+        return;
+      }
+      totalSeconds--;
+      const mins = Math.floor(totalSeconds / 60);
+      const secs = totalSeconds % 60;
+      timerEl.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+      if (totalSeconds < 300) {
+        timerEl.style.color = '#ef4444';
+      }
+    }, 1000);
+
+    // Option selection
+    document.querySelectorAll('.exam-opt').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const radio = this.querySelector('input[type="radio"]');
+        const name = radio.name;
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+          r.closest('.exam-opt').classList.remove('selected');
+        });
+        radio.checked = true;
+        this.classList.add('selected');
+      });
+    });
+
+    // Submit and Grade
+    function submitExam() {
+      clearInterval(timerInterval);
+      const answers = {
+        eq1: 'b',
+        eq2: 'a',
+        eq3: 'b',
+        eq4: 'b',
+        eq5: 'a',
+        eq6: 'b',
+        eq7: 'a',
+        eq8: 'b',
+        eq9: 'a',
+        eq10: 'b'
+      };
+
+      let score = 0;
+      let total = 10;
+      let answeredCount = 0;
+
+      for (let key in answers) {
+        const sel = document.querySelector(`input[name="${key}"]:checked`);
+        if (sel) answeredCount++;
+      }
+
+      if (answeredCount < total && totalSeconds > 0) {
+        if (!confirm(`Has respondido ${answeredCount} de ${total} preguntas. ¿Seguro que deseas calificar ahora?`)) {
+          return;
+        }
+      }
+
+      for (let key in answers) {
+        const correctVal = answers[key];
+        const sel = document.querySelector(`input[name="${key}"]:checked`);
+        const qNum = key.replace('eq', '');
+        const exp = document.getElementById('exp' + qNum);
+        if (exp) exp.style.display = 'block';
+
+        document.querySelectorAll(`input[name="${key}"]`).forEach(r => {
+          const parent = r.closest('.exam-opt');
+          parent.classList.remove('correct', 'incorrect');
+          if (r.value === correctVal) {
+            parent.classList.add('correct');
+          } else if (r.checked) {
+            parent.classList.add('incorrect');
+          }
+        });
+
+        if (sel && sel.value === correctVal) {
+          score++;
+        }
+      }
+
+      // Display score banner
+      const banner = document.getElementById('scoreBanner');
+      const title = document.getElementById('finalScoreTitle');
+      const desc = document.getElementById('finalScoreDesc');
+      banner.style.display = 'block';
+
+      title.innerText = `Calificación Parte Teórica: ${score.toFixed(1)} / 10.0`;
+      if (score >= 7.0) {
+        banner.style.background = 'rgba(16, 185, 129, 0.2)';
+        banner.style.border = '1px solid #10b981';
+        title.style.color = '#34d399';
+        desc.innerText = '¡Aprobado con solvencia! Has demostrado comprensión profunda de los resultados de aprendizaje RDA1, RDA2 y RDA7.';
+      } else {
+        banner.style.background = 'rgba(239, 68, 68, 0.2)';
+        banner.style.border = '1px solid #ef4444';
+        title.style.color = '#f87171';
+        desc.innerText = 'Calificación insuficiente. Revisa las justificaciones en amarillo debajo de cada pregunta y consulta la Guía de Repaso 6.0.';
+      }
+
+      banner.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+</body>
+</html>

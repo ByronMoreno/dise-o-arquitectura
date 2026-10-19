@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 6.0: Guía de Estudio y Repaso Integral para el Examen Parcial I. Fundamentos de diseño, modelado UML (Casos de uso, clases, secuencia, C4), principios SOLID/GRASP y patrones GoF.">
+  <title>Semana 6.0: Guía de Repaso Primer Parcial | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(245, 158, 11, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #f59e0b;
+      --color-secondary: #3b82f6;
+      --color-accent: #fbbf24;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(245, 158, 11, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+    .progress-bar-container { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.3); z-index: 101; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(245, 158, 11, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(245, 158, 11, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 45px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 45px; position: relative;
+    }
+    .hero-title {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 40%, #fde68a 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;
+    }
+    .hero-desc { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; max-width: 850px; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .card-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+
+    .section-header { border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+    .section-title { font-size: 1.75rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
+    .section-title span.number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; background: rgba(245, 158, 11, 0.2);
+      color: var(--color-primary); font-size: 0.95rem; font-weight: 700;
+    }
+    .section-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
+
+    .custom-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px;
+      overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #fff; padding: 12px 16px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 16px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    .summary-badge {
+      display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Evaluación Parcial I</div>
+      <h2>Semana 6</h2>
+      <p>Repaso y Preparación</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#mapa" class="active">🗺️ 1. Mapa Conceptual S1-S5</a></li>
+      <li><a href="#resumen-u1">📐 2. Síntesis Unidad 1</a></li>
+      <li><a href="#resumen-u2">🛡️ 3. Síntesis Unidad 2</a></li>
+      <li><a href="#trampas">⚠️ 4. Errores Típicos en Examen</a></li>
+      <li><a href="#checklist">📋 5. Checklist de Preparación</a></li>
+      <li><a href="Semana 6.1 - Simulador y Examen Parcial I.html">📝 Simulador de Examen Parcial I ↗</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; Primer Parcial
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="mapa">
+      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+        <span style="background:rgba(245,158,11,0.15); color:#fde68a; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">EVALUACIÓN DEL PRIMER PARCIAL</span>
+        <span style="background:rgba(59,130,246,0.15); color:#60a5fa; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">UNIDADES 1 Y 2</span>
+      </div>
+      <h1 class="hero-title">Guía de Repaso Integral para el Examen Parcial I</h1>
+      <p class="hero-desc">
+        Esta guía condensa los resultados de aprendizaje RDA1, RDA2 y RDA7 evaluados en el Primer Parcial de Diseño y Arquitectura de Software. Revisa las síntesis conceptuales, las matrices comparativas y el análisis de casos de estudio para afrontar con éxito la evaluación teórica y el laboratorio aplicado.
+      </p>
+    </header>
+
+    <!-- Roadmap Conceptual -->
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">1</span> Mapa de Navegación del Primer Parcial</h2>
+        <p class="section-subtitle">Alineación curricular de las 5 primeras semanas de clase</p>
+      </div>
+
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card" style="border-top:3px solid #3b82f6;">
+          <span class="summary-badge" style="background:rgba(59,130,246,0.15); color:#60a5fa;">Semana 1</span>
+          <h3 class="card-title">Fundamentos y Calidad</h3>
+          <p class="card-text">
+            • Diseño vs Arquitectura.<br>
+            • Requisitos RF vs RNF (ISO 25010).<br>
+            • Historias de Usuario INVEST + Gherkin.<br>
+            • Alta cohesión y bajo acoplamiento.
+          </p>
+        </div>
+
+        <div class="card" style="border-top:3px solid #8b5cf6;">
+          <span class="summary-badge" style="background:rgba(139,92,246,0.15); color:#c4b5fd;">Semana 2</span>
+          <h3 class="card-title">Modelado Estructural</h3>
+          <p class="card-text">
+            • Casos de uso: include vs extend.<br>
+            • Especificación textual formal.<br>
+            • Diagramas de clases y multiplicidad.<br>
+            • Agregación débil vs Composición fuerte.
+          </p>
+        </div>
+
+        <div class="card" style="border-top:3px solid #06b6d4;">
+          <span class="summary-badge" style="background:rgba(6,182,212,0.15); color:#67e8f9;">Semana 3</span>
+          <h3 class="card-title">Dinámica y Modelo C4</h3>
+          <p class="card-text">
+            • Diagramas de secuencia (alt, loop, par).<br>
+            • Máquinas de estados y actividades.<br>
+            • C4 Nivel 1: Contexto del Sistema.<br>
+            • C4 Nivel 2: Contenedores.
+          </p>
+        </div>
+
+        <div class="card" style="border-top:3px solid #a855f7;">
+          <span class="summary-badge" style="background:rgba(168,85,247,0.15); color:#d8b4fe;">Semana 4</span>
+          <h3 class="card-title">SOLID, GRASP &amp; Smells</h3>
+          <p class="card-text">
+            • SOLID (SRP, OCP, LSP, ISP, DIP).<br>
+            • GRASP (Experto, Creador, Controlador).<br>
+            • Clean Code, KISS, DRY, YAGNI.<br>
+            • Code Smells y Deuda Técnica de Fowler.
+          </p>
+        </div>
+
+        <div class="card" style="border-top:3px solid #10b981;">
+          <span class="summary-badge" style="background:rgba(16,185,129,0.15); color:#6ee7b7;">Semana 5</span>
+          <h3 class="card-title">Patrones GoF &amp; IoC</h3>
+          <p class="card-text">
+            • Creacionales: Factory Method, Builder.<br>
+            • Estructurales: Adapter, Facade, Decorator.<br>
+            • Comportamiento: Strategy, Observer.<br>
+            • Inyección de dependencias por constructor.
+          </p>
+        </div>
+
+        <div class="card" style="border-top:3px solid #f59e0b;">
+          <span class="summary-badge" style="background:rgba(245,158,11,0.15); color:#fde68a;">Semana 6</span>
+          <h3 class="card-title">Examen Parcial I</h3>
+          <p class="card-text">
+            • Evaluación Teórica (Cuestionario Plataforma).<br>
+            • Laboratorio Práctico (PlantUML / IDE).<br>
+            • Refactorización y patrones GoF.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Síntesis Unidad 1 -->
+    <section class="card" id="resumen-u1">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> Síntesis Rápida: Unidad 1 (Semanas 1 a 3)</h2>
+        <p class="section-subtitle">Conceptos fundamentales de diseño y modelado visual UML / C4</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Concepto</th>
+            <th>Regla Mnemotécnica o Definición Clave</th>
+            <th>Error Crítico a Evitar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Relación &lt;&lt;include&gt;&gt;</strong></td>
+            <td>El caso base <strong>siempre</strong> necesita del caso incluido para finalizar.</td>
+            <td>Invertir el sentido de la flecha: la flecha apunta hacia el caso incluido.</td>
+          </tr>
+          <tr>
+            <td><strong>Relación &lt;&lt;extend&gt;&gt;</strong></td>
+            <td>El caso extensor es <strong>opcional</strong> o condicional (se ejecuta solo bajo puntos de extensión).</td>
+            <td>Usar extend para pasos obligatorios del flujo normal.</td>
+          </tr>
+          <tr>
+            <td><strong>Composición vs Agregación</strong></td>
+            <td>Composición (rombo negro): ciclo de vida dependiente. Agregación (rombo blanco): ciclo independiente.</td>
+            <td>Crear composiciones en entidades maestras compartidas por múltiples módulos.</td>
+          </tr>
+          <tr>
+            <td><strong>Fragmento 'alt' en Secuencia</strong></td>
+            <td>Representa ramas condicionales mutuamente excluyentes (if-else).</td>
+            <td>Usar alt sin guardas entre corchetes <code>[condición]</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>C4 Nivel 2: Contenedores</strong></td>
+            <td>Representa aplicaciones web, servicios backend ejecutables y almacenes de datos.</td>
+            <td>Confundir "Contenedor C4" exclusivamente con imágenes de Docker.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Síntesis Unidad 2 -->
+    <section class="card" id="resumen-u2">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">3</span> Síntesis Rápida: Unidad 2 (Semanas 4 y 5)</h2>
+        <p class="section-subtitle">Calidad, SOLID, GRASP y patrones de diseño empresariales</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Principio / Patrón</th>
+            <th>Esencia Técnica</th>
+            <th>Aplicación Práctica</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>SRP (Single Responsibility)</strong></td>
+            <td>Una sola razón para cambiar; una sola responsabilidad de negocio.</td>
+            <td>Separar la lógica de cálculo de la persistencia SQL y de la generación de PDF.</td>
+          </tr>
+          <tr>
+            <td><strong>OCP (Open / Closed)</strong></td>
+            <td>Abierto a la extensión mediante polimorfismo, cerrado a la modificación.</td>
+            <td>Implementar nuevas becas universitarias creando clases sin tocar el código existente.</td>
+          </tr>
+          <tr>
+            <td><strong>DIP (Dependency Inversion)</strong></td>
+            <td>Módulos de alto nivel dependen de abstracciones (interfaces), no de detalles.</td>
+            <td>Inyectar <code>MateriaRepository</code> por constructor; no instanciar con <code>new PostgreSQLRepo()</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>Patrón Strategy</strong></td>
+            <td>Familia de algoritmos intercambiables en tiempo de ejecución.</td>
+            <td>Cálculo de tarifas o descuentos por tipo de estudiante.</td>
+          </tr>
+          <tr>
+            <td><strong>Patrón Factory Method</strong></td>
+            <td>Desacopla la creación de objetos complejos de su consumo.</td>
+            <td>Generación de enviadores de correo o mensajería SMS según configuración.</td>
+          </tr>
+          <tr>
+            <td><strong>Patrón Builder</strong></td>
+            <td>Construcción paso a paso de objetos complejos e inmutables.</td>
+            <td>Crear liquidaciones o matrículas con atributos opcionales sin constructores gigantes.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Trampas Típicas -->
+    <section class="card" id="trampas">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">4</span> Errores y Preguntas Trampa Frecuentes en el Parcial</h2>
+        <p class="section-subtitle">Lo que los docentes suelen evaluar para medir pensamiento crítico</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:16px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Trampa 1: Confundir Herencia con Agregación</h4>
+          <p class="card-text">
+            Si un enunciado dice "Una Matrícula tiene varios Ítems de Asignatura", NUNCA hagas que <code>ItemMatricula</code> herede de <code>Matricula</code>. Es una relación de <strong>Composición (rombo negro)</strong>, no de generalización.
+          </p>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:16px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Trampa 2: Dirección de Flechas en Casos de Uso</h4>
+          <p class="card-text">
+            En <code>&lt;&lt;include&gt;&gt;</code>, la flecha va desde el caso base hacia el caso obligatorio. En <code>&lt;&lt;extend&gt;&gt;</code>, la flecha va <strong>desde el caso extensor hacia el caso base</strong>. Es el error más sancionado en exámenes.
+          </p>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:16px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Trampa 3: Inyección por Campo en SOLID</h4>
+          <p class="card-text">
+            Si en el examen te preguntan cómo resolver una violación de DIP en Spring Boot, la respuesta correcta es <strong>Inyección por Constructor</strong> con campos <code>final</code>, no usar <code>@Autowired</code> sobre atributos privados.
+          </p>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:16px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Trampa 4: Abstracción vs Modularidad</h4>
+          <p class="card-text">
+            La modularidad es la división física o lógica en partes separadas; la abstracción es el ocultamiento de detalles complejos detrás de una interfaz simple. No son sinónimos.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section class="card" id="checklist">
+      <h2 class="card-title">📋 5. Lista de Autoevaluación para el Examen</h2>
+      <p style="color:var(--text-muted); margin-bottom:14px;">
+        Verifica tus habilidades antes de ingresar al simulador interactivo:
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:10px; font-size:0.92rem; color:var(--text-main);">
+        <label><input type="checkbox"> Puedo formular una historia de usuario con criterios Gherkin Given-When-Then sin dudar.</label>
+        <label><input type="checkbox"> Sé diferenciar cuándo un caso de uso es <code>&lt;&lt;include&gt;&gt;</code> vs <code>&lt;&lt;extend&gt;&gt;</code>.</label>
+        <label><input type="checkbox"> Escribo diagramas de clases en PlantUML aplicando composición, interfaces y visibilidad.</label>
+        <label><input type="checkbox"> Domino los fragmentos <code>alt</code> y <code>loop</code> en diagramas de secuencia.</label>
+        <label><input type="checkbox"> Sé dibujar un diagrama de contexto y contenedores en Modelo C4.</label>
+        <label><input type="checkbox"> Identifico violaciones de SRP, OCP y DIP en código Java y sé refactorizarlas con Strategy o Factory.</label>
+      </div>
+
+      <div style="margin-top:24px;">
+        <a href="Semana 6.1 - Simulador y Examen Parcial I.html" style="background:linear-gradient(135deg, var(--color-primary), var(--color-accent)); color:#000; text-decoration:none; padding:12px 24px; border-radius:8px; font-weight:700; display:inline-block;">Ir al Simulador de Examen Parcial I &rarr;</a>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('progressBar').style.width = ((winScroll / height) * 100) + '%';
+    });
+  </script>
+</body>
+</html>

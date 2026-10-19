@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 1.1 - Taller Práctico de Análisis: Descomposición Modular, Definición de Requisitos y Matriz de Atributos de Calidad (RDA1) | UNIBE.">
+  <title>Semana 1.1: Taller de Requisitos y Atributos de Calidad | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(59, 130, 246, 0.2);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(6, 182, 212, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 40px;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .hero-desc { font-size: 1rem; color: var(--text-muted); line-height: 1.6; }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #fff; padding: 12px 14px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 14px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    .code-container {
+      background: #0b1120;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+      font-family: var(--font-mono);
+      margin: 12px 0;
+    }
+    .code-header {
+      background: #131d33;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    pre code { display: block; padding: 14px; color: #e2e8f0; font-size: 0.84rem; line-height: 1.5; }
+
+    /* Checklist */
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 4px;
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      cursor: pointer;
+    }
+
+    .btn-calc {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 15px;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Taller Práctico APE</div>
+      <h2>Semana 1.1</h2>
+      <p>Requisitos y Atributos de Calidad</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#caso" class="active">🏥 Caso Empresarial</a></li>
+      <li><a href="#act1">🧩 Actividad 1: Descomposición</a></li>
+      <li><a href="#act2">📝 Actividad 2: User Stories BDD</a></li>
+      <li><a href="#act3">🎯 Actividad 3: Escenarios Calidad</a></li>
+      <li><a href="#rubrica">📊 Lista de Cotejo / Rúbrica</a></li>
+      <li><a href="Semana 1.0 - Fundamentos de Diseño y Atributos de Calidad.html">⬅ Clase Teórica 1.0</a></li>
+      <li><a href="Semana 1.2 - Diseño Avanzado, Mantenibilidad, Robustez y Calidad.html">🎓 Clase Avanzada 1.2 ↗</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; Modalidad Híbrida
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="caso">
+      <div style="margin-bottom:10px;">
+        <span style="background:rgba(59,130,246,0.15); color:#60a5fa; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">TALLER DE ANÁLISIS APE-01</span>
+      </div>
+      <h1 class="hero-title">Taller: Descomposición Modular y Matriz de Atributos de Calidad</h1>
+      <p class="hero-desc">
+        En este taller práctico aplicarás los fundamentos del diseño de software (RDA1) mediante la formulación de requisitos funcionales con historias de usuario INVEST, criterios de aceptación Gherkin y la caracterización de atributos de calidad en un escenario empresarial real.
+      </p>
+    </header>
+
+    <!-- Caso de Estudio -->
+    <section class="card">
+      <h2 class="card-title">🏢 Caso Empresarial: "SaludPlus Telemedicina"</h2>
+      <p style="color:var(--text-muted); line-height:1.7;">
+        La red hospitalaria <strong>SaludPlus</strong> planea lanzar una plataforma nacional de telemedicina y gestión de historias clínicas electrónicas. La plataforma atenderá a más de <strong>100,000 pacientes concurrentes</strong> en horas pico, integrando médicos especialistas, farmacias aliadas, pasarelas de pago y laboratorios clínicos.
+      </p>
+      <div style="background:rgba(255,255,255,0.03); border-left:3px solid var(--color-warning); padding:14px; margin-top:14px; border-radius:6px; font-size:0.9rem;">
+        <strong>Retos críticos del sistema:</strong>
+        <br>1. Los historiales médicos deben cumplir con confidencialidad absoluta (cifrado AES-256 y cumplimiento HIPAA).
+        <br>2. La consulta de disponibilidad médica y agendamiento no debe superar los 300 ms de latencia.
+        <br>3. El sistema de videollamadas y recetas electrónicas debe mantenerse operativo el 99.95% del tiempo anual.
+      </div>
+    </section>
+
+    <!-- Actividad 1 -->
+    <section class="card" id="act1">
+      <h2 class="card-title">🧩 Actividad 1: Descomposición Modular y Alta Cohesión</h2>
+      <p style="color:var(--text-muted); margin-bottom:14px;">
+        Descompón el sistema "SaludPlus" en módulos independientes de alta cohesión y bajo acoplamiento:
+      </p>
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Módulo</th>
+            <th>Responsabilidad Única (Cohesión Funcional)</th>
+            <th>Dependencias Clave (Acoplamiento)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Auth & Security</strong></td>
+            <td>Autenticación multifactor (MFA), roles y emisión de tokens seguros.</td>
+            <td>Ninguna (Módulo base / Core).</td>
+          </tr>
+          <tr>
+            <td><strong>Agendamiento de Citas</strong></td>
+            <td>Gestión de calendarios, slots de disponibilidad y reservas de pacientes.</td>
+            <td>Auth & Security, Módulo de Notificaciones.</td>
+          </tr>
+          <tr>
+            <td><strong>Historia Clínica Digital</strong></td>
+            <td>Registro y consulta inmutable de diagnósticos, recetas y antecedentes.</td>
+            <td>Auth & Security, Storage Cifrado.</td>
+          </tr>
+          <tr>
+            <td><strong>Facturación y Pagos</strong></td>
+            <td>Cálculo de tarifas, emisión de comprobantes fiscales y pasarela externa.</td>
+            <td>Pasarela Bancaria Externa (Webhook / REST).</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Actividad 2 -->
+    <section class="card" id="act2">
+      <h2 class="card-title">📝 Actividad 2: Formulación de Historias de Usuario con BDD Gherkin</h2>
+      <p style="color:var(--text-muted); margin-bottom:14px;">
+        A continuación se presenta el modelo estándar a replicar para las Historias de Usuario del proyecto integrador:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">HU-01: Agendamiento de Cita Virtual con Validación de Disponibilidad</div>
+        <pre><code><strong>Historia de Usuario:</strong>
+Como: Paciente registrado en SaludPlus
+Quiero: Consultar la disponibilidad de un médico especialista y reservar un turno virtual
+Para: Recibir atención médica oportuna desde mi hogar
+
+<strong>Criterio de Aceptación 1 (Flujo Exitoso):</strong>
+Scenario: Reserva exitosa de turno disponible
+  Given el paciente "María Gómez" ha iniciado sesión en la plataforma
+  And el cardiólogo "Dr. Pérez" tiene el turno del "25/11/2026 10:00 AM" en estado DISPONIBLE
+  When la paciente selecciona el turno y confirma el método de pago registrado
+  Then el sistema debe cambiar el estado del turno a RESERVADO
+  And debe enviar un correo de confirmación con el enlace de videoconsulta cifrado
+  And la transacción debe confirmarse en pantalla en menos de 400 ms
+
+<strong>Criterio de Aceptación 2 (Concurrencia / Conflicto):</strong>
+Scenario: Intento de reserva simultánea del mismo turno
+  Given dos pacientes intentan reservar el turno del "25/11/2026 10:00 AM" simultáneamente
+  When el primer paciente completa la confirmación
+  Then el segundo paciente debe recibir un mensaje de alerta: "El turno acaba de ser ocupado"
+  And el sistema debe sugerirle los 3 turnos disponibles más próximos del mismo especialista</code></pre>
+      </div>
+    </section>
+
+    <!-- Actividad 3 -->
+    <section class="card" id="act3">
+      <h2 class="card-title">🎯 Actividad 3: Escenarios de Atributos de Calidad (SEI Format)</h2>
+      <p style="color:var(--text-muted); margin-bottom:14px;">
+        Estructura formal de 6 partes para especificar atributos de calidad de forma verificable:
+      </p>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Elemento del Escenario</th>
+            <th>Escenario de Rendimiento (Latencia)</th>
+            <th>Escenario de Seguridad (Confidencialidad)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Fuente (Source)</strong></td>
+            <td>Pacientes concurrentes desde la app móvil.</td>
+            <td>Actor externo no autorizado o atacante.</td>
+          </tr>
+          <tr>
+            <td><strong>Estímulo (Stimulus)</strong></td>
+            <td>10,000 solicitudes de búsqueda de especialistas simultáneas.</td>
+            <td>Intento de inyección SQL o acceso a historia médica ajena.</td>
+          </tr>
+          <tr>
+            <td><strong>Artefacto (Artifact)</strong></td>
+            <td>Servicio de Búsqueda y Catálogo de Médicos.</td>
+            <td>API Gateway y Servicio de Historial Clínico.</td>
+          </tr>
+          <tr>
+            <td><strong>Entorno (Environment)</strong></td>
+            <td>Operación normal en hora pico de lunes por la mañana.</td>
+            <td>Operación normal bajo tráfico HTTPS.</td>
+          </tr>
+          <tr>
+            <td><strong>Respuesta (Response)</strong></td>
+            <td>El sistema atiende las búsquedas sin encolamiento excesivo.</td>
+            <td>El sistema bloquea la petición, registra la IP en auditoría y no expone datos.</td>
+          </tr>
+          <tr>
+            <td><strong>Medida de Respuesta</strong></td>
+            <td>Tiempo de respuesta p95 &lt; 350 ms; 0 errores HTTP 5xx.</td>
+            <td>0 filtraciones de datos; alerta de seguridad emitida en &lt; 5 s.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Lista de Cotejo / Rúbrica -->
+    <section class="card" id="rubrica">
+      <h2 class="card-title">📊 Lista de Cotejo para la Evaluación del Taller (Sobre 10 Pts)</h2>
+      <p style="color:var(--text-muted); margin-bottom:14px;">
+        Marca los ítems completados para simular la evaluación continua del informe de análisis:
+      </p>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="c1" onchange="calcScore()">
+        <div>
+          <label for="c1" style="font-weight:600; color:#fff;">1. Descomposición Modular (2.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Identifica al menos 4 módulos con responsabilidades funcionales únicas y justificación de bajo acoplamiento.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="c2" onchange="calcScore()">
+        <div>
+          <label for="c2" style="font-weight:600; color:#fff;">2. Historias de Usuario INVEST (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Formula al menos 3 Historias de Usuario con rol, acción, beneficio y cumplimiento de criterios INVEST.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="c3" onchange="calcScore()">
+        <div>
+          <label for="c3" style="font-weight:600; color:#fff;">3. Criterios de Aceptación Gherkin (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Redacta escenarios Given-When-Then para flujos normales y alternos/excepciones verificables.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="c4" onchange="calcScore()">
+        <div>
+          <label for="c4" style="font-weight:600; color:#fff;">4. Matriz de Atributos de Calidad SEI (2.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Define escenarios con Fuente, Estímulo, Artefacto, Entorno, Respuesta y Medida cuantitativa.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="c5" onchange="calcScore()">
+        <div>
+          <label for="c5" style="font-weight:600; color:#fff;">5. Redacción y Claridad Técnica (1.0 pt):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Uso riguroso de terminología técnica en ingeniería de software, formato limpio y justificaciones válidas.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn-calc" onclick="calcScore()">Calcular Calificación</button>
+        <div id="scoreDisplay" style="font-size:1.2rem; font-weight:700; color:var(--color-accent);">Calificación: 0.0 / 10.0</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function calcScore() {
+      const weights = [2.0, 2.5, 2.5, 2.0, 1.0];
+      let total = 0;
+      for (let i = 1; i <= 5; i++) {
+        if (document.getElementById('c' + i).checked) {
+          total += weights[i - 1];
+        }
+      }
+      document.getElementById('scoreDisplay').innerText = `Calificación: ${total.toFixed(1)} / 10.0`;
+    }
+  </script>
+</body>
+</html>

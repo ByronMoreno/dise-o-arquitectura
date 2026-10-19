@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 3.1: Taller Práctico de Modelado Dinámico y C4 - Diagramas de Secuencia, Estados y Modelo C4 Contexto/Contenedores (RDA2) | UNIBE.">
+  <title>Semana 3.1: Taller UML 2 - Secuencia y C4 | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(59, 130, 246, 0.2);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(6, 182, 212, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(6, 182, 212, 0.15); border-left: 3px solid var(--color-accent); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 40px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 40px;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .hero-desc { font-size: 1rem; color: var(--text-muted); line-height: 1.6; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+      overflow: hidden; font-family: var(--font-mono); margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 14px; font-size: 0.8rem; color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-accent); color: #fff; }
+    pre code { display: block; padding: 16px; color: #e2e8f0; font-size: 0.84rem; line-height: 1.5; overflow-x: auto; }
+
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-light);
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 4px; width: 18px; height: 18px; accent-color: var(--color-accent); cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Taller Práctico UML 2</div>
+      <h2>Semana 3.1</h2>
+      <p>Secuencia y C4 Model</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#objetivos" class="active">🎯 Objetivos del Taller</a></li>
+      <li><a href="#secuencia">⏱️ Diagrama de Secuencia</a></li>
+      <li><a href="#estados">🔄 Diagrama de Estados</a></li>
+      <li><a href="#c4-model">🗺️ Modelo C4 (Nivel 1 y 2)</a></li>
+      <li><a href="#rubrica">📊 Rúbrica Taller UML 2</a></li>
+      <li><a href="Semana 3.0 - Modelado Dinámico y Modelo C4.html">⬅ Clase Teórica 3.0</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA2
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="objetivos">
+      <div style="margin-bottom:10px;">
+        <span style="background:rgba(6,182,212,0.15); color:#67e8f9; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">TALLER PRÁCTICO APE-03</span>
+      </div>
+      <h1 class="hero-title">Taller UML 2: Diagramas de Secuencia y Modelo de Contexto C4</h1>
+      <p class="hero-desc">
+        En este taller práctico implementamos los flujos de interacción dinámica y la arquitectura de contenedores para el proyecto integrador de software, utilizando especificaciones formales y código PlantUML.
+      </p>
+    </header>
+
+    <!-- Entregable 1: Secuencia -->
+    <section class="card" id="secuencia">
+      <h2 class="card-title">⏱️ Entregable 1: Diagrama de Secuencia con Manejo de Excepciones</h2>
+      <p style="color:var(--text-muted); line-height:1.6;">
+        El siguiente script en PlantUML modela el flujo integral de validación de materias, cálculo arancelario y pago con pasarela externa bajo el estándar UML 2.5:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>secuencia_completa_siga.puml</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>@startuml
+skinparam style strictuml
+autonumber "<b>[00]</b>"
+
+actor "Estudiante" as est
+boundary "Portal Web (React)" as ui
+control "MatriculaController" as ctrl
+control "MatriculaService" as svc
+entity "MatriculaRepository" as repo
+boundary "PasarelaPagosClient" as payment
+
+est -&gt; ui : Click en "Confirmar e Inscribir"
+activate ui
+
+ui -&gt; ctrl : POST /api/v1/matriculas (materiasIds, metodoPago)
+activate ctrl
+
+ctrl -&gt; svc : procesarInscripcion(estudianteId, materiasIds)
+activate svc
+
+loop Por cada materia seleccionada
+    svc -&gt; svc : validarPrerrequisitos(materiaId)
+    svc -&gt; svc : verificarCupoDisponible(materiaId)
+end
+
+alt Alguna validación falla
+    svc --&gt; ctrl : throw CupoAgotadoException()
+    ctrl --&gt; ui : 409 Conflict ("Cupo no disponible")
+    ui --&gt; est : Mostrar alerta en rojo
+else Validaciones Exitosas
+    svc -&gt; repo : guardarMatriculaTemporal(estado=PENDIENTE)
+    activate repo
+    repo --&gt; svc : matriculaGuardada
+    deactivate repo
+
+    svc -&gt; payment : cobrarArancel(montoTotal, tokenTarjeta)
+    activate payment
+    payment --&gt; svc : Response(status="SUCCESS", authCode="TX-5511")
+    deactivate payment
+
+    svc -&gt; repo : actualizarEstadoMatricula(id, estado=CONFIRMADA)
+    svc --&gt; ctrl : MatriculaConfirmadaDTO
+    ctrl --&gt; ui : 201 Created (Comprobante PDF URL)
+    ui --&gt; est : Pantalla de éxito con descarga de comprobante
+end
+
+deactivate svc
+deactivate ctrl
+deactivate ui
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <!-- Entregable 2: Estados -->
+    <section class="card" id="estados">
+      <h2 class="card-title">🔄 Entregable 2: Máquina de Estados del Ciclo de Vida de la Matrícula</h2>
+      <div class="code-container">
+        <div class="code-header">
+          <span>estados_matricula.puml</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>@startuml
+skinparam state {
+    BackgroundColor #0f172a
+    BorderColor #06b6d4
+    FontColor #f1f5f9
+    ArrowColor #38bdf8
+}
+
+[*] --&gt; BORRADOR : Estudiante inicia selección
+
+state BORRADOR {
+    BORRADOR : entry / inicializarListaMaterias()
+    BORRADOR : do / calcularArancelEnTiempoReal()
+}
+
+BORRADOR --&gt; VALIDANDO : Enviar a confirmación
+VALIDANDO --&gt; RECHAZADA : [Fallo prerrequisitos o cupo]
+RECHAZADA --&gt; BORRADOR : Modificar selección
+
+VALIDANDO --&gt; PENDIENTE_PAGO : [Validaciones Aprobadas] / reservarCuposTemporales(15 min)
+
+state PENDIENTE_PAGO {
+    PENDIENTE_PAGO : entry / iniciarTimerExpiracion()
+}
+
+PENDIENTE_PAGO --&gt; ANULADA_POR_TIMEOUT : [Tiempo &gt; 15 min sin pago] / liberarCupos()
+PENDIENTE_PAGO --&gt; PAGADA : Evento: PagoConfirmado(authCode)
+
+PAGADA --&gt; ASIGNATURAS_ASIGNADAS : Generar actas académicas
+ASIGNATURAS_ASIGNADAS --&gt; [*] : Matrícula Activa y Vigente
+ANULADA_POR_TIMEOUT --&gt; [*]
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <!-- Entregable 3: C4 Model -->
+    <section class="card" id="c4-model">
+      <h2 class="card-title">🗺️ Entregable 3: Diagrama de Contexto y Contenedores (Modelo C4)</h2>
+      <p style="color:var(--text-muted); margin-bottom:12px;">
+        Código PlantUML utilizando la librería oficial <strong>C4-PlantUML</strong>:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>c4_contexto_siga.puml</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar C4</button>
+        </div>
+        <pre><code>@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+Person(estudiante, "Estudiante", "Estudiante de pregrado o posgrado matriculado en UNIBE")
+Person(docente, "Docente", "Profesor titular que califica y gestiona asistencias")
+Person(admin, "Administrador", "Personal de secretaría y registro académico")
+
+System_Boundary(c1, "Sistema Integral de Gestión Académica (SIGA)") {
+    Container(spa, "Single-Page Application", "React / TypeScript", "Interfaz web moderna y responsiva para usuarios")
+    Container(api, "Backend API Gateway / Core", "Java / Spring Boot", "Orquesta la lógica de matrícula, seguridad y aranceles")
+    ContainerDb(db, "Base de Datos Relacional", "PostgreSQL 16", "Almacena historiales, mallas curriculares y matrículas")
+    Container(broker, "Broker de Eventos", "RabbitMQ / Kafka", "Manejo asíncrono de notificaciones y facturación")
+}
+
+System_Ext(erp, "ERP Financiero Institucional", "Sistema contable institucional y tesorería")
+System_Ext(pasarela, "Pasarela de Pagos (Stripe/Datafast)", "Procesamiento de pagos en línea con tarjetas")
+System_Ext(email, "Servidor SMTP / SendGrid", "Envío de confirmaciones y alertas transaccionales")
+
+Rel(estudiante, spa, "Consulta oferta y se matricula", "HTTPS/TLS")
+Rel(docente, spa, "Registra notas y asistencia", "HTTPS/TLS")
+Rel(spa, api, "Llamadas a endpoints REST", "JSON/HTTPS")
+Rel(api, db, "Lectura y escritura transaccional", "JDBC / JPA")
+Rel(api, broker, "Publica eventos: MatriculaConfirmada", "AMQP")
+Rel(api, pasarela, "Solicita cobro de aranceles", "REST / HTTPS")
+Rel(broker, erp, "Sincroniza comprobantes contables", "REST API")
+Rel(broker, email, "Despacha notificaciones a estudiantes", "SMTP")
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <!-- Rúbrica -->
+    <section class="card" id="rubrica">
+      <h2 class="card-title">📊 Rúbrica de Calificación Taller UML 2 (10.0 Pts)</h2>
+      
+      <div class="checklist-item">
+        <input type="checkbox" id="k1" onchange="calcDynamicScore()">
+        <div>
+          <label for="k1" style="font-weight:600; color:#fff;">1. Diagrama de Secuencia y Sincronía (3.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Uso correcto de líneas de vida, focos de activación, diferenciación síncrona/asíncrona y fragmentos combinados <code>alt</code> y <code>loop</code>.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="k2" onchange="calcDynamicScore()">
+        <div>
+          <label for="k2" style="font-weight:600; color:#fff;">2. Máquina de Estados (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Definición de estados exhaustivos, eventos disparadores, guardas <code>[condición]</code> y acciones de entrada/salida coherentes.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="k3" onchange="calcDynamicScore()">
+        <div>
+          <label for="k3" style="font-weight:600; color:#fff;">3. Modelo C4 Nivel 1 Contexto y Nivel 2 Contenedores (3.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Identificación clara de usuarios, sistemas externos, tecnologías asociadas (React, Spring Boot, Postgres) y protocolos (HTTPS, JDBC).</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="k4" onchange="calcDynamicScore()">
+        <div>
+          <label for="k4" style="font-weight:600; color:#fff;">4. Sintaxis PlantUML y Legibilidad (1.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Código estructurado, sin errores de compilación y documentación textual adjunta en el informe.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <button class="copy-btn" style="padding:10px 20px; font-size:0.9rem;" onclick="calcDynamicScore()">Calcular Calificación</button>
+        <div id="dynamicScoreDisplay" style="font-size:1.2rem; font-weight:700; color:var(--color-accent);">Calificación: 0.0 / 10.0</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    function calcDynamicScore() {
+      const w = [3.0, 2.5, 3.0, 1.5];
+      let s = 0;
+      for (let i = 1; i <= 4; i++) {
+        if (document.getElementById('k' + i).checked) s += w[i - 1];
+      }
+      document.getElementById('dynamicScoreDisplay').innerText = `Calificación: ${s.toFixed(1)} / 10.0`;
+    }
+  </script>
+</body>
+</html>

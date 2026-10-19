@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 5: Patrones de Diseño GoF e Inyección de Dependencias (RDA7). Patrones Creacionales (Factory Method, Singleton, Builder), Estructurales (Adapter, Facade, Decorator) y de Comportamiento (Strategy, Observer) con IoC.">
+  <title>Semana 5: Patrones GoF e Inyección de Dependencias | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(16, 185, 129, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #10b981;
+      --color-secondary: #8b5cf6;
+      --color-accent: #34d399;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(16, 185, 129, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+    .progress-bar-container { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.3); z-index: 101; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent)); }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(16, 185, 129, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(16, 185, 129, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 45px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 45px; position: relative;
+    }
+    .hero-title {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 40%, #a7f3d0 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;
+    }
+    .hero-desc { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; max-width: 850px; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .card-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+
+    .section-header { border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+    .section-title { font-size: 1.75rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
+    .section-title span.number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.2);
+      color: var(--color-primary); font-size: 0.95rem; font-weight: 700;
+    }
+    .section-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+      overflow: hidden; font-family: var(--font-mono); margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 16px; display: flex; justify-content: space-between;
+      align-items: center; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 18px; color: #e2e8f0; font-size: 0.85rem; line-height: 1.55; overflow-x: auto; }
+
+    .custom-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px;
+      overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.8); color: #fff; padding: 12px 16px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 16px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    .quiz-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(20, 30, 50, 0.7));
+      border: 1px solid var(--border-glow); border-radius: 16px; padding: 30px;
+    }
+    .quiz-question { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+    .quiz-q-title { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 12px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-light);
+      padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .quiz-option.selected { border-color: var(--color-primary); background: rgba(16, 185, 129, 0.15); }
+    .quiz-option.correct { border-color: var(--color-success); background: rgba(16, 185, 129, 0.2); }
+    .quiz-option.incorrect { border-color: var(--color-danger); background: rgba(239, 68, 68, 0.2); }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño y Arquitectura</div>
+      <h2>Semana 5</h2>
+      <p>Patrones GoF e IoC</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#intro" class="active">🧩 1. Introducción GoF</a></li>
+      <li><a href="#creacionales">🏗️ 2. Patrones Creacionales</a></li>
+      <li><a href="#estructurales">🧱 3. Patrones Estructurales</a></li>
+      <li><a href="#comportamiento">🔄 4. Patrones de Comportamiento</a></li>
+      <li><a href="#ioc">💉 5. Inyección de Dependencias (IoC)</a></li>
+      <li><a href="#tradeoffs">⚖️ 6. Sobreingeniería y Trade-offs</a></li>
+      <li><a href="#quiz">🧪 7. Cuestionario de Patrones</a></li>
+      <li><a href="Semana 5.1 - Taller Práctico de Implementación de Patrones GoF.html">📝 Taller Práctico Semana 5 ↗</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA7
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="intro">
+      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+        <span style="background:rgba(16,185,129,0.15); color:#a7f3d0; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">UNIDAD 2: CALIDAD Y REFACTORIZACIÓN</span>
+        <span style="background:rgba(139,92,246,0.15); color:#c4b5fd; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">RDA7: PATRONES DE DISEÑO GOF &amp; IOC</span>
+      </div>
+      <h1 class="hero-title">Patrones de Diseño GoF e Inyección de Dependencias</h1>
+      <p class="hero-desc">
+        Los patrones de diseño son soluciones probadas, documentadas y reutilizables a problemas recurrentes en el diseño de software orientado a objetos. En esta semana exploramos los 8 patrones cardinales de la "Gang of Four" (GoF), combinados con los principios de Inversión de Control (IoC) y contenedores modernos de Inyección de Dependencias como Spring Boot.
+      </p>
+    </header>
+
+    <!-- Section 1: GoF -->
+    <section class="card">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">1</span> ¿Qué es un Patrón de Diseño GoF?</h2>
+        <p class="section-subtitle">Estructura canónica: Nombre, Problema, Solución y Consecuencias</p>
+      </div>
+      <p class="card-text" style="line-height:1.7;">
+        Propuestos originalmente en 1994 por Erich Gamma, Richard Helm, Ralph Johnson y John Vlissides (GoF). No son bibliotecas ni fragmentos de código listos para copiar y pegar: son <strong>plantillas conceptuales</strong> que describen cómo organizar clases e interfaces para resolver un dilema de diseño con flexibilidad y bajo acoplamiento.
+      </p>
+    </section>
+
+    <!-- Section 2: Creacionales -->
+    <section class="card" id="creacionales">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> Patrones Creacionales</h2>
+        <p class="section-subtitle">Mecanismos abstractos de instanciación que desacoplan el qué del cómo</p>
+      </div>
+
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-primary);">🏭 Factory Method</h3>
+          <p class="card-text">
+            Define una interfaz para crear un objeto, pero delega a las subclases o métodos de fábrica la decisión de qué clase exacta instanciar.
+            <br><br>
+            <em>Caso real:</em> Crear procesadores de pago (<code>StripeProcessor</code>, <code>PayPalProcessor</code>) según la pasarela seleccionada.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-accent);">🔒 Singleton</h3>
+          <p class="card-text">
+            Garantiza que una clase posea una única instancia global en todo el ciclo de vida de la JVM y provee un punto de acceso único.
+            <br><br>
+            <em>Alerta de diseño:</em> Debe implementarse con cuidado (preferiblemente vía Beans de Spring o <code>enum</code>) para no obstaculizar las pruebas unitarias con estado global mutable.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-secondary);">🔨 Builder</h3>
+          <p class="card-text">
+            Separa la construcción de un objeto complejo de su representación final, permitiendo crear objetos inmutables mediante una API fluida (Fluent Interface).
+            <br><br>
+            <em>Caso real:</em> Construcción de una <code>Matricula</code> con múltiples líneas, descuentos, seguros y recargos sin constructores telescópicos con 12 parámetros.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Estructurales -->
+    <section class="card" id="estructurales">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">3</span> Patrones Estructurales</h2>
+        <p class="section-subtitle">Composición de clases e interfaces para formar estructuras más complejas</p>
+      </div>
+
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card">
+          <h3 class="card-title" style="color:#60a5fa;">🔌 Adapter</h3>
+          <p class="card-text">
+            Convierte la interfaz de una clase existente en otra interfaz que el cliente espera, permitiendo que clases con interfaces incompatibles trabajen juntas.
+            <br><br>
+            <em>Ejemplo:</em> Adaptar un servicio SOAP/XML antiguo de una entidad bancaria a la interfaz REST/JSON moderna de la universidad.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" style="color:#c084fc;">🏛️ Facade (Fachada)</h3>
+          <p class="card-text">
+            Provee una interfaz unificada y de alto nivel a un subsistema complejo (compuesto por múltiples repositorios, servicios y clientes HTTP), simplificando drásticamente su consumo.
+            <br><br>
+            <em>Ejemplo:</em> <code>MatriculaFacade.completarInscripcion()</code> que oculta la llamada secuencial a 4 servicios internos.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" style="color:#f472b6;">🎨 Decorator</h3>
+          <p class="card-text">
+            Añade responsabilidades y comportamientos dinámicamente a un objeto sin alterar su clase original ni recurrir a la herencia explosiva.
+            <br><br>
+            <em>Ejemplo:</em> Decorar un servicio de cálculo con una capa de caché en Redis o una capa de logging y métricas Prometheus.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: Comportamiento -->
+    <section class="card" id="comportamiento">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">4</span> Patrones de Comportamiento</h2>
+        <p class="section-subtitle">Distribución dinámica de algoritmos, responsabilidades y comunicación</p>
+      </div>
+
+      <div class="grid-2" style="margin-top:16px;">
+        <div class="card" style="border-left:4px solid var(--color-primary);">
+          <h3 class="card-title">♟️ Strategy</h3>
+          <p class="card-text">
+            Define una familia de algoritmos intercambiables, encapsulando cada uno en una clase independiente bajo una misma interfaz. Permite cambiar el algoritmo en tiempo de ejecución sin modificar al cliente que lo utiliza.
+          </p>
+          <div class="code-container">
+            <div class="code-header"><span>Ejemplo Strategy: Algoritmos de Aranceles</span></div>
+            <pre><code>public interface CalculoArancelStrategy {
+    BigDecimal calcular(Estudiante est, int totalCreditos);
+}
+
+public class ArancelPregradoRegular implements CalculoArancelStrategy { ... }
+public class ArancelPosgradoExtranjero implements CalculoArancelStrategy { ... }</code></pre>
+          </div>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-secondary);">
+          <h3 class="card-title">📢 Observer</h3>
+          <p class="card-text">
+            Define una relación de dependencia uno a muchos entre objetos, de manera que cuando el sujeto central cambia de estado, todos sus observadores suscritos son notificados y actualizados automáticamente.
+          </p>
+          <div class="code-container">
+            <div class="code-header"><span>Ejemplo Observer: Eventos de Dominio en Spring</span></div>
+            <pre><code>// Sujeto emite evento
+publisher.publishEvent(new MatriculaConfirmadaEvent(matriculaId));
+
+// Observadores desacoplados
+@EventListener
+public void notificarEstudiante(MatriculaConfirmadaEvent e) { ... }
+
+@EventListener
+public void reservarCupoEnMoodle(MatriculaConfirmadaEvent e) { ... }</code></pre>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 5: IoC / DI -->
+    <section class="card" id="ioc">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">5</span> Inversión de Control (IoC) e Inyección de Dependencias</h2>
+        <p class="section-subtitle">El principio de Hollywood: "No nos llames a nosotros, nosotros te llamaremos a ti"</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Modalidad de Inyección</th>
+            <th>Sintaxis Típica (Spring / Java)</th>
+            <th>Veredicto y Buenas Prácticas</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Inyección por Constructor (Recomendada)</strong></td>
+            <td><code>public MiServicio(Repositorio repo) { this.repo = repo; }</code></td>
+            <td>✅ <strong>Mejor práctica empresarial:</strong> Garantiza inmutabilidad (campos <code>final</code>), detecta dependencias circulares en compilación y permite tests unitarios sin levantar el framework.</td>
+          </tr>
+          <tr>
+            <td><strong>Inyección por Setter</strong></td>
+            <td><code>public void setRepositorio(Repositorio repo) { ... }</code></td>
+            <td>⚠️ <strong>Uso condicional:</strong> Para dependencias opcionales que pueden cambiar durante el ciclo de vida del objeto.</td>
+          </tr>
+          <tr>
+            <td><strong>Inyección por Campo (Field Injection)</strong></td>
+            <td><code>@Autowired private Repositorio repo;</code></td>
+            <td>❌ <strong>Desaconsejada / Bad Practice:</strong> Oculta dependencias, viola la inmutabilidad y hace imposible instanciar la clase en tests unitarios puros sin reflexión.</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 6: Quiz -->
+    <section class="card" id="quiz">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">6</span> Cuestionario de Patrones GoF e IoC</h2>
+        <p class="section-subtitle">Valida tu criterio técnico para seleccionar y justificar patrones</p>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-question" data-q="1">
+          <div class="quiz-q-title">1. ¿Qué patrón de diseño GoF es el indicado para construir un objeto complejo paso a paso, asegurando que el objeto resultante sea inmutable y evitando constructores con decenas de parámetros?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="p1" value="a"> Adapter</label>
+            <label class="quiz-option"><input type="radio" name="p1" value="b"> Builder</label>
+            <label class="quiz-option"><input type="radio" name="p1" value="c"> Singleton</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="2">
+          <div class="quiz-q-title">2. Necesitas integrar una librería bancaria externa cuya interfaz no coincide con los métodos que tu arquitectura espera. ¿Qué patrón estructural resuelve este problema sin modificar el código de la librería externa?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="p2" value="a"> Adapter</label>
+            <label class="quiz-option"><input type="radio" name="p2" value="b"> Strategy</label>
+            <label class="quiz-option"><input type="radio" name="p2" value="c"> Decorator</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="3">
+          <div class="quiz-q-title">3. ¿Por qué la inyección de dependencias por constructor se considera superior a la inyección por campo (@Autowired directo en variable privada)?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="p3" value="a"> Porque hace que el código se ejecute 10 veces más rápido en tiempo de CPU.</label>
+            <label class="quiz-option"><input type="radio" name="p3" value="b"> Porque permite declarar campos inmutables (final), expone claramente las dependencias y facilita el testing unitario sin reflexión.</label>
+            <label class="quiz-option"><input type="radio" name="p3" value="c"> Porque evita tener que crear interfaces en el proyecto.</label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+          <button class="btn-submit" onclick="gradePatternsQuiz()">Verificar Evaluación</button>
+          <div id="patternsFeedback" style="display:none; font-weight:600; padding:10px 16px; border-radius:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('progressBar').style.width = ((winScroll / height) * 100) + '%';
+    });
+
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const r = this.querySelector('input[type="radio"]');
+        document.querySelectorAll(`input[name="${r.name}"]`).forEach(radio => {
+          radio.closest('.quiz-option').classList.remove('selected');
+        });
+        r.checked = true;
+        this.classList.add('selected');
+      });
+    });
+
+    function gradePatternsQuiz() {
+      const ans = { p1: 'b', p2: 'a', p3: 'b' };
+      let score = 0;
+      let total = 3;
+      for (let k in ans) {
+        if (!document.querySelector(`input[name="${k}"]:checked`)) {
+          alert('Por favor responde todas las preguntas del cuestionario.');
+          return;
+        }
+      }
+      for (let k in ans) {
+        const sel = document.querySelector(`input[name="${k}"]:checked`);
+        document.querySelectorAll(`input[name="${k}"]`).forEach(input => {
+          const p = input.closest('.quiz-option');
+          p.classList.remove('correct', 'incorrect');
+          if (input.value === ans[k]) p.classList.add('correct');
+          else if (input.checked) p.classList.add('incorrect');
+        });
+        if (sel.value === ans[k]) score++;
+      }
+      const fb = document.getElementById('patternsFeedback');
+      fb.style.display = 'block';
+      if (score === total) {
+        fb.style.background = 'rgba(16, 185, 129, 0.2)'; fb.style.color = '#34d399';
+        fb.innerText = `🎉 ¡Excelente! ${score}/${total} respuestas correctas. Dominas los patrones GoF e Inyección de Dependencias.`;
+      } else {
+        fb.style.background = 'rgba(245, 158, 11, 0.2)'; fb.style.color = '#fde68a';
+        fb.innerText = `⚠️ Calificación: ${score}/${total}. Revisa los conceptos marcados en rojo.`;
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Semana 5.1: Taller Práctico de Implementación de Patrones de Diseño GoF (Strategy, Factory Method, Builder) en Java / Spring Boot (RDA7) | UNIBE.">
+  <title>Semana 5.1: Taller Práctico Patrones GoF | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.7);
+      --bg-card-hover: rgba(30, 41, 59, 0.9);
+      --border-glow: rgba(16, 185, 129, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #10b981;
+      --color-secondary: #8b5cf6;
+      --color-accent: #34d399;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 280px;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(16, 185, 129, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(16, 185, 129, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 40px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.45));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 40px;
+    }
+    .hero-title { font-size: 2.2rem; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .hero-desc { font-size: 1rem; color: var(--text-muted); line-height: 1.6; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
+      overflow: hidden; font-family: var(--font-mono); margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 14px; font-size: 0.8rem; color: var(--text-muted);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06); display: flex; justify-content: space-between; align-items: center;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 16px; color: #e2e8f0; font-size: 0.84rem; line-height: 1.5; overflow-x: auto; }
+
+    .checklist-item {
+      display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-light);
+    }
+    .checklist-item input[type="checkbox"] {
+      margin-top: 4px; width: 18px; height: 18px; accent-color: var(--color-primary); cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Taller Práctico GoF</div>
+      <h2>Semana 5.1</h2>
+      <p>Implementación de Patrones</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#modulo" class="active">📦 Módulo Funcional</a></li>
+      <li><a href="#patron-strategy">♟️ 1. Patrón Strategy</a></li>
+      <li><a href="#patron-factory">🏭 2. Patrón Factory Method</a></li>
+      <li><a href="#patron-builder">🔨 3. Patrón Builder</a></li>
+      <li><a href="#testing">🧪 Pruebas Unitarias</a></li>
+      <li><a href="#rubrica">📊 Rúbrica y Sustentación</a></li>
+      <li><a href="Semana 5.0 - Patrones de Diseño GoF e Inyección de Dependencias.html">⬅ Clase Teórica 5.0</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA7
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <header class="hero-section" id="modulo">
+      <div style="margin-bottom:10px;">
+        <span style="background:rgba(16,185,129,0.15); color:#a7f3d0; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">TALLER PRÁCTICO APE-05</span>
+      </div>
+      <h1 class="hero-title">Taller: Implementación y Verificación de Patrones GoF</h1>
+      <p class="hero-desc">
+        En este taller práctico implementamos dos patrones esenciales en el módulo de facturación y notificaciones universitarias: <strong>Strategy</strong> para la tarificación de becas, <strong>Factory Method</strong> para la selección de canales de mensajería, y <strong>Builder</strong> para la creación inmutable del comprobante.
+      </p>
+    </header>
+
+    <!-- Módulo Funcional -->
+    <section class="card">
+      <h2 class="card-title">🎯 Requerimiento Funcional: Liquidación y Notificación Universitaria</h2>
+      <p style="color:var(--text-muted); line-height:1.7;">
+        El sistema debe liquidar los aranceles de matrícula aplicando diferentes fórmulas de becas o descuentos (que pueden ampliarse en el futuro sin modificar la lógica principal) y despachar el comprobante formal al estudiante mediante su canal preferido (Email, SMS o Push Notification).
+      </p>
+    </section>
+
+    <!-- Strategy -->
+    <section class="card" id="patron-strategy">
+      <h2 class="card-title">♟️ 1. Implementación del Patrón Strategy (Cálculo de Descuentos)</h2>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>Strategy Pattern en Java 21 / Spring Boot</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>package ec.edu.unibe.siga.facturacion.strategy;
+
+import java.math.BigDecimal;
+
+public interface DescuentoStrategy {
+    String getCodigo();
+    BigDecimal calcularDescuento(BigDecimal subtotal);
+}
+
+@Component
+public class BecaAcademicaStrategy implements DescuentoStrategy {
+    public String getCodigo() { return "BECA_ACADEMICA"; }
+    public BigDecimal calcularDescuento(BigDecimal subtotal) {
+        return subtotal.multiply(new BigDecimal("0.40")); // 40% de cobertura
+    }
+}
+
+@Component
+public class DescuentoProntoPagoStrategy implements DescuentoStrategy {
+    public String getCodigo() { return "PRONTO_PAGO"; }
+    public BigDecimal calcularDescuento(BigDecimal subtotal) {
+        return subtotal.multiply(new BigDecimal("0.10")); // 10% de ahorro
+    }
+}
+
+@Component
+public class SinDescuentoStrategy implements DescuentoStrategy {
+    public String getCodigo() { return "REGULAR"; }
+    public BigDecimal calcularDescuento(BigDecimal subtotal) {
+        return BigDecimal.ZERO;
+    }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- Factory Method -->
+    <section class="card" id="patron-factory">
+      <h2 class="card-title">🏭 2. Implementación de Factory Method (Canales de Mensajería)</h2>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>Factory Method desacoplado</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>package ec.edu.unibe.siga.notificacion.factory;
+
+public interface Notificador {
+    void enviar(String destinatario, String mensaje);
+}
+
+public class EmailNotificador implements Notificador {
+    public void enviar(String destinatario, String mensaje) {
+        System.out.println("[SMTP TLS] Enviando email a " + destinatario + ": " + mensaje);
+    }
+}
+
+public class SmsNotificador implements Notificador {
+    public void enviar(String destinatario, String mensaje) {
+        System.out.println("[TWILIO SMS] Enviando mensaje a " + destinatario + ": " + mensaje);
+    }
+}
+
+@Component
+public class NotificadorFactory {
+    public Notificador crearNotificador(String canal) {
+        return switch (canal.toUpperCase()) {
+            case "SMS" -> new SmsNotificador();
+            case "EMAIL" -> new EmailNotificador();
+            default -> throw new IllegalArgumentException("Canal no soportado: " + canal);
+        };
+    }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- Builder -->
+    <section class="card" id="patron-builder">
+      <h2 class="card-title">🔨 3. Patrón Builder: Entidad Inmutable Liquidación</h2>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>LiquidacionMatricula.java (Builder Pattern)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>package ec.edu.unibe.siga.facturacion.model;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+public final class LiquidacionMatricula {
+    private final String codigoOrden;
+    private final String estudianteId;
+    private final BigDecimal subtotal;
+    private final BigDecimal descuento;
+    private final BigDecimal totalPagar;
+    private final LocalDateTime fechaEmision;
+
+    private LiquidacionMatricula(Builder builder) {
+        this.codigoOrden = builder.codigoOrden;
+        this.estudianteId = builder.estudianteId;
+        this.subtotal = builder.subtotal;
+        this.descuento = builder.descuento;
+        this.totalPagar = builder.subtotal.subtract(builder.descuento);
+        this.fechaEmision = LocalDateTime.now();
+    }
+
+    public static class Builder {
+        private String codigoOrden;
+        private String estudianteId;
+        private BigDecimal subtotal = BigDecimal.ZERO;
+        private BigDecimal descuento = BigDecimal.ZERO;
+
+        public Builder conCodigo(String codigo) { this.codigoOrden = codigo; return this; }
+        public Builder paraEstudiante(String id) { this.estudianteId = id; return this; }
+        public Builder conSubtotal(BigDecimal sub) { this.subtotal = sub; return this; }
+        public Builder conDescuento(BigDecimal desc) { this.descuento = desc; return this; }
+
+        public LiquidacionMatricula build() {
+            if (codigoOrden == null || estudianteId == null) {
+                throw new IllegalStateException("Datos incompletos para liquidación");
+            }
+            return new LiquidacionMatricula(this);
+        }
+    }
+    // Getters inmutables...
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- Testing Unitario -->
+    <section class="card" id="testing">
+      <h2 class="card-title">🧪 4. Pruebas Unitarias Automatizadas con JUnit 5</h2>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>LiquidacionServiceTest.java (JUnit 5)</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>@SpringBootTest
+class LiquidacionServiceTest {
+
+    @Autowired
+    private List&lt;DescuentoStrategy&gt; estrategias;
+
+    @Test
+    void debeAplicarDescuentoBecaAcademicaCorrectamente() {
+        DescuentoStrategy strategy = estrategias.stream()
+            .filter(s -> s.getCodigo().equals("BECA_ACADEMICA"))
+            .findFirst()
+            .orElseThrow();
+
+        BigDecimal subtotal = new BigDecimal("1000.00");
+        BigDecimal descuento = strategy.calcularDescuento(subtotal);
+
+        assertEquals(new BigDecimal("400.00"), descuento);
+    }
+
+    @Test
+    void debeConstruirLiquidacionInmutableConBuilder() {
+        LiquidacionMatricula liq = new LiquidacionMatricula.Builder()
+            .conCodigo("ORD-2026-001")
+            .paraEstudiante("EST-7744")
+            .conSubtotal(new BigDecimal("800.00"))
+            .conDescuento(new BigDecimal("80.00"))
+            .build();
+
+        assertEquals(new BigDecimal("720.00"), liq.getTotalPagar());
+    }
+}</code></pre>
+      </div>
+    </section>
+
+    <!-- Rúbrica -->
+    <section class="card" id="rubrica">
+      <h2 class="card-title">📊 Rúbrica de Calificación y Sustentación Técnica (10.0 Pts)</h2>
+      
+      <div class="checklist-item">
+        <input type="checkbox" id="g1" onchange="calcGoFScore()">
+        <div>
+          <label for="g1" style="font-weight:600; color:#fff;">1. Implementación de Strategy Pattern (3.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Interfaz abstracta limpia, al menos 3 estrategias concretas desacopladas y selección polimórfica sin <code>if-else</code> encadenados.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="g2" onchange="calcGoFScore()">
+        <div>
+          <label for="g2" style="font-weight:600; color:#fff;">2. Implementación de Factory Method (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Desacoplamiento de la instanciación de objetos del consumidor final, con manejo de excepciones para tipos desconocidos.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="g3" onchange="calcGoFScore()">
+        <div>
+          <label for="g3" style="font-weight:600; color:#fff;">3. Inmutabilidad y Builder Pattern (2.0 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Construcción paso a paso validada con invariantes de negocio garantizadas en el método <code>build()</code>.</div>
+        </div>
+      </div>
+
+      <div class="checklist-item">
+        <input type="checkbox" id="g4" onchange="calcGoFScore()">
+        <div>
+          <label for="g4" style="font-weight:600; color:#fff;">4. Verificación con Tests Unitarios y Sustentación (2.5 pts):</label>
+          <div style="font-size:0.85rem; color:var(--text-muted);">Pruebas automatizadas con JUnit 5 pasando en verde y justificación oral clara de los trade-offs y prevención de sobreingeniería.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center;">
+        <button class="copy-btn" style="padding:10px 20px; font-size:0.9rem;" onclick="calcGoFScore()">Calcular Evaluación</button>
+        <div id="gofScoreDisplay" style="font-size:1.2rem; font-weight:700; color:var(--color-primary);">Calificación: 0.0 / 10.0</div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    function calcGoFScore() {
+      const w = [3.0, 2.5, 2.0, 2.5];
+      let s = 0;
+      for (let i = 1; i <= 4; i++) {
+        if (document.getElementById('g' + i).checked) s += w[i - 1];
+      }
+      document.getElementById('gofScoreDisplay').innerText = `Calificación: ${s.toFixed(1)} / 10.0`;
+    }
+  </script>
+</body>
+</html>
