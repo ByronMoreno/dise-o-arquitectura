@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clase 2.2: Diagramas de Casos de Uso I - Fundamentos y Ejemplo Práctico (RDA2). Basado en el curso de UML de Píldoras Informáticas (Vídeo 5). Límites del sistema, actores humanos y externos, casos de uso, asociaciones y caso práctico de App de Transporte.">
+  <title>Clase 2.2: Diagramas de Casos de Uso I (Píldoras Informáticas) | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.72);
+      --bg-card-hover: rgba(30, 41, 59, 0.92);
+      --border-glow: rgba(59, 130, 246, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #3b82f6;
+      --color-secondary: #8b5cf6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 290px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-sans); min-height: 100vh; display: flex; }
+
+    .bg-glow-1 { position: fixed; top: -20%; left: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(139, 92, 246, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+
+    .progress-bar-container { position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.3); z-index: 101; }
+    .progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-secondary)); }
+
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(15, 23, 42, 0.94); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header { padding: 24px; border-bottom: 1px solid var(--border-light); }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(6, 182, 212, 0.12); padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 8px;
+    }
+    .sidebar-menu { list-style: none; padding: 18px 12px; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; flex-grow: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: var(--text-muted);
+      text-decoration: none; border-radius: 8px; font-size: 0.88rem; font-weight: 500;
+    }
+    .sidebar-menu li a:hover { background: rgba(255, 255, 255, 0.05); color: var(--text-bright); }
+    .sidebar-menu li a.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid var(--color-primary); color: var(--color-accent); }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted); }
+
+    .main-content {
+      margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; display: flex; flex-direction: column; gap: 45px; min-width: 0;
+    }
+
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.5));
+      border: 1px solid var(--border-light); border-radius: 20px; padding: 45px; position: relative;
+    }
+    .hero-title {
+      font-size: 2.5rem; font-weight: 800; letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 40%, #c4b5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px; line-height: 1.2;
+    }
+    .hero-desc { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; max-width: 880px; }
+
+    .video-banner-card {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.12), rgba(15, 23, 42, 0.8));
+      border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 22px;
+      display: flex; gap: 20px; align-items: center; margin-top: 10px;
+    }
+    .yt-icon {
+      width: 52px; height: 52px; background: #ef4444; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff; font-size: 1.6rem;
+    }
+    .video-link-btn {
+      background: #ef4444; color: #fff; padding: 8px 18px; border-radius: 8px;
+      text-decoration: none; font-weight: 700; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;
+      margin-top: 8px; transition: background 0.2s;
+    }
+    .video-link-btn:hover { background: #dc2626; }
+
+    .card { background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 24px; transition: all var(--transition-speed); }
+    .card:hover { border-color: var(--border-glow); }
+    .card-title { font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+    .card-text { font-size: 0.92rem; color: var(--text-muted); line-height: 1.6; }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+
+    .section-header { border-bottom: 1px solid var(--border-light); padding-bottom: 12px; }
+    .section-title { font-size: 1.75rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 12px; }
+    .section-title span.number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 8px; background: rgba(139, 92, 246, 0.2);
+      color: var(--color-secondary); font-size: 0.95rem; font-weight: 700;
+    }
+    .section-subtitle { font-size: 0.95rem; color: var(--text-muted); margin-top: 4px; }
+
+    .custom-table {
+      width: 100%; border-collapse: collapse; margin: 16px 0; border-radius: 10px;
+      overflow: hidden; background: var(--bg-card); border: 1px solid var(--border-light);
+    }
+    .custom-table th { background: rgba(30, 41, 59, 0.85); color: #fff; padding: 12px 16px; text-align: left; font-size: 0.88rem; }
+    .custom-table td { padding: 12px 16px; border-top: 1px solid var(--border-light); color: var(--text-muted); font-size: 0.88rem; }
+
+    .code-container {
+      background: #0b1120; border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+      overflow: hidden; font-family: var(--font-mono); margin: 14px 0;
+    }
+    .code-header {
+      background: #131d33; padding: 8px 16px; display: flex; justify-content: space-between;
+      align-items: center; font-size: 0.8rem; color: var(--text-muted);
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: none; color: #cbd5e1; padding: 4px 10px;
+      border-radius: 5px; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+    pre code { display: block; padding: 16px; color: #e2e8f0; font-size: 0.84rem; line-height: 1.55; overflow-x: auto; }
+
+    .quiz-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(20, 30, 50, 0.7));
+      border: 1px solid var(--border-glow); border-radius: 16px; padding: 30px;
+    }
+    .quiz-question { margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border-light); }
+    .quiz-q-title { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 12px; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; }
+    .quiz-option {
+      background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-light);
+      padding: 10px 16px; border-radius: 8px; cursor: pointer; font-size: 0.9rem;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .quiz-option.selected { border-color: var(--color-primary); background: rgba(59, 130, 246, 0.15); }
+    .quiz-option.correct { border-color: var(--color-success); background: rgba(16, 185, 129, 0.2); }
+    .quiz-option.incorrect { border-color: var(--color-danger); background: rgba(239, 68, 68, 0.2); }
+    .btn-submit {
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 600; cursor: pointer;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px; }
+      .hero-title { font-size: 1.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="progress-bar-container"><div class="progress-bar" id="progressBar"></div></div>
+
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño y Modelado</div>
+      <h2>Clase 2.2</h2>
+      <p>Casos de Uso I (Píldoras)</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#intro" class="active">📹 1. Vídeo 5 de Píldoras</a></li>
+      <li><a href="#conceptos">🧱 2. Los 3 Elementos Clave</a></li>
+      <li><a href="#actores">👤 3. Tipología de Actores</a></li>
+      <li><a href="#caso-transporte">🚗 4. Caso Práctico Transporte</a></li>
+      <li><a href="#plantuml-transporte">💻 5. PlantUML del Vídeo</a></li>
+      <li><a href="#especificacion">📝 6. Ficha de Caso de Uso</a></li>
+      <li><a href="#errores">⚠️ 7. Errores Comunes</a></li>
+      <li><a href="#quiz">🧪 8. Cuestionario del Vídeo</a></li>
+      <li><a href="../Semana 2/Semana 2.0 - Modelado UML Estructural y Casos de Uso.html">⬅ Clase Teórica 2.0</a></li>
+      <li><a href="../index.html">🏠 Portal Principal</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; RDA2
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- Hero Header -->
+    <header class="hero-section" id="intro">
+      <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+        <span style="background:rgba(139,92,246,0.15); color:#c4b5fd; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">UNIDAD 1: FUNDAMENTOS Y MODELADO</span>
+        <span style="background:rgba(16,185,129,0.15); color:#34d399; padding:4px 10px; border-radius:6px; font-size:0.75rem; font-weight:700;">RDA2: MODELADO ORIENTADO A OBJETOS</span>
+      </div>
+      <h1 class="hero-title">Diagramas de Casos de Uso I: Fundamentos y Ejemplo Práctico</h1>
+      <p class="hero-desc">
+        Material didáctico interactivo basado en la lección magistral del canal <strong>Píldoras Informáticas (Vídeo 5: "Curso UML. Diagramas de casos de uso I")</strong>. En esta sesión aprendemos cómo modelar los requisitos funcionales del sistema desde la perspectiva del usuario exterior (caja negra), identificando los límites del software, la tipología de actores y la formulación correcta de casos de uso mediante el ejemplo práctico de una <strong>Aplicación de Transporte y Movilidad Urbana</strong>.
+      </p>
+
+      <!-- Video Card -->
+      <div class="video-banner-card">
+        <div class="yt-icon">▶</div>
+        <div>
+          <h3 style="color:#fff; font-size:1.05rem; margin-bottom:4px;">Vídeo de Referencia: Curso UML. Diagramas de casos de Uso I. Vídeo 5</h3>
+          <p style="color:var(--text-muted); font-size:0.88rem; line-height:1.5;">
+            Canal: <strong>Píldoras Informáticas</strong> (Prof. Juan Díaz) &middot; Duración: 21 min &middot; Análisis de requisitos, límites del sistema, actores humanos y externos, y modelado práctico de movilidad.
+          </p>
+          <a href="https://www.youtube.com/watch?v=8IN3xONGMIE" target="_blank" rel="noopener noreferrer" class="video-link-btn">
+            Ver Vídeo en YouTube ↗
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Section 1: Conceptos Fundamentales -->
+    <section class="card" id="conceptos">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">1</span> ¿Qué es un Diagrama de Casos de Uso según Píldoras Informáticas?</h2>
+        <p class="section-subtitle">El diagrama de comportamiento más popular para negociar requisitos con el cliente</p>
+      </div>
+
+      <p class="card-text" style="line-height:1.7;">
+        Como explica Juan Díaz en el vídeo, los diagramas de casos de uso pertenecen a los <strong>diagramas de comportamiento</strong> de UML. Tienen como meta fundamental responder a la pregunta: <em>"¿Qué debe hacer el sistema para satisfacer a sus usuarios?"</em> sin entrar en detalles de cómo se programará internamente (visión de caja negra).
+      </p>
+
+      <div class="grid-3" style="margin-top:16px;">
+        <div class="card" style="border-left:4px solid var(--color-primary);">
+          <h3 class="card-title">1. El Límite del Sistema (System Boundary)</h3>
+          <p class="card-text">
+            Representado por un <strong>rectángulo</strong> rotulado en la parte superior con el nombre del software. Delimita qué funcionalidades están <strong>dentro</strong> del alcance del desarrollo y qué elementos quedan <strong>fuera</strong> en el entorno exterior.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-accent);">
+          <h3 class="card-title">2. Los Actores (Actors)</h3>
+          <p class="card-text">
+            Entidades externas que interactúan con el sistema. Se ubican <strong>siempre fuera</strong> del rectángulo del sistema y se representan comúnmente con la figura de palo (*stickman*). No representan personas individuales, sino <em>roles</em>.
+          </p>
+        </div>
+
+        <div class="card" style="border-left:4px solid var(--color-secondary);">
+          <h3 class="card-title">3. Los Casos de Uso (Use Cases)</h3>
+          <p class="card-text">
+            Representados por <strong>óvalos / elipses</strong> ubicados <strong>dentro</strong> del límite del sistema. Describen una secuencia de acciones que el software realiza y que produce un resultado observable de valor para un actor.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Tipología de Actores -->
+    <section class="card" id="actores">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">2</span> Tipología Completa de Actores en UML</h2>
+        <p class="section-subtitle">Píldoras Informáticas destaca que un actor NO siempre es un ser humano</p>
+      </div>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Tipo de Actor</th>
+            <th>Descripción Conceptual</th>
+            <th>Ejemplo en la App de Transporte</th>
+            <th>Notación UML</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Usuarios Humanos Primarios</strong></td>
+            <td>Personas que usan directamente el software para obtener el valor central de negocio.</td>
+            <td><strong>Pasajero:</strong> Solicita un viaje y paga.<br><strong>Conductor:</strong> Acepta viajes y transporta.</td>
+            <td>Figura de palo (*stickman*) o clase <code>&lt;&lt;actor&gt;&gt;</code></td>
+          </tr>
+          <tr>
+            <td><strong>Usuarios Humanos Secundarios / Admin</strong></td>
+            <td>Personal operativo que gestiona, supervisa, audita o mantiene la plataforma.</td>
+            <td><strong>Administrador:</strong> Da de alta vehículos, fija tarifas base y revisa reportes.</td>
+            <td>Figura de palo (*stickman*)</td>
+          </tr>
+          <tr>
+            <td><strong>Sistemas Informáticos Externos</strong></td>
+            <td>Servidores, bases de datos externas o APIs de terceros con las que nuestro sistema dialoga.</td>
+            <td><strong>Pasarela de Pagos (Stripe / Banco):</strong> Procesa el cobro de la tarjeta.</td>
+            <td>Rectángulo con estereotipo <code>&lt;&lt;system&gt;&gt;</code> o *stickman*</td>
+          </tr>
+          <tr>
+            <td><strong>Dispositivos Hardware / Sensores</strong></td>
+            <td>Hardware periférico que emite o recibe información técnica hacia el sistema.</td>
+            <td><strong>Sensor Satelital GPS:</strong> Emite coordenadas geográficas de latitud/longitud en tiempo real.</td>
+            <td>Clase con estereotipo <code>&lt;&lt;device&gt;&gt;</code> o *stickman*</td>
+          </tr>
+          <tr>
+            <td><strong>El Reloj / Temporizadores (Timer)</strong></td>
+            <td>Procesos temporales que disparan acciones automáticas por calendario o cron job.</td>
+            <td><strong>Timer de Cancelación:</strong> Si un conductor no responde en 60 segundos, reasigna el viaje.</td>
+            <td>Icono de reloj o estereotipo <code>&lt;&lt;timer&gt;&gt;</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 3: El Caso Práctico de Transporte -->
+    <section class="card" id="caso-transporte">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">3</span> Caso Práctico del Vídeo: "App de Movilidad y Transporte Urbano"</h2>
+        <p class="section-subtitle">Desarrollo paso a paso del caso presentado por Juan Díaz</p>
+      </div>
+
+      <p class="card-text" style="line-height:1.7;">
+        En el vídeo se analiza una plataforma de transporte urbano (similar a Uber, Cabify o DiDi). A continuación se desglosa el modelado sistemático:
+      </p>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-primary);">Roles y Actores Identificados</h3>
+          <ul class="card-text" style="display:flex; flex-direction:column; gap:8px; padding-left:18px;">
+            <li><strong>Administrador:</strong> Rol con privilegios de gestión de configuración de flota.</li>
+            <li><strong>Pasajero / Usuario:</strong> Quien solicita el servicio y se traslada.</li>
+            <li><strong>Conductor / Chofer:</strong> Quien presta el servicio de movilidad con su vehículo.</li>
+            <li><strong>Sistema GPS / Geolocalización (Externo):</strong> Provee las coordenadas satelitales.</li>
+            <li><strong>Pasarela de Pagos (Externa):</strong> Procesa transacciones con tarjeta de crédito/débito.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title" style="color:var(--color-accent);">Casos de Uso Principales Identificados</h3>
+          <ul class="card-text" style="display:flex; flex-direction:column; gap:8px; padding-left:18px;">
+            <li><code>Establecer tipos de transporte</code> (Auto estándar, Confort, Van, Moto).</li>
+            <li><code>Fijar precios y tarifas base</code> (Precio por km, recargo nocturno).</li>
+            <li><code>Geolocalizar posición del usuario</code> (Lectura satelital GPS).</li>
+            <li><code>Solicitar viaje en transporte</code> (Selección de origen y destino).</li>
+            <li><code>Aceptar viaje asignado</code> (Confirmación del conductor).</li>
+            <li><code>Procesar cobro del trayecto</code> (Transacción con la pasarela bancaria).</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 4: PlantUML -->
+    <section class="card" id="plantuml-transporte">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">4</span> Diagrama PlantUML Oficial del Caso del Vídeo</h2>
+        <p class="section-subtitle">Código limpio y estructurado listo para renderizar en cualquier IDE o herramienta web</p>
+      </div>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>diagrama_transporte_pildoras.puml</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copiar Código PlantUML</button>
+        </div>
+        <pre><code>@startuml
+left to right direction
+skinparam actorStyle awesome
+skinparam packageStyle rectangle
+skinparam monochrome false
+
+skinparam rectangle {
+    BackgroundColor #0f172a
+    BorderColor #3b82f6
+    FontColor #f1f5f9
+}
+
+skinparam usecase {
+    BackgroundColor #1e293b
+    BorderColor #06b6d4
+    FontColor #f1f5f9
+    ArrowColor #38bdf8
+}
+
+actor "Administrador" as admin
+actor "Pasajero / Usuario" as pasajero
+actor "Conductor / Chofer" as conductor
+actor "Sistema GPS Externo" as gps &lt;&lt;System&gt;&gt;
+actor "Pasarela de Pagos" as pasarela &lt;&lt;System&gt;&gt;
+
+rectangle "Aplicación de Gestión de Transporte Urbano" {
+    usecase "CU01: Establecer Tipos de Transporte" as CU01
+    usecase "CU02: Fijar Precios y Tarifas" as CU02
+    usecase "CU03: Geolocalizar Posición del Usuario" as CU03
+    usecase "CU04: Solicitar Viaje en Transporte" as CU04
+    usecase "CU05: Aceptar Viaje Asignado" as CU05
+    usecase "CU06: Iniciar y Finalizar Trayecto" as CU06
+    usecase "CU07: Procesar Cobro de Tarifa" as CU07
+    usecase "CU08: Calificar Conductor y Servicio" as CU08
+}
+
+' Asociaciones del Administrador
+admin -- CU01
+admin -- CU02
+
+' Asociaciones del Pasajero
+pasajero -- CU03
+pasajero -- CU04
+pasajero -- CU08
+
+' Asociaciones del Conductor
+conductor -- CU05
+conductor -- CU06
+
+' Interacciones con Sistemas Externos
+CU03 -- gps
+CU07 -- pasarela
+CU04 -- pasarela
+@enduml</code></pre>
+      </div>
+    </section>
+
+    <!-- Section 5: Especificación Textual Formal -->
+    <section class="card" id="especificacion">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">5</span> Especificación Textual del Caso de Uso "Solicitar Viaje"</h2>
+        <p class="section-subtitle">El estándar formal que complementa al óvalo gráfico</p>
+      </div>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span>Ficha Técnica: CU-04 Solicitar Viaje en Transporte</span>
+        </div>
+        <pre><code><strong>ID:</strong> CU-04
+<strong>Nombre del Caso de Uso:</strong> Solicitar Viaje en Transporte Urbano
+<strong>Actor Principal:</strong> Pasajero / Usuario
+<strong>Actores Secundarios:</strong> Sistema GPS Externo, Conductor, Pasarela de Pagos
+<strong>Precondición:</strong> El pasajero ha iniciado sesión en la app y el GPS del móvil está activo.
+<strong>Flujo Principal (Camino Básico):</strong>
+  1. El pasajero abre la pantalla de solicitud de servicio.
+  2. El sistema consulta las coordenadas actuales con el Sistema GPS Externo (CU-03).
+  3. El pasajero introduce la dirección de destino.
+  4. El sistema calcula la distancia estimada, tiempo de llegada y tarifa base según el tipo de transporte.
+  5. El pasajero selecciona el tipo de vehículo (Estándar, Confort, Van) y confirma la solicitud.
+  6. El sistema busca conductores cercanos disponibles y envía la notificación de asignación.
+  7. Un conductor acepta el viaje (CU-05).
+  8. El sistema muestra al pasajero los datos del vehículo (placa, modelo) y tiempo de recogida.
+<strong>Flujos Alternativos / Excepciones:</strong>
+  4a. No hay cobertura de GPS:
+      - El sistema solicita al usuario escribir manualmente su punto de partida.
+  6a. Ningún conductor disponible en un radio de 5 km:
+      - El sistema alerta: "No hay vehículos disponibles en este momento. Intenta en unos minutos".
+<strong>Postcondición:</strong> El estado del viaje pasa a "ASIGNADO" y se bloquea temporalmente al conductor.</code></pre>
+      </div>
+    </section>
+
+    <!-- Section 6: Errores Comunes -->
+    <section class="card" id="errores">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">6</span> Errores Clásicos Explicados en el Vídeo</h2>
+        <p class="section-subtitle">Prácticas erróneas que debes evitar en tus entregas académicas y proyectos</p>
+      </div>
+
+      <div class="grid-2">
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:18px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Error 1: Poner los Actores DENTRO del Sistema</h4>
+          <p class="card-text">
+            Los actores representan entidades <strong>externas</strong> al software. Dibujar al "Pasajero" o al "Administrador" dentro del rectángulo del sistema es un error conceptual grave de notación UML.
+          </p>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:18px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Error 2: Confundir Pasos Internos con Casos de Uso</h4>
+          <p class="card-text">
+            "Conectar a base de datos MySQL" o "Validar sintaxis de password" NO son casos de uso. Son pasos de implementación interna. Un caso de uso debe entregar un <strong>valor de negocio observable</strong> para el actor.
+          </p>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:18px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Error 3: Nombrar Casos de Uso con Sustantivos</h4>
+          <p class="card-text">
+            Nombrar un óvalo como "Transporte" o "Precios" es incorrecto. La regla estricta de nomenclatura es siempre <strong>Verbo en Infinitivo + Objeto Directo</strong>: <em>"Establecer tipos de transporte"</em>, <em>"Fijar precios"</em>.
+          </p>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08); border:1px solid rgba(239,68,68,0.25); border-radius:10px; padding:18px;">
+          <h4 style="color:#f87171; margin-bottom:8px;">❌ Error 4: Usar Flechas con Dirección en la Asociación Básica</h4>
+          <p class="card-text">
+            En el nivel introductorio (Vídeo 5), la relación entre actor y caso de uso es una <strong>línea de asociación sólida continua sin flechas</strong>, ya que representa comunicación bidireccional entre el actor y el sistema.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 7: Quiz -->
+    <section class="card" id="quiz">
+      <div class="section-header">
+        <h2 class="section-title"><span class="number">7</span> Cuestionario de Evaluación del Vídeo 5</h2>
+        <p class="section-subtitle">Verifica lo aprendido en la clase de Píldoras Informáticas</p>
+      </div>
+
+      <div class="quiz-card">
+        <div class="quiz-question" data-q="1">
+          <div class="quiz-q-title">1. Según las explicaciones de Píldoras Informáticas, ¿dónde deben posicionarse SIEMPRE los Actores en un diagrama de casos de uso?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="vq1" value="a"> Dentro del rectángulo que delimita el límite del sistema.</label>
+            <label class="quiz-option"><input type="radio" name="vq1" value="b"> Fuera del rectángulo que delimita el sistema, ya que son entidades externas.</label>
+            <label class="quiz-option"><input type="radio" name="vq1" value="c"> En una tabla aparte sin conectarse con líneas.</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="2">
+          <div class="quiz-q-title">2. ¿Puede una API externa de pagos bancarios o un sensor de satélite GPS ser considerado un 'Actor' en UML?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="vq2" value="a"> Sí, porque un actor en UML es cualquier entidad externa (humano, hardware o software) que interactúa con el sistema.</label>
+            <label class="quiz-option"><input type="radio" name="vq2" value="b"> No, los actores en UML sólo y exclusivamente pueden ser seres humanos de carne y hueso.</label>
+            <label class="quiz-option"><input type="radio" name="vq2" value="c"> Sólo si están programados en el mismo lenguaje que nuestro sistema.</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="3">
+          <div class="quiz-q-title">3. ¿Cuál de los siguientes nombres cumple con la regla de nomenclatura correcta para un Caso de Uso?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="vq3" value="a"> Base de datos de transporte</label>
+            <label class="quiz-option"><input type="radio" name="vq3" value="b"> Solicitar viaje en transporte</label>
+            <label class="quiz-option"><input type="radio" name="vq3" value="c"> Pasajero conectado</label>
+          </div>
+        </div>
+
+        <div class="quiz-question" data-q="4">
+          <div class="quiz-q-title">4. ¿A qué gran categoría de diagramas de UML pertenecen los Diagramas de Casos de Uso?</div>
+          <div class="quiz-options">
+            <label class="quiz-option"><input type="radio" name="vq4" value="a"> Diagramas Estructurales.</label>
+            <label class="quiz-option"><input type="radio" name="vq4" value="b"> Diagramas de Comportamiento.</label>
+            <label class="quiz-option"><input type="radio" name="vq4" value="c"> Diagramas de Despliegue Físico.</label>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
+          <button class="btn-submit" onclick="gradeVideoQuiz()">Calificar Respuestas</button>
+          <div id="videoFeedback" style="display:none; font-weight:600; padding:10px 16px; border-radius:8px;"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      document.getElementById('progressBar').style.width = ((winScroll / height) * 100) + '%';
+    });
+
+    function copyCode(btn) {
+      const code = btn.closest('.code-container').querySelector('code').innerText;
+      navigator.clipboard.writeText(code).then(() => {
+        const txt = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        setTimeout(() => { btn.innerText = txt; }, 2000);
+      });
+    }
+
+    document.querySelectorAll('.quiz-option').forEach(opt => {
+      opt.addEventListener('click', function() {
+        const r = this.querySelector('input[type="radio"]');
+        document.querySelectorAll(`input[name="${r.name}"]`).forEach(radio => {
+          radio.closest('.quiz-option').classList.remove('selected');
+        });
+        r.checked = true;
+        this.classList.add('selected');
+      });
+    });
+
+    function gradeVideoQuiz() {
+      const ans = { vq1: 'b', vq2: 'a', vq3: 'b', vq4: 'b' };
+      let score = 0;
+      let total = 4;
+      for (let k in ans) {
+        if (!document.querySelector(`input[name="${k}"]:checked`)) {
+          alert('Por favor responde todas las preguntas del cuestionario.');
+          return;
+        }
+      }
+      for (let k in ans) {
+        const sel = document.querySelector(`input[name="${k}"]:checked`);
+        document.querySelectorAll(`input[name="${k}"]`).forEach(input => {
+          const p = input.closest('.quiz-option');
+          p.classList.remove('correct', 'incorrect');
+          if (input.value === ans[k]) p.classList.add('correct');
+          else if (input.checked) p.classList.add('incorrect');
+        });
+        if (sel.value === ans[k]) score++;
+      }
+      const fb = document.getElementById('videoFeedback');
+      fb.style.display = 'block';
+      if (score === total) {
+        fb.style.background = 'rgba(16, 185, 129, 0.2)'; fb.style.color = '#34d399';
+        fb.innerText = `🎉 ¡Perfecto! ${score}/${total} respuestas correctas. Dominas los conceptos del Vídeo 5 de Píldoras Informáticas.`;
+      } else {
+        fb.style.background = 'rgba(245, 158, 11, 0.2)'; fb.style.color = '#fde68a';
+        fb.innerText = `⚠️ Calificación: ${score}/${total}. Revisa los conceptos marcados en rojo.`;
+      }
+    }
+  </script>
+</body>
+</html>
