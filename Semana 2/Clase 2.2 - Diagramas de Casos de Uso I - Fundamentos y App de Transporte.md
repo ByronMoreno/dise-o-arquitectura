@@ -46,10 +46,10 @@ Un actor representa un **rol** desempeñado frente al sistema. Se clasifican for
 flowchart TD
   subgraph ActoresUML ["Tipos de Actores en UML 2.5"]
     direction TB
-    A1["1. Humanos<br/>👤 Usuarios finales que interactúan mediante una interfaz de usuario.<br/><i>Ej: Pasajero, Conductor, Administrador.</i>"]
-    A2["2. Sistemas Externos (&laquo;system&raquo;)<br/>🖥️ Software ajeno con el que el sistema intercambia datos mediante APIs/Webhooks.<br/><i>Ej: Pasarela de Pago Stripe, Servicio Meteorológico.</i>"]
-    A3["3. Dispositivos de Hardware (&laquo;device&raquo;)<br/>📡 Periféricos, antenas, sensores o chips que emiten telemetría física.<br/><i>Ej: Sensor GPS del teléfono, Lector biométrico.</i>"]
-    A4["4. Temporizadores (&laquo;timer&raquo;)<br/>⏰ Eventos cronológicos o demonios en segundo plano que disparan procesos por fecha/hora.<br/><i>Ej: Cron de liquidación mensual, Notificador de inactividad.</i>"]
+    A1["1. Humanos: Usuarios que interactúan mediante la interfaz de usuario (ej. Pasajero, Conductor)."]
+    A2["2. Sistemas Externos system: Software ajeno que intercambia datos vía APIs (ej. Pasarela Stripe)."]
+    A3["3. Dispositivos Hardware device: Periféricos o sensores que emiten datos físicos (ej. Sensor GPS)."]
+    A4["4. Temporizadores timer: Demonios o cron que disparan procesos por reloj (ej. Liquidación mensual)."]
   end
 ```
 
@@ -99,23 +99,23 @@ Diseñamos la arquitectura funcional para una aplicación móvil de movilidad (t
 ```mermaid
 flowchart LR
   %% Límite del Sistema
-  subgraph AppTransporte ["🚗 Límite del Sistema: App de Movilidad Urbana"]
+  subgraph AppTransporte ["Límite del Sistema: App de Movilidad Urbana"]
     direction TB
     
-    UC_Vehiculo(["🚗 Seleccionar Tipo de Transporte<br/>(Auto, Moto, Taxi)"])
-    UC_GPS(["📍 Obtener Geolocalización de Origen"])
-    UC_Cotizar(["💲 Calcular y Visualizar Tarifa"])
-    UC_Solicitar(["📲 Solicitar Viaje"])
-    UC_Aceptar(["🤝 Aceptar Solicitud de Viaje"])
-    UC_Cobrar(["💳 Procesar Cobro Automatizado"])
-    UC_Calificar(["⭐ Calificar Servicio y Conductor"])
+    UC_Vehiculo(["Seleccionar Tipo de Transporte"])
+    UC_GPS(["Obtener Geolocalización de Origen"])
+    UC_Cotizar(["Calcular y Visualizar Tarifa"])
+    UC_Solicitar(["Solicitar Viaje"])
+    UC_Aceptar(["Aceptar Solicitud de Viaje"])
+    UC_Cobrar(["Procesar Cobro Automatizado"])
+    UC_Calificar(["Calificar Servicio"])
   end
 
   %% Actores
-  Cliente["👤 Cliente (Pasajero)"]
-  Conductor["👤 Conductor"]
-  GPS["📡 Sensor GPS Móvil<br/>&laquo;device&raquo;"]
-  Banco[("🏦 Pasarela Bancaria<br/>&laquo;system&raquo;")]
+  Cliente["Cliente (Pasajero)"]
+  Conductor["Conductor"]
+  GPS["Sensor GPS Móvil - device"]
+  Banco[("Pasarela Bancaria - system")]
 
   %% Asociaciones Cliente
   Cliente --- UC_Vehiculo
@@ -131,9 +131,9 @@ flowchart LR
   Banco --- UC_Cobrar
 
   %% Dependencias internas entre Casos de Uso
-  UC_Solicitar -.->|&laquo;include&raquo;| UC_GPS
-  UC_Solicitar -.->|&laquo;include&raquo;| UC_Cotizar
-  UC_Aceptar -.->|&laquo;extend&raquo;<br/>[Viaje Finalizado]| UC_Cobrar
+  UC_Solicitar -.->|"<<include>>"| UC_GPS
+  UC_Solicitar -.->|"<<include>>"| UC_Cotizar
+  UC_Aceptar -.->|"<<extend>> - Viaje Finalizado"| UC_Cobrar
 
   %% Estilos visuales
   style AppTransporte fill:#0b1329,stroke:#3b82f6,stroke-width:2.5px

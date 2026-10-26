@@ -34,24 +34,24 @@ El siguiente diagrama formal en notación UML representa la frontera del sistema
 ```mermaid
 flowchart LR
   %% Límite del Sistema
-  subgraph SistemaMatricula ["🏛️ Límite del Sistema: Plataforma de Matrícula Universitaria (SIGA)"]
+  subgraph SistemaMatricula ["Límite del Sistema: Plataforma de Matrícula Universitaria - SIGA"]
     direction TB
     
     %% Casos de Uso Base
-    UC_Login(["🔐 Iniciar Sesión"])
-    UC_Consultar(["🔍 Consultar Oferta y Horarios"])
-    UC_Matricular(["📝 Matricular Asignatura<br/>(Caso Base Principal)"])
-    UC_Prereq(["🎓 Validar Prerrequisitos y Cupos"])
-    UC_Pago(["💳 Realizar Pago en Línea"])
-    UC_Extraord(["⚠️ Autorizar Matrícula Extraordinaria"])
-    UC_Historial(["📄 Descargar Comprobante Oficial"])
+    UC_Login(["Iniciar Sesión"])
+    UC_Consultar(["Consultar Oferta y Horarios"])
+    UC_Matricular(["Matricular Asignatura"])
+    UC_Prereq(["Validar Prerrequisitos y Cupos"])
+    UC_Pago(["Realizar Pago en Línea"])
+    UC_Extraord(["Autorizar Matrícula Extraordinaria"])
+    UC_Historial(["Descargar Comprobante Oficial"])
   end
 
   %% Actores Externos (Fuera del límite)
-  Estudiante["👤 Estudiante"]
-  EstBecado["🎓 Estudiante Becado"]
-  Admin["👔 Administrador Académico"]
-  Banco[("🏦 Pasarela Bancaria Externa")]
+  Estudiante["Estudiante"]
+  EstBecado["Estudiante Becado"]
+  Admin["Administrador Académico"]
+  Banco[("Pasarela Bancaria Externa")]
 
   %% Generalización de Actores (Herencia)
   EstBecado -->|Generalización| Estudiante
@@ -64,12 +64,12 @@ flowchart LR
   Banco --- UC_Pago
 
   %% Relaciones de Inclusión <<include>> (Siempre obligatorias)
-  UC_Matricular -.->|&laquo;include&raquo;| UC_Login
-  UC_Matricular -.->|&laquo;include&raquo;| UC_Prereq
+  UC_Matricular -.->|"<<include>>"| UC_Login
+  UC_Matricular -.->|"<<include>>"| UC_Prereq
 
   %% Relaciones de Extensión <<extend>> (Condicionales / Puntos de extensión)
-  UC_Pago -.->|&laquo;extend&raquo;<br/>[Requiere Arancel]| UC_Matricular
-  UC_Extraord -.->|&laquo;extend&raquo;<br/>[Fuera de Fecha]| UC_Matricular
+  UC_Pago -.->|"<<extend>> - Requiere Arancel"| UC_Matricular
+  UC_Extraord -.->|"<<extend>> - Fuera de Fecha"| UC_Matricular
 
   %% Estilos visuales
   style SistemaMatricula fill:#0f172a,stroke:#3b82f6,stroke-width:2px,stroke-dasharray: 4 4
@@ -93,16 +93,16 @@ flowchart TD
   subgraph Comparativa ["Regla Mnemotécnica de Relaciones en Casos de Uso"]
     direction LR
 
-    subgraph CasoInclude ["Relación <<include>> (Inclusión Obligatoria)"]
+    subgraph CasoInclude ["Relación include: Inclusión Obligatoria"]
       direction TB
-      A1(["Caso de Uso Base<br/>(Matricular)"]) -->|Flecha SALE del base hacia el componente| B1(["Caso de Uso Incluido<br/>(Validar Prerrequisitos)"])
-      Nota1["💡 Ocurre SIEMPRE.<br/>Sin B1, A1 no se puede completar."]
+      A1(["Caso Base: Matricular"]) -->|"Flecha sale del base"| B1(["Caso Incluido: Validar Prerrequisitos"])
+      Nota1["Ocurre SIEMPRE. Sin él, el base no se completa."]
     end
 
-    subgraph CasoExtend ["Relación <<extend>> (Extensión Opcional / Condicional)"]
+    subgraph CasoExtend ["Relación extend: Extensión Condicional"]
       direction TB
-      B2(["Caso de Uso de Extensión<br/>(Realizar Pago)"]) -->|Flecha SALE de la extensión hacia el base| A2(["Caso de Uso Base<br/>(Matricular)"])
-      Nota2["💡 Ocurre SOLO BAJO CONDICIÓN.<br/>A2 puede completarse solo, salvo si se dispara la regla."]
+      B2(["Caso Extensión: Realizar Pago"]) -->|"Flecha sale de la extensión"| A2(["Caso Base: Matricular"])
+      Nota2["Ocurre SOLO bajo condición especial."]
     end
   end
 ```
@@ -137,28 +137,28 @@ Un diagrama gráfico debe ir acompañado de su especificación formal:
 
 ```mermaid
 flowchart TD
-  Inicio([Inicio: Estudiante selecciona materias]) --> P1[1. Sistema invoca <<include>> Iniciar Sesión]
-  P1 --> P2[2. Estudiante visualiza oferta y selecciona materias deseadas]
-  P2 --> P3[3. Sistema invoca <<include>> Validar Prerrequisitos y Cupos]
+  Inicio(["Inicio: Estudiante selecciona materias"]) --> P1["1. Sistema invoca include: Iniciar Sesión"]
+  P1 --> P2["2. Estudiante visualiza oferta y selecciona materias deseadas"]
+  P2 --> P3["3. Sistema invoca include: Validar Prerrequisitos y Cupos"]
   
-  P3 --> ValPrereq{¿Cumple prerrequisitos y hay cupos?}
-  ValPrereq -- NO --> ErrorPrereq[Flujo Alterno A1: Notificar impedimento académico y abortar]
-  ValPrereq -- SÍ --> CheckFecha{¿Fecha ordinaria vigente?}
+  P3 --> ValPrereq{"¿Cumple prerrequisitos y hay cupos?"}
+  ValPrereq -- NO --> ErrorPrereq["Flujo Alterno A1: Notificar impedimento académico y abortar"]
+  ValPrereq -- SÍ --> CheckFecha{"¿Fecha ordinaria vigente?"}
 
-  CheckFecha -- NO --> ExtAdmin[Extensión: <<extend>> Autorizar Extraordinaria por Admin]
-  ExtAdmin --> CheckAutorizado{¿Admin autorizó?}
-  CheckAutorizado -- NO --> ErrorAdmin[Flujo Alterno A2: Matrícula rechazada por vencimiento]
+  CheckFecha -- NO --> ExtAdmin["Extensión: extend - Autorizar Extraordinaria por Admin"]
+  ExtAdmin --> CheckAutorizado{"¿Admin autorizó?"}
+  CheckAutorizado -- NO --> ErrorAdmin["Flujo Alterno A2: Matrícula rechazada por vencimiento"]
   CheckAutorizado -- SÍ --> CheckPago
 
-  CheckFecha -- SÍ --> CheckPago{¿Genera aranceles?}
+  CheckFecha -- SÍ --> CheckPago{"¿Genera aranceles?"}
 
-  CheckPago -- SÍ --> ExtPago[Extensión: <<extend>> Realizar Pago en Línea vía Banco]
-  ExtPago --> ValPago{¿Pago bancario aprobado?}
-  ValPago -- NO --> ErrorPago[Flujo Alterno A3: Pago rechazado, mantener reserva 15 min]
+  CheckPago -- SÍ --> ExtPago["Extensión: extend - Realizar Pago en Línea vía Banco"]
+  ExtPago --> ValPago{"¿Pago bancario aprobado?"}
+  ValPago -- NO --> ErrorPago["Flujo Alterno A3: Pago rechazado, mantener reserva 15 min"]
   ValPago -- SÍ --> Confirmar
 
-  CheckPago -- NO --> Confirmar[4. Sistema descuenta cupos y graba matrícula oficial]
-  Confirmar --> Fin([Fin: Estudiante descarga comprobante])
+  CheckPago -- NO --> Confirmar["4. Sistema descuenta cupos y graba matrícula oficial"]
+  Confirmar --> Fin(["Fin: Estudiante descarga comprobante"])
 ```
 
 ---

@@ -160,8 +160,8 @@ flowchart LR
   Estudiante --- UC2
   Docente --- UC5
 
-  UC2 -.->|<<include>>| UC3
-  UC2 -.->|<<extend>>| UC4
+  UC2 -.->|"<<include>>"| UC3
+  UC2 -.->|"<<extend>>"| UC4
   UC4 --- Banco
 ```
 
