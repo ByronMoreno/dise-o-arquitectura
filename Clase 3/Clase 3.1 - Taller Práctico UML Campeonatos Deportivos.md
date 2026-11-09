@@ -198,8 +198,6 @@ Cada pareja deberá consolidar y presentar un informe técnico formal con los do
    * Métodos representativos de las operaciones y reglas de negocio del sistema.
 3. **Semántica Relacional Rigurosa:**
    * **Generalización / Herencia:** Superclase `Persona` y sus especializaciones (`Jugador`, `Arbitro`, `TutorLegal`).
-   * **Composición Fuerte (◆):** Vínculos existenciales estrictos (*Campeonato* contiene *Partidos*, *Partido* contiene *ActaPartido*, *Jugador* contiene su *FichaMedica*).
-   * **Agregación Débil (◇):** Colecciones con ciclos de vida independientes (*Club* agrupa *Equipos*, *Club* referencia *Canchas*).
    * **Clase Asociativa:** Modelado explícito de `FichajeTemporada` para resolver la relación $N:M$ entre *Jugador*, *Equipo* y *Temporada*.
    * **Multiplicidades explícitas:** Obligatorias en todos los extremos de relación (`1`, `0..1`, `1..*`, `*`).
 
