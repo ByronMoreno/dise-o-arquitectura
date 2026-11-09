@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Taller Práctico APE: Análisis y Modelado de Diagramas de Casos de Uso y Diagrama de Clases para un Sistema Deportivo Integral, Campeonatos, Formativas y Carnetización Digital | UNIBE.">
+  <title>Taller Práctico UML: Sistema Deportivo Integral y Campeonatos | UNIBE</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       CSS VARIABLES & GLOBAL RESET (UNIBE Shared Theme System)
+       ========================================================= */
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(15, 23, 42, 0.72);
+      --bg-card-hover: rgba(30, 41, 59, 0.88);
+      --border-glow: rgba(59, 130, 246, 0.2);
+      --border-light: rgba(255, 255, 255, 0.08);
+
+      --color-primary: #3b82f6;    /* Azul brillante */
+      --color-secondary: #8b5cf6;  /* Púrpura */
+      --color-accent: #06b6d4;     /* Cyan */
+      --color-success: #10b981;    /* Esmeralda */
+      --color-danger: #ef4444;     /* Rojo */
+      --color-warning: #f59e0b;    /* Ámbar */
+      --color-gold: #fbbf24;       /* Dorado */
+
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+
+      --sidebar-width: 295px;
+      --transition-speed: 0.25s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      line-height: 1.6;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(59, 130, 246, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 85%, rgba(139, 92, 246, 0.08) 0%, transparent 40%);
+      background-attachment: fixed;
+    }
+
+    /* Reading Progress Bar */
+    .progress-bar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.05);
+      z-index: 9999;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-accent), var(--color-secondary));
+      transition: width 0.1s ease-out;
+    }
+
+    /* =========================================================
+       SIDEBAR NAVIGATION
+       ========================================================= */
+    .sidebar {
+      width: var(--sidebar-width);
+      height: 100vh;
+      position: fixed;
+      left: 0;
+      top: 0;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(20px);
+      border-right: 1px solid var(--border-light);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-header {
+      padding: 24px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .course-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-gold);
+      background: rgba(251, 191, 36, 0.12);
+      border: 1px solid rgba(251, 191, 36, 0.25);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 8px;
+    }
+    .sidebar-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .sidebar-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      padding: 16px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      overflow-y: auto;
+      flex-grow: 1;
+    }
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      color: var(--text-muted);
+      text-decoration: none;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      transition: all var(--transition-speed) ease;
+    }
+    .sidebar-menu li a:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-bright);
+      transform: translateX(3px);
+    }
+    .sidebar-menu li a.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-left: 3px solid var(--color-primary);
+      color: var(--color-accent);
+      font-weight: 600;
+    }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-light);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: rgba(10, 15, 29, 0.6);
+    }
+
+    /* =========================================================
+       MAIN CONTENT
+       ========================================================= */
+    .main-content {
+      margin-left: var(--sidebar-width);
+      flex-grow: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 36px;
+      min-width: 0;
+      max-width: 1250px;
+    }
+
+    /* Hero Banner */
+    .hero-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.88), rgba(30, 41, 59, 0.55));
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      padding: 38px 42px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+    .hero-section::before {
+      content: '';
+      position: absolute;
+      top: -50px;
+      right: -50px;
+      width: 240px;
+      height: 240px;
+      background: radial-gradient(circle, rgba(59, 130, 246, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .meta-badges {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .badge-item {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-blue { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+    .badge-purple { background: rgba(139, 92, 246, 0.15); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.3); }
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-gold { background: rgba(251, 191, 36, 0.15); color: #fcd34d; border: 1px solid rgba(251, 191, 36, 0.3); }
+
+    .hero-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #ffffff 40%, #93c5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 12px;
+    }
+    .hero-desc {
+      font-size: 1.02rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 950px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 16px;
+      padding: 30px;
+      transition: all var(--transition-speed) ease;
+      position: relative;
+    }
+    .card:hover {
+      border-color: rgba(59, 130, 246, 0.3);
+      box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.4);
+    }
+    .card-title {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .card-title .icon {
+      font-size: 1.4rem;
+    }
+    .card-subtitle {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* Modalidad en Parejas Alert Box */
+    .alert-pair {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05));
+      border: 1px solid rgba(251, 191, 36, 0.35);
+      border-left: 5px solid var(--color-gold);
+      border-radius: 12px;
+      padding: 20px 24px;
+      margin: 10px 0 24px 0;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+    .alert-pair-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    .alert-pair-content h4 {
+      color: var(--color-gold);
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .alert-pair-content p {
+      color: #e2e8f0;
+      font-size: 0.92rem;
+      line-height: 1.55;
+    }
+
+    /* Grids */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 20px;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    /* Feature Item in Entities */
+    .entity-box {
+      background: rgba(10, 15, 29, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 12px;
+      padding: 18px 20px;
+      border-left: 3px solid var(--color-primary);
+      transition: all 0.2s ease;
+    }
+    .entity-box:hover {
+      background: rgba(30, 41, 59, 0.45);
+      transform: translateY(-2px);
+    }
+    .entity-box.accent-purple { border-left-color: var(--color-secondary); }
+    .entity-box.accent-cyan { border-left-color: var(--color-accent); }
+    .entity-box.accent-green { border-left-color: var(--color-success); }
+    .entity-box.accent-gold { border-left-color: var(--color-gold); }
+    .entity-box.accent-red { border-left-color: var(--color-danger); }
+
+    .entity-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .entity-desc {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+    .entity-rules {
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.07);
+      font-size: 0.8rem;
+      color: #93c5fd;
+    }
+
+    /* Open Analysis Box */
+    .open-analysis-box {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(59, 130, 246, 0.04));
+      border: 1px solid rgba(6, 182, 212, 0.25);
+      border-radius: 14px;
+      padding: 22px 26px;
+      margin: 16px 0;
+    }
+    .open-analysis-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--color-accent);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .open-analysis-text {
+      font-size: 0.93rem;
+      color: #cbd5e1;
+      line-height: 1.65;
+    }
+
+    /* Tables */
+    .custom-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 16px 0;
+      font-size: 0.9rem;
+    }
+    .custom-table th {
+      background: rgba(30, 41, 59, 0.8);
+      color: var(--text-bright);
+      text-align: left;
+      padding: 12px 16px;
+      font-weight: 600;
+      border: 1px solid var(--border-light);
+    }
+    .custom-table td {
+      padding: 12px 16px;
+      border: 1px solid var(--border-light);
+      color: var(--text-muted);
+      background: rgba(15, 23, 42, 0.4);
+    }
+    .custom-table tr:hover td {
+      background: rgba(59, 130, 246, 0.05);
+      color: var(--text-main);
+    }
+
+    /* Interactive Carnet Simulator */
+    .carnet-wrapper {
+      background: linear-gradient(135deg, #090e1a, #131c31);
+      border: 2px dashed rgba(59, 130, 246, 0.35);
+      border-radius: 16px;
+      padding: 24px;
+      margin: 20px 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      align-items: center;
+      justify-content: center;
+    }
+    .carnet-card {
+      width: 330px;
+      height: 490px;
+      background: linear-gradient(160deg, #1e293b 0%, #0f172a 100%);
+      border: 2px solid #3b82f6;
+      border-radius: 18px;
+      box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.8), 0 0 20px rgba(59, 130, 246, 0.3);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .carnet-card::after {
+      content: 'HABILITADO';
+      position: absolute;
+      top: 40px;
+      right: -30px;
+      transform: rotate(45deg);
+      background: #10b981;
+      color: #fff;
+      font-size: 0.65rem;
+      font-weight: 800;
+      padding: 4px 35px;
+      letter-spacing: 1px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+    .carnet-header {
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+    }
+    .carnet-org {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--color-gold);
+      font-weight: 700;
+    }
+    .carnet-torneo {
+      font-size: 0.88rem;
+      font-weight: 800;
+      color: #fff;
+      margin-top: 2px;
+    }
+    .carnet-photo-row {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin: 10px 0;
+    }
+    .carnet-photo {
+      width: 85px;
+      height: 105px;
+      border-radius: 8px;
+      background: #334155;
+      border: 2px solid var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.2rem;
+      color: #94a3b8;
+      overflow: hidden;
+    }
+    .carnet-player-info {
+      flex: 1;
+    }
+    .carnet-player-name {
+      font-size: 1rem;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+    .carnet-player-club {
+      font-size: 0.83rem;
+      color: var(--color-accent);
+      font-weight: 600;
+      margin-top: 4px;
+    }
+    .carnet-badge-dorsal {
+      display: inline-block;
+      background: rgba(59, 130, 246, 0.2);
+      border: 1px solid var(--color-primary);
+      color: #93c5fd;
+      font-weight: 800;
+      font-size: 0.78rem;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 5px;
+    }
+    .carnet-details-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 0.75rem;
+    }
+    .carnet-details-item span {
+      display: block;
+      color: var(--text-muted);
+      font-size: 0.66rem;
+    }
+    .carnet-details-item strong {
+      color: #f8fafc;
+    }
+    .carnet-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 10px;
+    }
+    .carnet-qr {
+      width: 58px;
+      height: 58px;
+      background: #fff;
+      padding: 4px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .carnet-qr svg {
+      width: 100%;
+      height: 100%;
+    }
+    .carnet-security-meta {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-align: right;
+    }
+    .carnet-security-meta strong {
+      color: var(--color-gold);
+      display: block;
+    }
+
+    /* Interactive Checklist */
+    .checklist-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-light);
+      border-radius: 12px;
+      padding: 18px 22px;
+    }
+    .checklist-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .check-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .check-item:last-child {
+      border-bottom: none;
+    }
+    .check-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--color-primary);
+      margin-top: 2px;
+      cursor: pointer;
+    }
+    .check-label {
+      color: var(--text-main);
+      user-select: none;
+    }
+    .check-desc {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Rubric Item */
+    .rubric-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 4px;
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    @media (max-width: 900px) {
+      .sidebar {
+        display: none;
+      }
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+      .carnet-wrapper {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Reading Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Sidebar Navigation -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Taller Práctico APE</div>
+      <h2 class="sidebar-title">Clase 3: Taller UML</h2>
+      <p class="sidebar-subtitle">Sistema Deportivo Integral</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#intro" class="active">🎯 1. Ficha del Taller</a></li>
+      <li><a href="#parejas">👥 2. Modalidad en Parejas</a></li>
+      <li><a href="#caso-negocio">🏟️ 3. El Caso de Negocio</a></li>
+      <li><a href="#dimensiones">🌐 4. Dimensiones del Sistema</a></li>
+      <li><a href="#entidades">📦 5. Módulos y Entidades</a></li>
+      <li><a href="#formativas">🧒 6. Canteras y Juveniles</a></li>
+      <li><a href="#carnet-demo">🪪 7. Carnetización y QR</a></li>
+      <li><a href="#analisis-casos">🧠 8. Análisis de Casos de Uso</a></li>
+      <li><a href="#entregables">📋 9. Entregables Requeridos</a></li>
+      <li><a href="#rubrica">📊 10. Rúbrica de Calificación</a></li>
+      <li><a href="#checklist">✅ 11. Checklist de Entrega</a></li>
+      <li style="margin-top: 15px; border-top: 1px solid var(--border-light); padding-top: 10px;">
+        <a href="../index.html">🏠 Portal Principal</a>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      UNIBE &middot; Software &middot; RDA2
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Hero Banner -->
+    <header class="hero-section" id="intro">
+      <div class="meta-badges">
+        <span class="badge-item badge-blue">UNIDAD 1: FUNDAMENTOS DEL DISEÑO</span>
+        <span class="badge-item badge-green">RDA2: MODELADO ORIENTADO A OBJETOS</span>
+        <span class="badge-item badge-purple">APRENDIZAJE PRÁCTICO EXPERIMENTAL (APE)</span>
+        <span class="badge-item badge-gold">MODALIDAD: PAREJAS (2 ESTUDIANTES)</span>
+      </div>
+      <h1 class="hero-title">Taller Integral de Análisis y Modelado UML: Plataforma de Gestión Deportiva y Campeonatos</h1>
+      <p class="hero-desc">
+        En este taller grupal aplicarás la notación formal UML 2.5 para analizar y diseñar la arquitectura completa de un sistema deportivo integral: desde la administración institucional y canteras formativas, hasta la programación de campeonatos multideporte, arbitraje, control disciplinario, carnetización inteligente y actas de juego en tiempo real.
+      </p>
+    </header>
+
+    <!-- Modalidad en Parejas (Instrucción explícita) -->
+    <section class="card" id="parejas">
+      <div class="alert-pair">
+        <div class="alert-pair-icon">👥</div>
+        <div class="alert-pair-content">
+          <h4>MODALIDAD OBLIGATORIA: TRABAJO EXCLUSIVAMENTE EN PAREJAS (2 ESTUDIANTES)</h4>
+          <p>
+            La ingeniería de software requiere deliberación de diseño, justificación de decisiones y revisión técnica por pares (*peer-review*). Por este motivo, <strong>el taller debe ser resuelto exclusivamente en grupos de dos personas</strong>. No se admiten entregas individuales ni grupos de 3 o más integrantes.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top: 10px;">
+        <div class="entity-box accent-cyan">
+          <div class="entity-name">🧑‍💻 Estudiante 1: Analista de Requisitos & Modelador Dinámico</div>
+          <div class="entity-desc">
+            Lidera la delimitación del alcance funcional (límite del sistema), la clasificación exhaustiva de actores primarios/secundarios, el descubrimiento analítico de los casos de uso, las relaciones <code>&lt;&lt;include&gt;&gt;</code> y <code>&lt;&lt;extend&gt;&gt;</code>, y la redacción de las especificaciones textuales formales.
+          </div>
+          <div class="entity-rules">Responsabilidad: Comportamiento del sistema, flujos de negocio y contingencias.</div>
+        </div>
+
+        <div class="entity-box accent-purple">
+          <div class="entity-name">👩‍💻 Estudiante 2: Arquitecto de Dominio & Diseñador Estructural</div>
+          <div class="entity-desc">
+            Lidera la formulación del diagrama de clases de dominio, tipado de atributos y métodos con visibilidad estricta (+, -, #), definición rigurosa de relaciones semánticas (composición, agregación, generalización), multiplicidades y modelado de clases asociativas complejas.
+          </div>
+          <div class="entity-rules">Responsabilidad: Estructura de clases, encapsulamiento y coherencia relacional.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- El Caso de Negocio -->
+    <section class="card" id="caso-negocio">
+      <h2 class="card-title"><span class="icon">🏟️</span> El Caso Empresarial: SportChamp Pro</h2>
+      <p class="card-subtitle">Reto de transformación digital para una federación deportiva moderna</p>
+      
+      <p style="color: var(--text-muted); line-height: 1.7; margin-bottom: 16px;">
+        Una <strong>Federación Deportiva Provincial y sus Asociaciones de Ligas Barriales</strong> organizan anualmente múltiples torneos en diversas disciplinas (Fútbol 11, Fútbol Sala, Básquetbol y Ecuavóley). Hasta hoy, sus procesos dependían de planillas físicas, libros de actas manuales y archivos dispersos, lo que ha ocasionado crisis institucionales recurrentes:
+      </p>
+
+      <ul style="color: #cbd5e1; margin-left: 24px; line-height: 1.8; margin-bottom: 20px;">
+        <li><strong>Suplantación de identidad y adulteración de edades:</strong> Atletas profesionales o mayores de edad jugando ilegalmente en torneos formativos o juveniles.</li>
+        <li><strong>Falta de trazabilidad en canteras y juveniles:</strong> Menores de edad jugando sin consentimiento informado de sus padres ni seguro médico, y clubes profesionales llevándose talentos sin reconocer los derechos de formación del club barrial de origen.</li>
+        <li><strong>Doble fichaje en la misma temporada:</strong> Jugadores que actúan con un equipo el sábado y con el archirrival el domingo en la misma categoría.</li>
+        <li><strong>Descontrol arbitral y logístico:</strong> Canchas sin iluminación asignadas a partidos nocturnos, estadios con gramado en mal estado y actas de partido alteradas tras el pitazo final.</li>
+        <li><strong>Impugnaciones y sanciones no ejecutadas:</strong> Jugadores expulsados que vuelven a jugar la fecha siguiente porque el Tribunal de Penas no notificó la sanción a tiempo.</li>
+      </ul>
+
+      <p style="color: var(--text-muted); line-height: 1.7;">
+        El encargo profesional consiste en <strong>analizar y modelar una solución de software integral</strong> que contemple todos los aspectos del ecosistema deportivo: administrativo, competitivo, arbitral, disciplinario, formativo y de carnetización.
+      </p>
+    </section>
+
+    <!-- Dimensiones del Sistema Deportivo Integral -->
+    <section class="card" id="dimensiones">
+      <h2 class="card-title"><span class="icon">🌐</span> Las 6 Dimensiones que debe Considerar el Sistema Deportivo</h2>
+      <p class="card-subtitle">Un software deportivo no es solo una tabla de posiciones; debe articular toda la operativa</p>
+
+      <div class="grid-3">
+        <div class="entity-box accent-gold">
+          <div class="entity-name">🏛️ 1. Institucional y Legal</div>
+          <div class="entity-desc">
+            Personería jurídica de clubes, directivas vigentes, sedes sociales, estado de afiliación y tesorería (cuotas ordinarias y extraordinarias).
+          </div>
+        </div>
+
+        <div class="entity-box accent-blue">
+          <div class="entity-name">🧒 2. Canteras y Juveniles</div>
+          <div class="entity-desc">
+            Categorías formativas (Sub-10 a Sub-18), tutela legal de padres, certificados de escolaridad, regla de minutos juveniles en primera y derechos de formación.
+          </div>
+        </div>
+
+        <div class="entity-box accent-cyan">
+          <div class="entity-name">🏆 3. Competición y Fixture</div>
+          <div class="entity-desc">
+            Parametrización multideporte, series (A, B, C), fases eliminatorias y de grupos, generación de calendarios y tablas automatizadas (Fair Play).
+          </div>
+        </div>
+
+        <div class="entity-box accent-purple">
+          <div class="entity-name">🚩 4. Arbitraje e Infraestructura</div>
+          <div class="entity-desc">
+            Ternas arbitrales, escalafones, asignación según neutralidad, estadios/canchas con aforo, tipo de superficie e iluminación nocturna.
+          </div>
+        </div>
+
+        <div class="entity-box accent-green">
+          <div class="entity-name">🪪 5. Carnetización y Control</div>
+          <div class="entity-desc">
+            Ficha médica obligatoria, electrocardiograma, póliza de seguro, carnet digital con Código QR dinámico firmado criptográficamente.
+          </div>
+        </div>
+
+        <div class="entity-box accent-red">
+          <div class="entity-name">⚖️ 6. Tribunal y Disciplina</div>
+          <div class="entity-desc">
+            Acta de partido digital, acumulación de tarjetas amarillas, expulsiones directas, suspensiones automáticas por fechas, multas y apelaciones.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Módulos y Entidades a Modelar -->
+    <section class="card" id="entidades">
+      <h2 class="card-title"><span class="icon">📦</span> Requisitos de Dominio y Entidades a Modelar</h2>
+      <p class="card-subtitle">Base requerida para la construcción del Diagrama de Clases y el análisis de Casos de Uso</p>
+
+      <div class="grid-2">
+        <!-- Deporte -->
+        <div class="entity-box accent-gold">
+          <div class="entity-name">⚽ 1. Deporte y Reglamento</div>
+          <div class="entity-desc">
+            Soporte multideporte (Fútbol 11, Fútbol Sala, Básquetbol, Ecuavóley). Debe almacenar nombre, reglamento base, cantidad de jugadores titulares y suplentes en planilla, tiempos/periodos de juego y sistema de puntuación (ej. 3 pts por victoria en fútbol, 2 pts en básquet, etc.).
+          </div>
+          <div class="entity-rules">Regla: Cada campeonato se rige bajo los parámetros específicos de un deporte.</div>
+        </div>
+
+        <!-- Clubes -->
+        <div class="entity-box accent-blue">
+          <div class="entity-name">🛡️ 2. Clubes Deportivos</div>
+          <div class="entity-desc">
+            Entidad con personería jurídica, fecha de fundación, colores representativos, escudo oficial, presidente o representante legal, y estado de afiliación (Activo, Moroso, Suspendido).
+          </div>
+          <div class="entity-rules">Regla: El club es el titular de las franquicias y derechos deportivos.</div>
+        </div>
+
+        <!-- Equipos -->
+        <div class="entity-box accent-cyan">
+          <div class="entity-name">👕 3. Equipos (Filiales)</div>
+          <div class="entity-desc">
+            Un club inscribe múltiples equipos en distintas categorías y series (ej. "Club América Senior A", "Club América Femenino", "Club América Sub-14"). Registra uniforme titular y alterno, y Director Técnico acreditado.
+          </div>
+          <div class="entity-rules">Relación: Pertenencia estricta de equipos hacia su Club matriz.</div>
+        </div>
+
+        <!-- Categorías y Series -->
+        <div class="entity-box accent-purple">
+          <div class="entity-name">🏅 4. Categorías y Series / Divisiones</div>
+          <div class="entity-desc">
+            <strong>Categorías:</strong> Sub-10, Sub-12, Sub-14, Sub-16, Sub-18, Senior (Libre), Máster (+40 años), Supermáster (+50 años), Femenino y Masculino (con validación de edad estricta).<br>
+            <strong>Series:</strong> Serie A (Honor), Serie B (Ascenso), Serie C, gobernando el régimen de ascensos y descensos anuales.
+          </div>
+          <div class="entity-rules">Regla: Un equipo solo puede disputar una categoría y serie por temporada.</div>
+        </div>
+
+        <!-- Jugadores -->
+        <div class="entity-box accent-green">
+          <div class="entity-name">🏃 5. Jugadores Mayores y Ficha Médica</div>
+          <div class="entity-desc">
+            Cédula de identidad/pasaporte único, nombres y apellidos, fecha de nacimiento, tipo de sangre, contacto y foto carnet. Ficha médica obligatoria con electrocardiograma, aptitud física y póliza de seguro contra accidentes con fecha de caducidad.
+          </div>
+          <div class="entity-rules">Condición: Sin ficha médica vigente el deportista queda en estado "No Habilitado".</div>
+        </div>
+
+        <!-- Fichajes por Temporadas -->
+        <div class="entity-box accent-gold">
+          <div class="entity-name">🔄 6. Jugadores por Temporadas (Fichajes / Pases)</div>
+          <div class="entity-desc">
+            Clase asociativa fundamental que modela el vínculo entre un Jugador, un Equipo y una Temporada/Año lectivo. Registra dorsal (1 al 99), posición de juego, costo del pase, historial de clubes y estado de habilitación.
+          </div>
+          <div class="entity-rules">Restricción: Bloqueo automático ante intentos de doble fichaje en la misma categoría y temporada.</div>
+        </div>
+
+        <!-- Árbitros -->
+        <div class="entity-box accent-purple">
+          <div class="entity-name">🚩 7. Árbitros y Jueces de Mesa</div>
+          <div class="entity-desc">
+            Cédula, nombres, escalafón (FIFA, Nacional, Provincial, Aficionado), rol asignado (Juez Central, Asistente 1, Asistente 2, Cuarto Árbitro, Vocal de Mesa), tarifa por partido y registro de calificaciones de desempeño.
+          </div>
+          <div class="entity-rules">Conflicto de interés: Un árbitro no puede arbitrar partidos de su propio club de origen.</div>
+        </div>
+
+        <!-- Canchas y Estadios -->
+        <div class="entity-box accent-cyan">
+          <div class="entity-name">🏟️ 8. Estadios y Canchas Deportivas</div>
+          <div class="entity-desc">
+            Nombre, dirección georreferenciada (coordenadas GPS), aforo de espectadores, tipo de superficie (Césped natural, Sintético, Hormigón, Parqué), disponibilidad de iluminación nocturna (indispensable para programar partidos después de las 18:00) y camerinos.
+          </div>
+          <div class="entity-rules">Regla: El programador de partidos debe validar la disponibilidad del escenario.</div>
+        </div>
+
+        <!-- Campeonatos y Actas -->
+        <div class="entity-box accent-blue">
+          <div class="entity-name">🏆 9. Campeonatos, Fixture y Actas de Partido</div>
+          <div class="entity-desc">
+            Campeonato con sistema de competencia (grupos y eliminación directa), generación automática de fixture, acta digital de partido con goles por jugador y minuto, tarjetas amarillas/rojas, sustituciones, incidencias y firma de capitanes y vocal.
+          </div>
+          <div class="entity-rules">Automatización: El acta oficializa el resultado y actualiza la tabla de posiciones inmediatamente.</div>
+        </div>
+
+        <!-- Tribunal Disciplinario -->
+        <div class="entity-box accent-red">
+          <div class="entity-name">⚖️ 10. Tribunal de Penas y Sanciones</div>
+          <div class="entity-desc">
+            Procesamiento de informes arbitrales. Sanciones automáticas por acumulación de 3 tarjetas amarillas (1 fecha de suspensión), tarjeta roja directa (2 a 4 fechas según gravedad), multas económicas al club por invasión de hinchas y resolución de apelaciones.
+          </div>
+          <div class="entity-rules">Impacto: Jugador sancionado no puede aparecer habilitado en el escaneo de carnet de la mesa de control.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Módulo Especial de Formativas y Juveniles -->
+    <section class="card" id="formativas">
+      <h2 class="card-title"><span class="icon">🧒</span> Módulo Especial: Canteras, Formativas y Regulación de Juveniles</h2>
+      <p class="card-subtitle">Aspectos jurídicos, deportivos y formativos que deben modelarse con rigor</p>
+
+      <div class="open-analysis-box">
+        <div class="open-analysis-title">⚽ Consideraciones Críticas para el Modelado de Juveniles</div>
+        <p class="open-analysis-text">
+          El desarrollo del fútbol base y el deporte juvenil exige normativas específicas para proteger a los menores de edad y asegurar el recambio generacional en los primeros equipos. El sistema debe incorporar los siguientes conceptos:
+        </p>
+      </div>
+
+      <div class="grid-2" style="margin-top: 16px;">
+        <div class="entity-box accent-gold">
+          <div class="entity-name">📝 1. Patria Potestad y Consentimiento del Tutor</div>
+          <div class="entity-desc">
+            Todo jugador menor de 18 años debe vincular en el sistema a su <strong>Padre, Madre o Tutor Legal</strong> (con cédula, parentesco, teléfono y correo). Se exige la subida digital de la <em>Carta de Autorización de Participación Deportiva</em>, el <em>Consentimiento Informado Médico</em> y la <em>Cesión de Derechos de Imagen</em> para transmisiones.
+          </div>
+          <div class="entity-rules">Regla: El carnet juvenil no puede emitirse sin la validación del consentimiento del tutor.</div>
+        </div>
+
+        <div class="entity-box accent-blue">
+          <div class="entity-name">🎓 2. Certificado de Escolaridad Obligatorio</div>
+          <div class="entity-desc">
+            Para evitar la deserción escolar en deportistas formativos, el sistema solicita semestralmente el certificado de matrícula o asistencia estudiantil emitido por una institución educativa acreditada.
+          </div>
+          <div class="entity-rules">Regla formativa: Jugador con certificado vencido queda bloqueado temporalmente.</div>
+        </div>
+
+        <div class="entity-box accent-green">
+          <div class="entity-name">⏱️ 3. Regla del Juvenil en Primera División (Regla Sub-X)</div>
+          <div class="entity-desc">
+            Por reglamento de la liga, cada equipo de la <strong>Serie A (Primera División)</strong> está obligado a alinear como titular a al menos un jugador de categoría juvenil (Sub-18) durante un mínimo de <strong>45 minutos por partido</strong>. El sistema debe controlar el cumplimiento de este requisito en el acta de juego: si el DT sustituye al juvenil antes de tiempo sin ingresar a otro juvenil, el sistema alerta de la infracción y el club pierde los puntos en mesa.
+          </div>
+          <div class="entity-rules">Control en Acta: El vocal registra los minutos exactos del juvenil en cancha.</div>
+        </div>
+
+        <div class="entity-box accent-purple">
+          <div class="entity-name">🔄 4. Doble Habilitación y Promoción Temporal</div>
+          <div class="entity-desc">
+            Un talento de las formativas puede ser ascendido para disputar partidos con el equipo de primera categoría de su club, pero **sin perder su elegibilidad** para disputar el torneo de su propia división juvenil (Sub-16 o Sub-18) en la misma semana, siempre respetando los tiempos de descanso fisiológico reglamentarios (mínimo 48 horas entre partidos).
+          </div>
+          <div class="entity-rules">Relación: Un jugador juvenil puede pertenecer a dos plantillas del mismo club.</div>
+        </div>
+
+        <div class="entity-box accent-cyan">
+          <div class="entity-name">💼 5. Derechos de Formación y Solidaridad</div>
+          <div class="entity-desc">
+            El sistema debe conservar el historial formativo de cada atleta (clubes donde militó entre los 12 y 18 años). En caso de que el jugador sea transferido a nivel profesional o con costo de pase, el sistema calcula la distribución porcentual correspondiente a los clubes barriales formadores.
+          </div>
+          <div class="entity-rules">Trazabilidad: Registro cronológico imborrable de pases formativos.</div>
+        </div>
+
+        <div class="entity-box accent-gold">
+          <div class="entity-name">🛡️ 6. Protección contra Adulteración de Identidad</div>
+          <div class="entity-desc">
+            Para erradicar la inscripción de jugadores mayores con partidas falsas en categorías formativas, el carnet incorpora una verificación biométrica o consulta a la base de datos de registro civil (`<<system>>`), cruzando la partida de nacimiento original.
+          </div>
+          <div class="entity-rules">Seguridad: Alerta automática si la fecha de nacimiento no concuerda con la cédula.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Módulo de Carnetización con Simulador Visual -->
+    <section class="card" id="carnet-demo">
+      <h2 class="card-title"><span class="icon">🪪</span> Módulo Clave: Carnetización Inteligente y Mesa de Control</h2>
+      <p class="card-subtitle">Mecanismo tecnológico para la prevención del fraude y control del partido</p>
+
+      <div class="carnet-wrapper">
+        <!-- Visual Carnet Card -->
+        <div class="carnet-card">
+          <div class="carnet-header">
+            <div class="carnet-org">LIGA DEPORTIVA PROVINCIAL UNIBE</div>
+            <div class="carnet-torneo">TORNEO OFICIAL FORMATIVO 2026</div>
+          </div>
+
+          <div class="carnet-photo-row">
+            <div class="carnet-photo">
+              🧒
+            </div>
+            <div class="carnet-player-info">
+              <div class="carnet-player-name">MATEO SEBASTIÁN SILVA</div>
+              <div class="carnet-player-club">⚽ C.D. RAYO CENTRAL (CANTERA)</div>
+              <span class="carnet-badge-dorsal">DORSAL # 7 &middot; JUVENIL</span>
+            </div>
+          </div>
+
+          <div class="carnet-details-grid">
+            <div class="carnet-details-item">
+              <span>CÉDULA</span>
+              <strong>1750849123</strong>
+            </div>
+            <div class="carnet-details-item">
+              <span>CATEGORÍA</span>
+              <strong>SUB-16 FORMATIVA</strong>
+            </div>
+            <div class="carnet-details-item">
+              <span>EDAD REAL</span>
+              <strong>15 AÑOS (APTO)</strong>
+            </div>
+            <div class="carnet-details-item">
+              <span>TUTOR LEGAL</span>
+              <strong>CARLOS SILVA (PADRE)</strong>
+            </div>
+            <div class="carnet-details-item">
+              <span>TIPO SANGRE</span>
+              <strong>O POSITIVO (O+)</strong>
+            </div>
+            <div class="carnet-details-item">
+              <span>FICHA MÉDICA</span>
+              <strong style="color: #34d399;">VIGENTE &check;</strong>
+            </div>
+            <div class="carnet-details-item">
+              <span>ESCOLARIDAD</span>
+              <strong style="color: #60a5fa;">MATRÍCULA OK &check;</strong>
+            </div>
+            <div class="carnet-details-item">
+              <span>REGLA SUB-X</span>
+              <strong style="color: #fcd34d;">HABILITADO 1RA &check;</strong>
+            </div>
+          </div>
+
+          <div class="carnet-footer">
+            <div class="carnet-qr">
+              <svg viewBox="0 0 100 100" fill="#0f172a">
+                <rect x="0" y="0" width="30" height="30" fill="#000"/>
+                <rect x="5" y="5" width="20" height="20" fill="#fff"/>
+                <rect x="9" y="9" width="12" height="12" fill="#000"/>
+                <rect x="70" y="0" width="30" height="30" fill="#000"/>
+                <rect x="75" y="5" width="20" height="20" fill="#fff"/>
+                <rect x="79" y="9" width="12" height="12" fill="#000"/>
+                <rect x="0" y="70" width="30" height="30" fill="#000"/>
+                <rect x="5" y="75" width="20" height="20" fill="#fff"/>
+                <rect x="9" y="79" width="12" height="12" fill="#000"/>
+                <rect x="40" y="10" width="10" height="25" fill="#000"/>
+                <rect x="55" y="15" width="8" height="15" fill="#000"/>
+                <rect x="35" y="45" width="30" height="10" fill="#000"/>
+                <rect x="45" y="60" width="15" height="25" fill="#000"/>
+                <rect x="70" y="50" width="20" height="12" fill="#000"/>
+                <rect x="75" y="75" width="20" height="20" fill="#000"/>
+              </svg>
+            </div>
+            <div class="carnet-security-meta">
+              <strong>ID: JUV-2026-0418</strong>
+              <span>VÁLIDO HASTA: DIC 2026</span>
+              <span>VERIFICACIÓN QR EN TIEMPO REAL</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Explanation -->
+        <div style="flex: 1; min-width: 300px;">
+          <h3 style="color: var(--color-cyan); margin-bottom: 12px; font-size: 1.2rem;">Flujo de Validación Tecnológica en Mesa de Control:</h3>
+          <p style="color: #cbd5e1; font-size: 0.92rem; line-height: 1.7; margin-bottom: 14px;">
+            15 minutos antes de cada partido, el <strong>Vocal de Mesa</strong> recibe los carnets físicos o digitales de ambos planteles y utiliza un dispositivo móvil con cámara (<code>&lt;&lt;device&gt;&gt; Lector QR / Móvil</code>) para escanear el token de cada jugador.
+          </p>
+          <ul style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.7; margin-left: 20px;">
+            <li>Si el deportista arrastra una <strong>tarjeta roja o acumulación de amarillas</strong>, la pantalla del vocal se tiñe de rojo indicando la sanción vigente y el impedimento de alinear.</li>
+            <li>Si el carnet pertenece a un <strong>juvenil habilitado para primera división</strong>, el sistema lo marca para el cómputo automático de los minutos Sub-X del partido.</li>
+            <li>Al confirmar la alineación, el sistema precarga a los jugadores aptos en el acta digital oficial del encuentro.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Análisis Abierto de Casos de Uso (Abierto para los estudiantes) -->
+    <section class="card" id="analisis-casos">
+      <h2 class="card-title"><span class="icon">🧠</span> Análisis Abierto de Casos de Uso (Trabajo Analítico de la Pareja)</h2>
+      <p class="card-subtitle">No existe una única respuesta prefabricada: el equipo debe analizar el negocio y modelar su propuesta</p>
+
+      <div class="open-analysis-box" style="border-left: 4px solid var(--color-gold);">
+        <div class="open-analysis-title">⚠️ INSTRUCCIÓN IMPORTANTE SOBRE LOS CASOS DE USO</div>
+        <p class="open-analysis-text">
+          Los casos de uso presentados a continuación <strong>SON ÚNICAMENTE REFERENCIAS ILUSTRATIVAS Y EJEMPLOS GUÍA</strong> para disparar el debate técnico en su equipo. 
+          <br><br>
+          Como ingenieros de software, <strong>su responsabilidad en este taller es analizar integralmente el caso de negocio y proponer su propio catálogo completo de Casos de Uso</strong>, organizándolos en paquetes o subsistemas funcionales. No se limiten a los ejemplos dados: identifiquen qué otros casos de uso son imprescindibles para que el sistema opere sin vacíos (ej. transferencias de pases, designación de ternas arbitrales, aplicación de multas, reprogramación de partidos por lluvia, etc.).
+        </p>
+      </div>
+
+      <h3 style="color: #fff; font-size: 1.15rem; margin: 24px 0 12px 0;">Ejemplos Orientativos de Casos de Uso por Subsistema (Para Inspiración y Debate):</h3>
+
+      <div class="grid-2">
+        <!-- Paquete 1 -->
+        <div class="entity-box accent-blue">
+          <div class="entity-name">🏛️ Subsistema 1: Gestión de Clubes y Afiliaciones (Ejemplos)</div>
+          <div class="entity-desc">
+            &bull; <em>Inscribir Club y Equipos Filiales</em><br>
+            &bull; <em>Renovar Personería Jurídica</em><br>
+            &bull; <em>Registrar Directiva y Delegados</em><br>
+            &bull; <em>Pagar Cuota de Afiliación Anual</em>
+          </div>
+          <div class="entity-rules">Pregunta de análisis: ¿Qué actor inicia estos trámites y qué sistemas externos intervienen?</div>
+        </div>
+
+        <!-- Paquete 2 -->
+        <div class="entity-box accent-green">
+          <div class="entity-name">🧒 Subsistema 2: Formativas, Jugadores y Carnetización (Ejemplos)</div>
+          <div class="entity-desc">
+            &bull; <em>Fichar Jugador por Temporada</em><br>
+            &bull; <em>Registrar Ficha Médica y Electrocardiograma</em><br>
+            &bull; <em>Validar Autorización de Tutor Legal (Menores)</em><br>
+            &bull; <em>Verificar Certificado de Escolaridad</em><br>
+            &bull; <em>Promover Juvenil al Primer Equipo</em><br>
+            &bull; <em>Emitir Carnet Deportivo Digital con QR</em>
+          </div>
+          <div class="entity-rules">Pregunta de análisis: ¿Cuáles de estos casos son &laquo;include&raquo; obligatorios para emitir el carnet?</div>
+        </div>
+
+        <!-- Paquete 3 -->
+        <div class="entity-box accent-cyan">
+          <div class="entity-name">🏆 Subsistema 3: Campeonatos, Fixture y Canchas (Ejemplos)</div>
+          <div class="entity-desc">
+            &bull; <em>Configurar Torneo y Parámetros del Deporte</em><br>
+            &bull; <em>Generar Fixture / Calendario Automático</em><br>
+            &bull; <em>Asignar Cancha / Estadio según Horario e Iluminación</em><br>
+            &bull; <em>Designar Terna Arbitral Neutral</em><br>
+            &bull; <em>Reprogramar Encuentro por Fuerza Mayor</em>
+          </div>
+          <div class="entity-rules">Pregunta de análisis: ¿Cómo modelar la extensión condicional de reprogramación?</div>
+        </div>
+
+        <!-- Paquete 4 -->
+        <div class="entity-box accent-red">
+          <div class="entity-name">⚖️ Subsistema 4: Control de Partido y Tribunal de Penas (Ejemplos)</div>
+          <div class="entity-desc">
+            &bull; <em>Escanear Carnets en Mesa de Control (QR)</em><br>
+            &bull; <em>Validar Minutos del Juvenil en Cancha (Regla Sub-X)</em><br>
+            &bull; <em>Registrar Acta de Partido en Vivo</em><br>
+            &bull; <em>Registrar Tarjetas, Expulsiones e Incidentes</em><br>
+            &bull; <em>Emitir Sanción Disciplinaria Automática</em><br>
+            &bull; <em>Apelar Sanción ante el Tribunal</em>
+          </div>
+          <div class="entity-rules">Pregunta de análisis: ¿Qué relación existe entre registrar el acta y aplicar tarjetas rojas?</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Entregables Requeridos del Taller -->
+    <section class="card" id="entregables">
+      <h2 class="card-title"><span class="icon">📋</span> Entregables Formales Requeridos de la Pareja</h2>
+      <p class="card-subtitle">Estructura formal del documento que deberán elaborar y defender</p>
+
+      <div class="grid-2">
+        <!-- Entregable 1 -->
+        <div class="entity-box accent-blue">
+          <div class="entity-name">📦 ENTREGABLE 1: Modelo de Casos de Uso UML 2.5</div>
+          <div class="entity-desc">
+            <ul style="margin-left: 18px; margin-top: 8px; line-height: 1.7;">
+              <li><strong>Diagrama de Casos de Uso Completo:</strong>
+                <br>&bull; Límite del sistema bien delimitado con nombre de la solución.
+                <br>&bull; Identificación de actores humanos (<em>Administrador de Liga, Delegado de Club, Vocal de Mesa, Árbitro, Tutor Legal de Menor</em>).
+                <br>&bull; Identificación de sistemas externos y dispositivos (<code>&lt;&lt;system&gt;&gt; Pasarela de Pago / Registro Civil</code>, <code>&lt;&lt;device&gt;&gt; Lector QR / Smartphone</code>).
+                <br>&bull; Presencia justificada de relaciones <code>&lt;&lt;include&gt;&gt;</code> y <code>&lt;&lt;extend&gt;&gt;</code> (con puntos de extensión y condiciones declaradas).
+                <br>&bull; Generalización de actores (ej. tipos de usuarios o árbitros) o de casos de uso si aplica.
+              </li>
+              <li><strong>Especificación Textual Formal (2 Fichas Técnicas Libres):</strong>
+                <br>La pareja seleccionará <strong>dos casos de uso críticos</strong> derivados de su propio análisis y redactará la ficha técnica completa que incluya:
+                <br>&bull; ID y Nombre del Caso de Uso.
+                <br>&bull; Actores primarios y secundarios.
+                <br>&bull; Precondiciones y Postcondiciones.
+                <br>&bull; Flujo Básico Principal (mínimo 6 pasos de interacción actor-sistema).
+                <br>&bull; Al menos dos Flujos Alternativos / de Excepción detallados.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Entregable 2 -->
+        <div class="entity-box accent-purple">
+          <div class="entity-name">📦 ENTREGABLE 2: Diagrama de Clases del Dominio</div>
+          <div class="entity-desc">
+            <ul style="margin-left: 18px; margin-top: 8px; line-height: 1.7;">
+              <li><strong>Cobertura Total del Negocio:</strong>
+                <br>Debe modelar las clases para <em>Deporte, Club, Equipo, Categoria, Serie, Jugador, TutorLegal, FichaMedica, FichajeTemporada, Arbitro, CanchaEstadio, Campeonato, Fase, Partido, ActaPartido, SancionDisciplinaria, CarnetDigital</em>.
+              </li>
+              <li><strong>Anatomía y Encapsulamiento:</strong>
+                <br>Cada clase debe contener sus atributos con tipos de datos y visibilidad estricta (<code>- privado</code>, <code>+ público</code>, <code># protegido</code>), además de métodos con signaturas que representen la lógica del negocio.
+              </li>
+              <li><strong>Relaciones Semánticas Rigurosas:</strong>
+                <br>&bull; <strong>Herencia / Generalización:</strong> Jerarquía lógica (ej. Persona como clase base abstracta de Jugador y Árbitro).
+                <br>&bull; <strong>Composición Fuerte (◆):</strong> Ciclos de vida acoplados (Campeonato-Partidos, Partido-ActaPartido, Jugador-FichaMédica).
+                <br>&bull; <strong>Agregación Débil (◇):</strong> Colecciones independientes (Club-Equipos, Club-Canchas).
+                <br>&bull; <strong>Clase Asociativa de Temporada:</strong> Resolución de la relación muchos a muchos entre Jugador, Equipo y Temporada con atributos propios (dorsal, estado, valor).
+                <br>&bull; <strong>Multiplicidades explícitas:</strong> En todos los extremos sin excepción.
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: 20px; background: rgba(30, 41, 59, 0.4); border-radius: 10px; padding: 16px 20px; border: 1px solid var(--border-light);">
+        <h4 style="color: #fff; font-size: 0.95rem; margin-bottom: 6px;">🛠️ Herramientas de Modelado Sugeridas</h4>
+        <p style="color: var(--text-muted); font-size: 0.88rem; line-height: 1.6;">
+          Pueden utilizar <strong>PlantUML</strong>, <strong>Draw.io (diagrams.net)</strong>, <strong>Visual Paradigm</strong> o <strong>StarUML</strong>. El informe final debe incluir las imágenes en alta resolución de los diagramas y el código fuente o archivo editable correspondiente para su sustentación.
+        </p>
+      </div>
+    </section>
+
+    <!-- Rúbrica de Calificación -->
+    <section class="card" id="rubrica">
+      <h2 class="card-title"><span class="icon">📊</span> Rúbrica de Evaluación Académica (Sobre 10.0 Puntos)</h2>
+      <p class="card-subtitle">Criterios de evaluación alineados al Resultado de Aprendizaje RDA2</p>
+
+      <table class="custom-table">
+        <thead>
+          <tr>
+            <th>Criterio Evaluado</th>
+            <th>Descripción Técnica</th>
+            <th style="width: 130px; text-align: center;">Puntaje Máx.</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>1. Análisis y Modelado de Casos de Uso</strong></td>
+            <td>Identificación rigurosa de actores (humanos, sistemas externos y dispositivos), límite del sistema claro, catálogo exhaustivo de casos de uso propuestos por el equipo, y aplicación correcta de relaciones <code>&lt;&lt;include&gt;&gt;</code> y <code>&lt;&lt;extend&gt;&gt;</code> sin confundir con diagramas de flujo.</td>
+            <td style="text-align: center;"><span class="rubric-pill">2.5 Pts</span></td>
+          </tr>
+          <tr>
+            <td><strong>2. Especificación Textual Formal (2 Fichas)</strong></td>
+            <td>Estructuración profunda de dos fichas técnicas de casos de uso seleccionadas libremente por la pareja: precondiciones, postcondiciones, puntos de extensión, flujo básico paso a paso de al menos 6 pasos y flujos alternativos de contingencia.</td>
+            <td style="text-align: center;"><span class="rubric-pill">1.5 Pts</span></td>
+          </tr>
+          <tr>
+            <td><strong>3. Diagrama de Clases: Estructura, Atributos y Métodos</strong></td>
+            <td>Representación de todas las dimensiones del ecosistema deportivo (institucional, categorías, formativas/juveniles, árbitros, canchas, campeonatos, tribunal disciplinario y carnets) con atributos tipados, visibilidad UML (-, +, #) y métodos de negocio.</td>
+            <td style="text-align: center;"><span class="rubric-pill">2.5 Pts</span></td>
+          </tr>
+          <tr>
+            <td><strong>4. Semántica Relacional y Multiplicidad</strong></td>
+            <td>Dominio de la notación UML: diferenciación estricta entre composición (◆) y agregación (◇), jerarquía de herencia, multiplicidades en todos los extremos y resolución de la clase asociativa de fichajes por temporada.</td>
+            <td style="text-align: center;"><span class="rubric-pill">2.0 Pts</span></td>
+          </tr>
+          <tr>
+            <td><strong>5. Coherencia Técnica y Sustentación en Pareja</strong></td>
+            <td>Correspondencia exacta entre las funciones de los casos de uso y las operaciones del diagrama de clases. Sustentación oral fluida que evidencie trabajo equitativo y dominio conceptual por parte de ambos integrantes.</td>
+            <td style="text-align: center;"><span class="rubric-pill">1.5 Pts</span></td>
+          </tr>
+          <tr style="background: rgba(59, 130, 246, 0.1);">
+            <td colspan="2" style="font-weight: 700; color: #fff;">TOTAL DE LA EVALUACIÓN PRÁCTICA (RDA2)</td>
+            <td style="text-align: center; font-weight: 800; color: var(--color-gold); font-size: 1.1rem;">10.0 Pts</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Checklist Interactivo de Entrega -->
+    <section class="card" id="checklist">
+      <h2 class="card-title"><span class="icon">✅</span> Checklist de Verificación para la Pareja</h2>
+      <p class="card-subtitle">Auditen en conjunto cada ítem antes de consolidar el informe final</p>
+
+      <div class="checklist-card">
+        <div class="checklist-title">Lista de Cotejo previa al envío:</div>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Pareja Conformada y Roles Asignados</strong>
+            <span class="check-desc">El informe contiene la portada formal con los nombres completos de los 2 estudiantes y la declaración de roles desempeñados.</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Límite del Sistema y Actores Exhaustivos</strong>
+            <span class="check-desc">Todos los actores están fuera del rectángulo del sistema y se diferencian claramente actores humanos de dispositivos y servicios externos.</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Catálogo Propio de Casos de Uso Analizados</strong>
+            <span class="check-desc">El equipo analizó el negocio y propuso su propio conjunto de casos de uso (sin limitarse a los ejemplos ilustrativos).</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Relaciones Include y Extend Correctamente Dirigidas</strong>
+            <span class="check-desc">Las flechas de include parten del caso base al incluido; las de extend parten del caso de extensión al caso base con su condición de disparo declarada.</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>2 Fichas Técnicas de Especificación Completas</strong>
+            <span class="check-desc">Se redactaron las especificaciones formales de los 2 casos de uso críticos elegidos por la pareja, con flujos básicos y alternos.</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Inclusión de Juveniles y Formativas en el Modelo de Clases</strong>
+            <span class="check-desc">Se modelaron las entidades de categorías formativas, tutor legal de menores, certificado escolar y la regla de minutos juveniles en primera.</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Clase Asociativa de Fichajes por Temporadas</strong>
+            <span class="check-desc">Se modeló la relación muchos a muchos entre Jugador, Equipo y Temporada resolviendo el dorsal, historial y vigencia.</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Diferenciación Rigurosa entre Composición y Agregación</strong>
+            <span class="check-desc">Se aplicó composición fuerte (rombos negros) donde el ciclo de vida depende del todo, y agregación débil (rombos blancos) donde las entidades sobreviven independientemente.</span>
+          </div>
+        </label>
+
+        <label class="check-item">
+          <input type="checkbox" onchange="saveChecklist()">
+          <div class="check-label">
+            <strong>Archivos Fuente Editables Adjuntos</strong>
+            <span class="check-desc">Se adjunta el código fuente (.puml) o archivo de diagramación editable (.drawio, .vpp) para la sustentación con el docente.</span>
+          </div>
+        </label>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Reading Progress Bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+
+      // Active sidebar menu item on scroll
+      const sections = document.querySelectorAll('section[id], header[id]');
+      let currentSection = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop - 120;
+        if (winScroll >= sectionTop) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+
+      document.querySelectorAll('.sidebar-menu a').forEach(a => {
+        a.classList.remove('active');
+        if (a.getAttribute('href') === '#' + currentSection) {
+          a.classList.add('active');
+        }
+      });
+    });
+
+    // Checklist LocalStorage Persistence
+    function saveChecklist() {
+      const checkboxes = document.querySelectorAll('.check-item input[type="checkbox"]');
+      const states = Array.from(checkboxes).map(cb => cb.checked);
+      localStorage.setItem('siga_taller_sportchamp_checklist', JSON.stringify(states));
+    }
+
+    function loadChecklist() {
+      const saved = localStorage.getItem('siga_taller_sportchamp_checklist');
+      if (saved) {
+        const states = JSON.parse(saved);
+        const checkboxes = document.querySelectorAll('.check-item input[type="checkbox"]');
+        checkboxes.forEach((cb, idx) => {
+          if (states[idx] !== undefined) cb.checked = states[idx];
+        });
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', loadChecklist);
+  </script>
+</body>
+</html>
