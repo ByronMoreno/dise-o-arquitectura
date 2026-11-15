@@ -1,0 +1,1776 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Guía interactiva completa de los 9 Principios GRASP con Java 21 y Spring Boot 3.5. Asignación de responsabilidades de Craig Larman: Experto en Información, Creador, Controlador, Bajo Acoplamiento, Alta Cohesión, Polimorfismo, Fabricación Pura, Indirección y Variaciones Protegidas.">
+  <title>Principios GRASP paso a paso con Java 21 y Spring Boot | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #080d1a;
+      --bg-surface: #0e172a;
+      --bg-card: rgba(17, 24, 43, 0.78);
+      --bg-card-hover: rgba(30, 41, 69, 0.92);
+      --bg-code: #0b1120;
+      
+      --border-glow: rgba(56, 189, 248, 0.3);
+      --border-light: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      
+      --color-primary: #38bdf8;
+      --color-secondary: #818cf8;
+      --color-accent: #34d399;
+      --color-warning: #f59e0b;
+      --color-danger: #ef4444;
+      --color-purple: #c084fc;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 300px;
+      --transition-speed: 0.25s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 { position: fixed; top: -15%; left: -10%; width: 55vw; height: 55vw; background: radial-gradient(circle, rgba(56, 189, 248, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -15%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(129, 140, 248, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-3 { position: fixed; top: 45%; right: 25%; width: 40vw; height: 40vw; background: radial-gradient(circle, rgba(52, 211, 153, 0.06) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Reading Progress Bar */
+    .progress-bar-container {
+      position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.4); z-index: 101;
+    }
+    .progress-bar {
+      height: 100%; width: 0%; background: linear-gradient(90deg, #38bdf8, #818cf8, #34d399);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+      transition: width 0.1s ease-out;
+    }
+
+    /* Sticky Sidebar */
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(14, 23, 42, 0.95); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header {
+      padding: 24px 20px; border-bottom: 1px solid var(--border-light);
+    }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+      color: #38bdf8; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.25);
+      padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px;
+    }
+    .sidebar-header h2 { font-size: 1.25rem; font-weight: 800; color: var(--text-bright); line-height: 1.25; }
+    .sidebar-header p { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    
+    .sidebar-menu {
+      flex: 1; overflow-y: auto; padding: 18px 12px; display: flex; flex-direction: column; gap: 3px;
+      list-style: none;
+    }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 8px 12px;
+      color: var(--text-muted); text-decoration: none; border-radius: 8px;
+      font-size: 0.84rem; font-weight: 500; transition: all var(--transition-speed);
+    }
+    .sidebar-menu li a:hover, .sidebar-menu li a.active {
+      color: var(--text-bright); background: rgba(56, 189, 248, 0.15); border-left: 3px solid var(--color-primary);
+    }
+    .sidebar-menu .nav-num {
+      width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(255, 255, 255, 0.08); border-radius: 6px; font-weight: 700; font-family: var(--font-mono);
+      font-size: 0.72rem; color: #38bdf8; flex-shrink: 0;
+    }
+    .sidebar-footer {
+      padding: 16px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .sidebar-footer a { color: #60a5fa; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .sidebar-footer a:hover { text-decoration: underline; }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width); flex: 1; padding: 48px 56px 80px; max-width: 1280px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(14, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.85) 100%);
+      border: 1px solid var(--border-accent); border-radius: 24px; padding: 46px 42px;
+      position: relative; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.45);
+      margin-bottom: 48px;
+    }
+    .hero-banner::after {
+      content: ''; position: absolute; top: -120px; right: -120px; width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.22) 0%, transparent 70%); pointer-events: none;
+    }
+    .hero-badge-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .hero-pill {
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      padding: 5px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .pill-unibe { background: rgba(59, 130, 246, 0.18); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .pill-larman { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
+    .pill-java { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
+
+    .hero-title {
+      font-size: 2.7rem; font-weight: 900; letter-spacing: -1.2px; line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 30%, #93c5fd 75%, #34d399 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;
+    }
+    .hero-desc {
+      font-size: 1.1rem; color: #cbd5e1; line-height: 1.7; max-width: 900px; margin-bottom: 24px;
+    }
+    .hero-callout {
+      background: rgba(15, 23, 42, 0.7); border-left: 4px solid var(--color-primary);
+      border-radius: 10px; padding: 16px 20px; font-size: 0.96rem; color: #e2e8f0; line-height: 1.6;
+    }
+
+    /* Section Styles */
+    section { margin-bottom: 64px; scroll-margin-top: 30px; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-bottom: 24px; border-bottom: 1px solid var(--border-light); padding-bottom: 16px;
+    }
+    .section-title {
+      font-size: 1.85rem; font-weight: 800; color: var(--text-bright); display: flex; align-items: center; gap: 12px;
+      letter-spacing: -0.5px;
+    }
+    .section-badge {
+      font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 20px;
+      background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+    .section-subtitle {
+      font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px;
+    }
+
+    /* 9 GRASP Cards Grid */
+    .grasp-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; margin-bottom: 36px;
+    }
+    .grasp-card {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 18px;
+      padding: 22px; transition: all var(--transition-speed); display: flex; flex-direction: column;
+      position: relative; overflow: hidden; text-decoration: none; color: inherit;
+    }
+    .grasp-card:hover {
+      background: var(--bg-card-hover); border-color: var(--color-primary); transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+    }
+    .grasp-card-num {
+      font-family: var(--font-mono); font-size: 1.8rem; font-weight: 900; line-height: 1;
+      color: rgba(56, 189, 248, 0.4); margin-bottom: 10px;
+    }
+    .grasp-card h4 { font-size: 1.15rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .grasp-card .grasp-card-es { font-size: 0.85rem; font-weight: 600; color: #38bdf8; margin-bottom: 10px; }
+    .grasp-card p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; flex-grow: 1; }
+
+    /* Architecture Tree Box */
+    .arch-tree-card {
+      background: var(--bg-code); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 16px;
+      padding: 24px; margin: 24px 0; font-family: var(--font-mono); font-size: 0.88rem; color: #e2e8f0;
+      position: relative; overflow-x: auto;
+    }
+    .arch-tree-card .tree-header {
+      font-family: var(--font-sans); font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: #38bdf8; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Principle Container */
+    .principle-box {
+      background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px;
+      padding: 36px; margin-bottom: 48px; position: relative; box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+    .principle-box::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; border-radius: 20px 0 0 20px;
+      background: linear-gradient(180deg, #38bdf8, #818cf8);
+    }
+    .principle-headline {
+      display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .principle-num-badge {
+      font-family: var(--font-mono); font-size: 1.4rem; font-weight: 900; padding: 4px 12px;
+      border-radius: 10px; background: rgba(56, 189, 248, 0.15); color: #38bdf8;
+    }
+    .principle-name-full { font-size: 1.6rem; font-weight: 800; color: var(--text-bright); }
+    .principle-axiom {
+      font-size: 1.05rem; font-weight: 600; color: #cbd5e1; margin-bottom: 22px;
+      font-style: italic; border-left: 3px solid rgba(56, 189, 248, 0.4); padding-left: 14px;
+    }
+
+    /* Problem vs Solution Split */
+    .step-box {
+      margin-bottom: 24px; border-radius: 14px; overflow: hidden;
+    }
+    .step-header {
+      padding: 14px 20px; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;
+    }
+    .step-header-problem {
+      background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5;
+    }
+    .step-header-solution {
+      background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7;
+    }
+
+    .code-container {
+      background: var(--bg-code); border: 1px solid var(--border-light); border-top: none;
+      padding: 20px; position: relative;
+    }
+    .code-title {
+      font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted);
+      margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-light); border-radius: 6px;
+      color: var(--text-main); font-size: 0.72rem; padding: 4px 10px; cursor: pointer; font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #000; font-weight: 700; }
+
+    pre code {
+      font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6; display: block;
+      color: #e2e8f0; overflow-x: auto; tab-size: 2;
+    }
+
+    /* Syntax Tokens */
+    .kw { color: #f43f5e; font-weight: 600; }
+    .ann { color: #f59e0b; font-weight: 600; }
+    .tp { color: #38bdf8; font-weight: 600; }
+    .fn { color: #a855f7; }
+    .str { color: #10b981; }
+    .cm { color: #64748b; font-style: italic; }
+
+    /* Checklist Badge */
+    .checklist-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.85));
+      border: 1px dashed rgba(56, 189, 248, 0.4); border-radius: 14px; padding: 20px 24px;
+      margin-top: 24px; display: flex; align-items: flex-start; gap: 16px;
+    }
+    .checklist-icon {
+      font-size: 1.8rem; line-height: 1; color: var(--color-warning);
+    }
+    .checklist-text h5 { font-size: 1rem; font-weight: 700; color: var(--text-bright); margin-bottom: 6px; }
+    .checklist-text p { font-size: 0.92rem; color: #cbd5e1; line-height: 1.55; }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto; margin: 28px 0; border: 1px solid var(--border-light); border-radius: 16px;
+      background: var(--bg-surface);
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
+    th {
+      background: rgba(30, 41, 59, 0.85); color: var(--text-bright); font-weight: 700; padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+    /* Interactive Quiz */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.6));
+      border: 1px solid var(--border-accent); border-radius: 20px; padding: 36px; margin: 36px 0;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+    .quiz-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 28px; border-bottom: 1px solid var(--border-light); padding-bottom: 16px;
+    }
+    .quiz-title { font-size: 1.5rem; font-weight: 800; color: var(--text-bright); }
+    .quiz-score-badge {
+      font-size: 0.9rem; font-weight: 700; padding: 6px 16px; border-radius: 20px;
+      background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .question-card {
+      background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-light); border-radius: 14px;
+      padding: 24px; margin-bottom: 20px; transition: border-color 0.2s;
+    }
+    .question-card.answered-correct { border-color: rgba(16, 185, 129, 0.5); }
+    .question-card.answered-incorrect { border-color: rgba(239, 68, 68, 0.5); }
+
+    .question-text {
+      font-size: 1rem; font-weight: 600; color: var(--text-bright); line-height: 1.6; margin-bottom: 16px;
+      display: flex; gap: 10px;
+    }
+    .question-num {
+      width: 28px; height: 28px; border-radius: 50%; background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; flex-shrink: 0;
+    }
+
+    .options-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 14px;
+    }
+    .opt-btn {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-light); border-radius: 10px;
+      color: var(--text-main); font-size: 0.88rem; font-weight: 600;
+      padding: 10px 14px; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .opt-btn:hover:not(:disabled) {
+      background: rgba(56, 189, 248, 0.2); border-color: var(--color-primary); color: #fff;
+    }
+    .opt-btn.selected-correct {
+      background: rgba(16, 185, 129, 0.3) !important; border-color: #10b981 !important; color: #6ee7b7 !important;
+    }
+    .opt-btn.selected-incorrect {
+      background: rgba(239, 68, 68, 0.3) !important; border-color: #ef4444 !important; color: #fca5a5 !important;
+    }
+
+    .explanation-box {
+      font-size: 0.88rem; line-height: 1.5; padding: 12px 16px; border-radius: 8px; margin-top: 10px; display: none;
+    }
+    .exp-correct { background: rgba(16, 185, 129, 0.12); border-left: 3px solid #10b981; color: #a7f3d0; }
+    .exp-incorrect { background: rgba(239, 68, 68, 0.12); border-left: 3px solid #ef4444; color: #fecaca; }
+
+    .quiz-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-light); color: var(--text-muted);
+      padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 0.86rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-reset:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-light); padding: 36px 0 20px; text-align: center; font-size: 0.85rem;
+      color: var(--text-muted); line-height: 1.8;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .main-content { padding: 36px 28px 60px; }
+    }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; }
+      .main-content { margin-left: 0; padding: 24px 18px 48px; }
+      .progress-bar-container { left: 0; }
+      .hero-title { font-size: 2.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="bg-glow-3"></div>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño y Arquitectura &middot; UNIBE</div>
+      <h2>Principios GRASP</h2>
+      <p>Craig Larman &middot; Java 21 &middot; Spring Boot 3.5</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#introduccion" class="active"><span class="nav-num">📌</span> 1. ¿Qué es GRASP?</a></li>
+      <li><a href="#proyecto-ejemplo"><span class="nav-num">🛒</span> 2. Dominio: Tienda Virtual</a></li>
+      <li><a href="#g1-expert"><span class="nav-num">01</span> Information Expert</a></li>
+      <li><a href="#g2-creator"><span class="nav-num">02</span> Creator</a></li>
+      <li><a href="#g3-controller"><span class="nav-num">03</span> Controller</a></li>
+      <li><a href="#g4-lowcoupling"><span class="nav-num">04</span> Low Coupling</a></li>
+      <li><a href="#g5-highcohesion"><span class="nav-num">05</span> High Cohesion</a></li>
+      <li><a href="#g6-polymorphism"><span class="nav-num">06</span> Polymorphism</a></li>
+      <li><a href="#g7-purefabrication"><span class="nav-num">07</span> Pure Fabrication</a></li>
+      <li><a href="#g8-indirection"><span class="nav-num">08</span> Indirection</a></li>
+      <li><a href="#g9-protectedvariations"><span class="nav-num">09</span> Protected Variations</a></li>
+      <li><a href="#resumen-preguntas"><span class="nav-num">📊</span> 10. Resumen de Preguntas</a></li>
+      <li><a href="#solid-vs-grasp"><span class="nav-num">⚖️</span> 11. SOLID vs GRASP</a></li>
+      <li><a href="#evaluacion-interactiva"><span class="nav-num">🧪</span> 12. Desafío GRASP</a></li>
+      <li><a href="#recomendacion-docente"><span class="nav-num">🎓</span> 13. Ruta de Enseñanza</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="../SOLID/Principios SOLID con Java y Spring Boot.html">📘 Guía SOLID</a>
+      <a href="../SOLID ANIMADO/index.html">🎨 SOLID Animado</a>
+      <a href="../../index.html">🏠 Portal Principal UNIBE</a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Hero Banner -->
+    <header class="hero-banner" id="introduccion">
+      <div class="hero-badge-group">
+        <span class="hero-pill pill-unibe">Universidad Iberoamericana del Ecuador</span>
+        <span class="hero-pill pill-larman">Craig Larman &middot; Patrones de Asignación</span>
+        <span class="hero-pill pill-java">Java 21 &middot; Spring Boot 3.5</span>
+      </div>
+      <h1 class="hero-title">Principios GRASP paso a paso con Java 21 y Spring Boot</h1>
+      <p class="hero-desc">
+        Si <strong>SOLID</strong> nos ayuda a diseñar clases limpias y dependencias desacopladas, <strong>GRASP</strong> nos ayuda a responder la pregunta fundamental del diseño orientado a objetos: <em>"¿Qué clase debe encargarse de cada responsabilidad dentro del sistema?"</em>
+      </p>
+      <div class="hero-callout">
+        💡 <strong>Definición Clave:</strong> GRASP significa <em>General Responsibility Assignment Software Patterns</em> (patrones generales para asignar responsabilidades al software). Fueron propuestos por Craig Larman y son esenciales para estructurar arquitecturas empresariales por capas con Spring Boot y Spring Data JPA.
+      </div>
+    </header>
+
+    <!-- 1. ¿Qué es GRASP? Grid de los 9 principios -->
+    <section>
+      <div class="section-header">
+        <h2 class="section-title">🧱 1. Los Nueve Principios de Asignación de Responsabilidades</h2>
+        <span class="section-badge">Visión Panorámica</span>
+      </div>
+      <p class="section-subtitle">
+        Haz clic en cualquiera de las tarjetas para saltar directamente al análisis del principio con código en Java 21:
+      </p>
+
+      <div class="grasp-grid">
+        <a href="#g1-expert" class="grasp-card">
+          <div class="grasp-card-num">01</div>
+          <h4>Information Expert</h4>
+          <div class="grasp-card-es">Experto en Información</div>
+          <p>Asigna la responsabilidad a la clase que posee la información necesaria para cumplirla.</p>
+        </a>
+
+        <a href="#g2-creator" class="grasp-card">
+          <div class="grasp-card-num">02</div>
+          <h4>Creator</h4>
+          <div class="grasp-card-es">Creador</div>
+          <p>Asigna la creación de un objeto a la clase que lo contiene, agrega o utiliza cercanamente.</p>
+        </a>
+
+        <a href="#g3-controller" class="grasp-card">
+          <div class="grasp-card-num">03</div>
+          <h4>Controller</h4>
+          <div class="grasp-card-es">Controlador</div>
+          <p>Asigna la gestión de eventos del sistema al componente que coordina el caso de uso.</p>
+        </a>
+
+        <a href="#g4-lowcoupling" class="grasp-card">
+          <div class="grasp-card-num">04</div>
+          <h4>Low Coupling</h4>
+          <div class="grasp-card-es">Bajo Acoplamiento</div>
+          <p>Diseña clases con la menor cantidad posible de dependencias con otros componentes.</p>
+        </a>
+
+        <a href="#g5-highcohesion" class="grasp-card">
+          <div class="grasp-card-num">05</div>
+          <h4>High Cohesion</h4>
+          <div class="grasp-card-es">Alta Cohesión</div>
+          <p>Asegura que los métodos de una clase estén fuertemente relacionados con un propósito claro.</p>
+        </a>
+
+        <a href="#g6-polymorphism" class="grasp-card">
+          <div class="grasp-card-num">06</div>
+          <h4>Polymorphism</h4>
+          <div class="grasp-card-es">Polimorfismo</div>
+          <p>Gestiona variantes de comportamiento mediante contratos polimórficos en vez de condicionales.</p>
+        </a>
+
+        <a href="#g7-purefabrication" class="grasp-card">
+          <div class="grasp-card-num">07</div>
+          <h4>Pure Fabrication</h4>
+          <div class="grasp-card-es">Fabricación Pura</div>
+          <p>Crea clases técnicas artificiales que no existen en el dominio para preservar cohesión y acoplamiento.</p>
+        </a>
+
+        <a href="#g8-indirection" class="grasp-card">
+          <div class="grasp-card-num">08</div>
+          <h4>Indirection</h4>
+          <div class="grasp-card-es">Indirección</div>
+          <p>Introduce un intermediario (adaptador/broker) entre dos componentes para desacoplarlos.</p>
+        </a>
+
+        <a href="#g9-protectedvariations" class="grasp-card">
+          <div class="grasp-card-num">09</div>
+          <h4>Protected Variations</h4>
+          <div class="grasp-card-es">Variaciones Protegidas</div>
+          <p>Identifica los puntos inestables o variables y envuélvelos detrás de interfaces estables.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- 2. Nuestro proyecto de ejemplo -->
+    <section id="proyecto-ejemplo">
+      <div class="section-header">
+        <h2 class="section-title">🛒 2. Nuestro Proyecto de Ejemplo: Tienda Virtual</h2>
+        <span class="section-badge">Dominio de Referencia</span>
+      </div>
+      <p class="section-subtitle">
+        Para mantener coherencia con nuestro estudio previo de SOLID, utilizaremos el mismo dominio transaccional: una <strong>Tienda Virtual empresarial</strong> con registro de clientes, creación de pedidos, cálculo de totales, procesamiento de pagos y facturación.
+      </p>
+
+      <div class="arch-tree-card">
+        <div class="tree-header">📁 Paquetes Iniciales en Spring Boot</div>
+<pre><code>com.tienda
+│
+├── <span class="kw">controller</span>/
+│   └── <span class="tp">PedidoController</span>.java       <span class="cm">// Recepción HTTP (@RestController)</span>
+│
+├── <span class="kw">service</span>/
+│   └── <span class="tp">PedidoService</span>.java          <span class="cm">// Coordinador del caso de uso (@Service)</span>
+│
+├── <span class="kw">repository</span>/
+│   ├── <span class="tp">PedidoRepository</span>.java       <span class="cm">// Persistencia Spring Data JPA</span>
+│   └── <span class="tp">ProductoRepository</span>.java
+│
+├── <span class="kw">entity</span>/
+│   ├── <span class="tp">Pedido</span>.java                 <span class="cm">// Entidad del dominio</span>
+│   ├── <span class="tp">DetallePedido</span>.java          <span class="cm">// Línea de producto y cantidad</span>
+│   ├── <span class="tp">Producto</span>.java               <span class="cm">// Catálogo</span>
+│   └── <span class="tp">Cliente</span>.java
+│
+└── <span class="kw">dto</span>/
+    └── <span class="tp">PedidoRequest</span>.java          <span class="cm">// Record inmutable de transporte</span></code></pre>
+      </div>
+    </section>
+
+    <!-- ==================== 1. INFORMATION EXPERT ==================== -->
+    <section id="g1-expert">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">01</span>
+          <h3 class="principle-name-full">Information Expert (Experto en Información)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Asignar la responsabilidad a la clase que tiene la información necesaria para cumplirla."
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">
+          Si un cálculo o decisión requiere los datos de una entidad, es esa entidad la que debe poseer el método que ejecuta la operación, evitando extraer los datos hacia capas externas.
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Cálculo indebido en el Controlador)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoController.java calculando el total manualmente</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@RestController</span>
+<span class="ann">@RequestMapping</span>(<span class="str">"/pedidos"</span>)
+<span class="kw">public class</span> <span class="tp">PedidoController</span> {
+
+    <span class="ann">@PostMapping</span>(<span class="str">"/total"</span>)
+    <span class="kw">public double</span> <span class="fn">calcularTotal</span>(<span class="ann">@RequestBody</span> <span class="tp">Pedido</span> pedido) {
+        <span class="kw">double</span> total = 0;
+        <span class="cm">// ❌ El controlador viola Information Expert al extraer datos e iterar manualmente</span>
+        <span class="kw">for</span> (<span class="tp">Producto</span> producto : pedido.<span class="fn">getProductos</span>()) {
+            total += producto.<span class="fn">getPrecio</span>() * producto.<span class="fn">getCantidad</span>();
+        }
+        <span class="kw">return</span> total;
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div style="background:rgba(239, 68, 68, 0.08); border-left:4px solid var(--color-danger); padding:14px 18px; border-radius:8px; margin-bottom:20px; font-size:0.92rem;">
+          <strong>¿Qué problemas genera?</strong> El controlador asume lógica matemática de negocio. Si un servicio de facturación, un reporte o una tarea batch necesita el total, tendrán que duplicar el mismo bucle <code>for</code> en cada lugar.
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Pedido y DetallePedido son los expertos)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>1. DetallePedido.java (Experto en subtotal: precio x cantidad)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="tp">DetallePedido</span> {
+    <span class="ann">@ManyToOne</span>
+    <span class="kw">private</span> <span class="tp">Producto</span> producto;
+    <span class="kw">private</span> <span class="tp">Integer</span> cantidad;
+
+    <span class="cm">// ✅ Experto en calcular su propio subtotal</span>
+    <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">calcularSubtotal</span>() {
+        <span class="kw">return</span> producto.<span class="fn">getPrecio</span>()
+                .<span class="fn">multiply</span>(<span class="tp">BigDecimal</span>.<span class="fn">valueOf</span>(cantidad));
+    }
+}</code></pre>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>2. Pedido.java (Experto en sumar subtotales de sus detalles)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="tp">Pedido</span> {
+    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>(<span class="kw">strategy</span> = <span class="tp">GenerationType</span>.IDENTITY)
+    <span class="kw">private</span> <span class="tp">Long</span> id;
+
+    <span class="ann">@OneToMany</span>(<span class="kw">cascade</span> = <span class="tp">CascadeType</span>.ALL)
+    <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">DetallePedido</span>&gt; detalles = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+    <span class="cm">// ✅ Experto en el total completo del pedido</span>
+    <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">calcularTotal</span>() {
+        <span class="kw">return</span> detalles.<span class="fn">stream</span>()
+                .<span class="fn">map</span>(<span class="tp">DetallePedido</span>::<span class="fn">calcularSubtotal</span>)
+                .<span class="fn">reduce</span>(<span class="tp">BigDecimal</span>.ZERO, <span class="tp">BigDecimal</span>::<span class="fn">add</span>);
+    }
+}</code></pre>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>3. PedidoController.java (Solo delega al experto)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@GetMapping</span>(<span class="str">"/{id}/total"</span>)
+<span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">calcularTotal</span>(<span class="ann">@PathVariable</span> <span class="tp">Long</span> id) {
+    <span class="tp">Pedido</span> pedido = pedidoService.<span class="fn">buscarPorId</span>(id);
+    <span class="kw">return</span> pedido.<span class="fn">calcularTotal</span>(); <span class="cm">// ✅ Limpio y reutilizable</span>
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Information Expert?</h5>
+            <p>Pregúntate: <em>"¿Qué clase tiene los campos y datos necesarios para realizar esta operación?"</em> Si una clase externa está haciendo múltiples <code>get()</code> para sumar o procesar datos de otra entidad, traslada el método directamente a la clase poseedora de los datos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 2. CREATOR ==================== -->
+    <section id="g2-creator">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">02</span>
+          <h3 class="principle-name-full">Creator (Creador)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Asignar la responsabilidad de crear una instancia de la clase A a la clase B si B contiene, agrega, graba o utiliza estrechamente a A."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Controlador creando manualmente partes internas)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>El controlador construye pieza a pieza los detalles de la compra</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@PostMapping</span>
+<span class="kw">public</span> <span class="tp">Pedido</span> <span class="fn">crearPedido</span>(<span class="ann">@RequestBody</span> <span class="tp">PedidoRequest</span> request) {
+    <span class="tp">Pedido</span> pedido = <span class="kw">new</span> <span class="tp">Pedido</span>();
+
+    <span class="kw">for</span> (<span class="tp">ItemRequest</span> item : request.<span class="fn">items</span>()) {
+        <span class="cm">// ❌ El controlador se encarga de instanciar DetallePedido</span>
+        <span class="tp">DetallePedido</span> detalle = <span class="kw">new</span> <span class="tp">DetallePedido</span>();
+        detalle.<span class="fn">setCantidad</span>(item.<span class="fn">cantidad</span>());
+        detalle.<span class="fn">setProducto</span>(productoService.<span class="fn">buscarPorId</span>(item.<span class="fn">productoId</span>()));
+        pedido.<span class="fn">getDetalles</span>().<span class="fn">add</span>(detalle);
+    }
+    <span class="kw">return</span> pedidoService.<span class="fn">guardar</span>(pedido);
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Pedido crea y encapsula sus propios detalles)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>Pedido.java (Creador natural de DetallePedido)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="tp">Pedido</span> {
+    <span class="ann">@OneToMany</span>(<span class="kw">cascade</span> = <span class="tp">CascadeType</span>.ALL, <span class="kw">orphanRemoval</span> = <span class="kw">true</span>)
+    <span class="kw">private</span> <span class="tp">List</span>&lt;<span class="tp">DetallePedido</span>&gt; detalles = <span class="kw">new</span> <span class="tp">ArrayList</span>&lt;&gt;();
+
+    <span class="cm">// ✅ Pedido crea y administra el ciclo de vida de DetallePedido</span>
+    <span class="kw">public void</span> <span class="fn">agregarDetalle</span>(<span class="tp">Producto</span> producto, <span class="tp">Integer</span> cantidad) {
+        <span class="tp">DetallePedido</span> detalle = <span class="kw">new</span> <span class="tp">DetallePedido</span>(producto, cantidad);
+        detalles.<span class="fn">add</span>(detalle);
+    }
+}</code></pre>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoService.java (Orquesta invocando al método Creador)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+    <span class="kw">private final</span> <span class="tp">PedidoRepository</span> pedidoRepository;
+    <span class="kw">private final</span> <span class="tp">ProductoRepository</span> productoRepository;
+
+    <span class="kw">public</span> <span class="tp">Pedido</span> <span class="fn">crear</span>(<span class="tp">PedidoRequest</span> request) {
+        <span class="tp">Pedido</span> pedido = <span class="kw">new</span> <span class="tp">Pedido</span>();
+        <span class="kw">for</span> (<span class="tp">ItemRequest</span> item : request.<span class="fn">items</span>()) {
+            <span class="tp">Producto</span> producto = productoRepository.<span class="fn">findById</span>(item.<span class="fn">productoId</span>()).<span class="fn">orElseThrow</span>();
+            pedido.<span class="fn">agregarDetalle</span>(producto, item.<span class="fn">cantidad</span>()); <span class="cm">// ✅ Creación centralizada</span>
+        }
+        <span class="kw">return</span> pedidoRepository.<span class="fn">save</span>(pedido);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Creator?</h5>
+            <p>Pregúntate: <em>"¿Qué objeto contiene, almacena o tiene la información de inicialización de la entidad que quiero instanciar?"</em> Si estás instanciando componentes hijos desde controladores o servicios distantes, mueve el método creador al contenedor directo.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. CONTROLLER ==================== -->
+    <section id="g3-controller">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">03</span>
+          <h3 class="principle-name-full">Controller (Controlador)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Asignar la responsabilidad de recibir o gestionar un mensaje de evento del sistema a una clase que represente el sistema global o el escenario de caso de uso."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (El controlador hace todo el trabajo)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>Controlador hinchado con lógica de base de datos y negocio</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@RestController</span>
+<span class="ann">@RequestMapping</span>(<span class="str">"/pedidos"</span>)
+<span class="kw">public class</span> <span class="tp">PedidoController</span> {
+    <span class="kw">private final</span> <span class="tp">PedidoRepository</span> repository;
+    <span class="kw">private final</span> <span class="tp">ProductoRepository</span> productoRepository;
+
+    <span class="ann">@PostMapping</span>
+    <span class="kw">public</span> <span class="tp">Pedido</span> <span class="fn">crear</span>(<span class="ann">@RequestBody</span> <span class="tp">PedidoRequest</span> request) {
+        <span class="cm">// ❌ El controlador busca en BD, arma pedidos, calcula y notifica</span>
+        <span class="tp">Pedido</span> pedido = <span class="kw">new</span> <span class="tp">Pedido</span>();
+        <span class="cm">// Buscar productos... crear detalles... calcular totales... enviar emails...</span>
+        <span class="kw">return</span> repository.<span class="fn">save</span>(pedido);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Separar Endpoint HTTP de Caso de Uso)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>PedidoController.java (Solo atiende HTTP y serialización)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@RestController</span>
+<span class="ann">@RequestMapping</span>(<span class="str">"/pedidos"</span>)
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PedidoController</span> {
+    <span class="kw">private final</span> <span class="tp">PedidoService</span> pedidoService;
+
+    <span class="ann">@PostMapping</span>
+    <span class="kw">public</span> <span class="tp">ResponseEntity</span>&lt;<span class="tp">Pedido</span>&gt; <span class="fn">crear</span>(<span class="ann">@RequestBody</span> <span class="tp">PedidoRequest</span> request) {
+        <span class="tp">Pedido</span> pedido = pedidoService.<span class="fn">crear</span>(request);
+        <span class="kw">return</span> <span class="tp">ResponseEntity</span>.<span class="fn">status</span>(<span class="tp">HttpStatus</span>.CREATED).<span class="fn">body</span>(pedido);
+    }
+}</code></pre>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoService.java (Controlador de Caso de Uso en Spring Boot)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+    <span class="kw">private final</span> <span class="tp">PedidoRepository</span> repository;
+
+    <span class="kw">public</span> <span class="tp">Pedido</span> <span class="fn">crear</span>(<span class="tp">PedidoRequest</span> request) {
+        <span class="cm">// ✅ Coordina la orquestación del caso de uso de negocio</span>
+        <span class="kw">return</span> repository.<span class="fn">save</span>(<span class="kw">new</span> <span class="tp">Pedido</span>());
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Controller?</h5>
+            <p>Pregúntate: <em>"¿Mi controlador REST está ejecutando transacciones, consultas SQL o lógica algorítmica directamente?"</em> Si es así, delega el caso de uso a un servicio (Application/Use Case Service) para que el controlador solo gestione el protocolo web.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. LOW COUPLING ==================== -->
+    <section id="g4-lowcoupling">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">04</span>
+          <h3 class="principle-name-full">Low Coupling (Bajo Acoplamiento)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Asignar responsabilidades de forma que las dependencias entre clases se mantengan al mínimo posible."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Dependencia dura a clase concreta)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoService atado directamente a EmailService</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+    <span class="cm">// ❌ Acoplamiento rígido con new</span>
+    <span class="kw">private final</span> <span class="tp">EmailService</span> emailService = <span class="kw">new</span> <span class="tp">EmailService</span>();
+
+    <span class="kw">public void</span> <span class="fn">confirmarPedido</span>() {
+        emailService.<span class="fn">enviar</span>(<span class="str">"Pedido confirmado"</span>);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Contrato abstracto Notificador)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>Notificador.java e Implementaciones (@Service, @Primary)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public interface</span> <span class="tp">Notificador</span> { <span class="kw">void</span> <span class="fn">enviar</span>(<span class="tp">String</span> mensaje); }
+
+<span class="ann">@Service</span> <span class="ann">@Primary</span>
+<span class="kw">public class</span> <span class="tp">EmailService</span> <span class="kw">implements</span> <span class="tp">Notificador</span> {
+    <span class="ann">@Override</span> <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="tp">String</span> msg) { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Correo: "</span> + msg); }
+}
+
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">WhatsAppService</span> <span class="kw">implements</span> <span class="tp">Notificador</span> {
+    <span class="ann">@Override</span> <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="tp">String</span> msg) { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"WhatsApp: "</span> + msg); }
+}</code></pre>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoService.java (Depende de la interfaz y no de la tecnología)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+    <span class="cm">// ✅ Bajo acoplamiento mediante inversión de control</span>
+    <span class="kw">private final</span> <span class="tp">Notificador</span> notificador;
+
+    <span class="kw">public void</span> <span class="fn">confirmarPedido</span>() {
+        notificador.<span class="fn">enviar</span>(<span class="str">"Pedido confirmado"</span>);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Low Coupling?</h5>
+            <p>Pregúntate: <em>"Si modifico la implementación técnica de una clase, ¿cuántas otras clases se ven forzadas a cambiar o recompilarse?"</em> Si el cambio se propaga en cascada, reduce las dependencias directas mediante abstracciones.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. HIGH COHESION ==================== -->
+    <section id="g5-highcohesion">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">05</span>
+          <h3 class="principle-name-full">High Cohesion (Alta Cohesión)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Asignar responsabilidades de forma que las tareas de una clase estén íntimamente relacionadas entre sí y enfocadas en un objetivo unificado."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (SistemaService "Bolsa de Gatos")</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>SistemaService acumulando tareas inconexas</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">SistemaService</span> {
+    <span class="kw">public void</span> <span class="fn">crearPedido</span>() { ... }
+    <span class="kw">public void</span> <span class="fn">enviarCorreo</span>() { ... }
+    <span class="kw">public void</span> <span class="fn">generarFactura</span>() { ... }
+    <span class="kw">public void</span> <span class="fn">registrarUsuario</span>() { ... }
+    <span class="kw">public void</span> <span class="fn">generarReporte</span>() { ... }
+    <span class="kw">public void</span> <span class="fn">calcularImpuestos</span>() { ... }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Servicios Altamente Cohesivos por Dominio)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoService.java (Enfocado exclusivamente en el ciclo de vida del pedido)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+    <span class="kw">private final</span> <span class="tp">PedidoRepository</span> repository;
+
+    <span class="kw">public</span> <span class="tp">Pedido</span> <span class="fn">crear</span>(<span class="tp">Pedido</span> pedido) { <span class="kw">return</span> repository.<span class="fn">save</span>(pedido); }
+    <span class="kw">public</span> <span class="tp">Pedido</span> <span class="fn">buscar</span>(<span class="tp">Long</span> id) { <span class="kw">return</span> repository.<span class="fn">findById</span>(id).<span class="fn">orElseThrow</span>(); }
+    <span class="kw">public void</span> <span class="fn">cancelar</span>(<span class="tp">Long</span> id) {
+        <span class="tp">Pedido</span> pedido = <span class="fn">buscar</span>(id);
+        pedido.<span class="fn">cancelar</span>();
+        repository.<span class="fn">save</span>(pedido);
+    }
+}
+<span class="cm">// ✅ Cada servicio se enfoca en su área: UsuarioService, FacturaService, EmailService</span></code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de High Cohesion?</h5>
+            <p>Pregúntate: <em>"¿Todos los métodos de esta clase colaboran directamente para cumplir un único objetivo de negocio?"</em> Si la clase atiende dominios dispares (usuarios, pagos, PDFs, emails), divide la clase en componentes especializados.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 6. POLYMORPHISM ==================== -->
+    <section id="g6-polymorphism">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">06</span>
+          <h3 class="principle-name-full">Polymorphism (Polimorfismo)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Cuando los comportamientos varían según el tipo, asignar la responsabilidad de la variación a los tipos para los que varía utilizando operaciones polimórficas."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Condicionales por tipo de envío)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>EnvioService con if-else por tipo de tarifa</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">EnvioService</span> {
+    <span class="kw">public double</span> <span class="fn">calcularCosto</span>(<span class="tp">String</span> tipo, <span class="kw">double</span> peso) {
+        <span class="kw">if</span> (tipo.<span class="fn">equals</span>(<span class="str">"NORMAL"</span>)) {
+            <span class="kw">return</span> peso * 2;
+        } <span class="kw">else if</span> (tipo.<span class="fn">equals</span>(<span class="str">"EXPRESS"</span>)) {
+            <span class="kw">return</span> peso * 5;
+        } <span class="kw">else if</span> (tipo.<span class="fn">equals</span>(<span class="str">"INTERNACIONAL"</span>)) {
+            <span class="kw">return</span> peso * 10;
+        }
+        <span class="kw">throw new</span> <span class="tp">IllegalArgumentException</span>();
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Estrategias Polimórficas Inyectadas en Map)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>TipoEnvio.java y Componentes de Tarifa</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public interface</span> <span class="tp">TipoEnvio</span> { <span class="tp">BigDecimal</span> <span class="fn">calcularCosto</span>(<span class="tp">BigDecimal</span> peso); }
+
+<span class="ann">@Component</span>(<span class="str">"normal"</span>)
+<span class="kw">public class</span> <span class="tp">EnvioNormal</span> <span class="kw">implements</span> <span class="tp">TipoEnvio</span> {
+    <span class="ann">@Override</span> <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">calcularCosto</span>(<span class="tp">BigDecimal</span> p) { <span class="kw">return</span> p.<span class="fn">multiply</span>(<span class="tp">BigDecimal</span>.<span class="fn">valueOf</span>(2)); }
+}
+
+<span class="ann">@Component</span>(<span class="str">"express"</span>)
+<span class="kw">public class</span> <span class="tp">EnvioExpress</span> <span class="kw">implements</span> <span class="tp">TipoEnvio</span> {
+    <span class="ann">@Override</span> <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">calcularCosto</span>(<span class="tp">BigDecimal</span> p) { <span class="kw">return</span> p.<span class="fn">multiply</span>(<span class="tp">BigDecimal</span>.<span class="fn">valueOf</span>(5)); }
+}</code></pre>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>EnvioService.java (Inyección de Map&lt;String, TipoEnvio&gt; en Spring Boot)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">EnvioService</span> {
+    <span class="cm">// Spring inyecta automáticamente todos los beans usando el nombre del componente como clave</span>
+    <span class="kw">private final</span> <span class="tp">Map</span>&lt;<span class="tp">String</span>, <span class="tp">TipoEnvio</span>&gt; estrategias;
+
+    <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">calcular</span>(<span class="tp">String</span> tipo, <span class="tp">BigDecimal</span> peso) {
+        <span class="tp">TipoEnvio</span> estrategia = estrategias.<span class="fn">get</span>(tipo.<span class="fn">toLowerCase</span>());
+        <span class="kw">if</span> (estrategia == <span class="kw">null</span>) <span class="kw">throw new</span> <span class="tp">IllegalArgumentException</span>(<span class="str">"Tipo de envío no válido"</span>);
+        <span class="kw">return</span> estrategia.<span class="fn">calcularCosto</span>(peso);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Polymorphism?</h5>
+            <p>Pregúntate: <em>"¿Estoy usando cadenas if/else o switch basadas en un atributo de tipo para decidir cómo ejecutar una lógica?"</em> Reemplaza las ramas condicionales por implementaciones polimórficas de una interfaz común.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 7. PURE FABRICATION ==================== -->
+    <section id="g7-purefabrication">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">07</span>
+          <h3 class="principle-name-full">Pure Fabrication (Fabricación Pura)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Asignar un conjunto altamente cohesivo de responsabilidades a una clase artificial que no representa un concepto del dominio del problema, con el fin de favorecer el bajo acoplamiento y la alta cohesión."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Entidad de negocio ensuciada con SQL)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>Pedido.java administrando conexiones a PostgreSQL</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public class</span> <span class="tp">Pedido</span> {
+    <span class="cm">// ❌ Mezcla lógica de negocio con infraestructura técnica</span>
+    <span class="kw">public void</span> <span class="fn">guardarEnBaseDatos</span>() {
+        <span class="cm">// Conexión JDBC... Preparar sentencia INSERT... Manejar SQLException...</span>
+    }
+
+    <span class="kw">public void</span> <span class="fn">calcularTotal</span>() {
+        <span class="cm">// Lógica del negocio</span>
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Repositorios y DAOs como Fabricación Pura)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoRepository.java (Clase técnica artificial en Spring Data JPA)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="cm">// ✅ "PedidoRepository" no existe en la vida real (un cliente no compra repositorios)</span>
+<span class="cm">// Es una FABRICACIÓN PURA para aislar la persistencia técnica sin manchar el dominio.</span>
+<span class="ann">@Repository</span>
+<span class="kw">public interface</span> <span class="tp">PedidoRepository</span> <span class="kw">extends</span> <span class="tp">JpaRepository</span>&lt;<span class="tp">Pedido</span>, <span class="tp">Long</span>&gt; {
+}
+
+<span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+    <span class="kw">private final</span> <span class="tp">PedidoRepository</span> repository;
+
+    <span class="kw">public</span> <span class="tp">Pedido</span> <span class="fn">guardar</span>(<span class="tp">Pedido</span> pedido) {
+        <span class="kw">return</span> repository.<span class="fn">save</span>(pedido);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Pure Fabrication?</h5>
+            <p>Pregúntate: <em>"¿Estoy forzando a una entidad de negocio a encargarse de serialización JSON, almacenamiento en disco, cifrado o conexiones de red?"</em> Crea clases de fabricación pura (Repositories, Mappers, Adapters, Builders) para salvaguardar la pureza del dominio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 8. INDIRECTION ==================== -->
+    <section id="g8-indirection">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">08</span>
+          <h3 class="principle-name-full">Indirection (Indirección)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Asignar la responsabilidad a un objeto intermediario para mediar entre otros componentes o servicios, de modo que no queden acoplados directamente."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Acoplamiento directo con API externa)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>PagoService llamando directamente al SDK de PayPal</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PagoService</span> {
+    <span class="kw">public void</span> <span class="fn">pagar</span>(<span class="kw">double</span> monto) {
+        <span class="cm">// ❌ Si cambiamos a Stripe o Redsys, PagoService colapsa y debe reescribirse</span>
+        <span class="tp">PayPalApi</span> api = <span class="kw">new</span> <span class="tp">PayPalApi</span>();
+        api.<span class="fn">realizarPago</span>(monto);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Adaptador Intermediario)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>PasarelaPago.java (Contrato de Indirección) y Adaptadores</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public interface</span> <span class="tp">PasarelaPago</span> { <span class="kw">void</span> <span class="fn">realizarPago</span>(<span class="tp">BigDecimal</span> monto); }
+
+<span class="ann">@Component</span> <span class="ann">@Primary</span> <span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PayPalAdapter</span> <span class="kw">implements</span> <span class="tp">PasarelaPago</span> {
+    <span class="kw">private final</span> <span class="tp">PayPalApi</span> payPalApi;
+    <span class="ann">@Override</span> <span class="kw">public void</span> <span class="fn">realizarPago</span>(<span class="tp">BigDecimal</span> monto) { payPalApi.<span class="fn">realizarPago</span>(monto); }
+}
+
+<span class="ann">@Component</span> <span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">StripeAdapter</span> <span class="kw">implements</span> <span class="tp">PasarelaPago</span> {
+    <span class="kw">private final</span> <span class="tp">StripeApi</span> stripeApi;
+    <span class="ann">@Override</span> <span class="kw">public void</span> <span class="fn">realizarPago</span>(<span class="tp">BigDecimal</span> monto) { stripeApi.<span class="fn">cobrar</span>(monto); }
+}</code></pre>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>PagoService.java (Solo se comunica a través del intermediario)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PagoService</span> {
+    <span class="cm">// ✅ Mediación por indirección</span>
+    <span class="kw">private final</span> <span class="tp">PasarelaPago</span> pasarelaPago;
+
+    <span class="kw">public void</span> <span class="fn">pagar</span>(<span class="tp">BigDecimal</span> monto) {
+        pasarelaPago.<span class="fn">realizarPago</span>(monto);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Indirection?</h5>
+            <p>Pregúntate: <em>"¿Dos componentes que deberían ser independientes están acoplados directamente sin una capa intermedia que amortigüe los cambios?"</em> Aplica el patrón Adapter o Facade para introducir un intermediario estabilizador.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 9. PROTECTED VARIATIONS ==================== -->
+    <section id="g9-protectedvariations">
+      <div class="principle-box">
+        <div class="principle-headline">
+          <span class="principle-num-badge">09</span>
+          <h3 class="principle-name-full">Protected Variations (Variaciones Protegidas)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Identificar los puntos de variación o inestabilidad previsibles y asignar responsabilidades para crear una interfaz estable alrededor de ellos."
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Lógica de negocio expuesta a API de terceros inestable)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>CompraService consultando directamente el precio del dólar</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">CompraService</span> {
+    <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">convertirDolares</span>(<span class="tp">BigDecimal</span> monto) {
+        <span class="cm">// ❌ Conexión directa a API externa de tipo de cambio.</span>
+        <span class="cm">// Si el proveedor cambia su JSON o se cae, nuestro servicio de compras colapsa.</span>
+        <span class="kw">return</span> monto;
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Contrato Blindado TipoCambioProvider)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>TipoCambioProvider.java (Interfaz Estable) y Proveedores</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public interface</span> <span class="tp">TipoCambioProvider</span> { <span class="tp">BigDecimal</span> <span class="fn">obtenerTasaCambio</span>(); }
+
+<span class="ann">@Service</span> <span class="ann">@Primary</span>
+<span class="kw">public class</span> <span class="tp">BancoCentralProvider</span> <span class="kw">implements</span> <span class="tp">TipoCambioProvider</span> {
+    <span class="ann">@Override</span> <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">obtenerTasaCambio</span>() { <span class="kw">return</span> <span class="tp">BigDecimal</span>.ONE; }
+}
+
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">ProveedorExternoProvider</span> <span class="kw">implements</span> <span class="tp">TipoCambioProvider</span> {
+    <span class="ann">@Override</span> <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">obtenerTasaCambio</span>() { <span class="kw">return</span> <span class="tp">BigDecimal</span>.ONE; }
+}</code></pre>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>CompraService.java (Blindado ante cualquier cambio de proveedor externo)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">CompraService</span> {
+    <span class="cm">// ✅ Variación protegida mediante contrato estable</span>
+    <span class="kw">private final</span> <span class="tp">TipoCambioProvider</span> tipoCambioProvider;
+
+    <span class="kw">public</span> <span class="tp">BigDecimal</span> <span class="fn">convertirDolares</span>(<span class="tp">BigDecimal</span> monto) {
+        <span class="tp">BigDecimal</span> tasa = tipoCambioProvider.<span class="fn">obtenerTasaCambio</span>();
+        <span class="kw">return</span> monto.<span class="fn">multiply</span>(tasa);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de Protected Variations?</h5>
+            <p>Pregúntate: <em>"¿Qué partes del sistema son propensas a cambiar (APIs de terceros, formatos legales, pasarelas) y cómo protejo el resto de la aplicación?"</em> Blinda esos puntos de dolor detrás de interfaces estables de tu propio dominio.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 10. RESUMEN DE PREGUNTAS ==================== -->
+    <section id="resumen-preguntas">
+      <div class="section-header">
+        <h2 class="section-title">📊 10. Resumen de los Nueve Principios GRASP</h2>
+        <span class="section-badge">Tabla de Síntesis</span>
+      </div>
+      <p class="section-subtitle">
+        Esta tabla te permite identificar instantáneamente qué principio GRASP aplicar según la duda arquitectónica a la que te enfrentes:
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:200px;">Principio GRASP</th>
+              <th>¿Qué pregunta clave responde?</th>
+              <th>Ejemplo de Aplicación en Spring Boot</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong style="color:#38bdf8;">Information Expert</strong></td>
+              <td>¿Quién tiene la información para realizar la tarea?</td>
+              <td><code>Pedido</code> calcula su propio total sumando los subtotales de sus <code>DetallePedido</code>.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">Creator</strong></td>
+              <td>¿Quién debe crear este objeto?</td>
+              <td><code>Pedido</code> contiene y agrega <code>DetallePedido</code>, por eso los instancia en <code>agregarDetalle()</code>.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">Controller</strong></td>
+              <td>¿Quién recibe y coordina la operación?</td>
+              <td><code>PedidoController</code> atiende HTTP y delega a <code>PedidoService</code> como coordinador del caso de uso.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">Low Coupling</strong></td>
+              <td>¿Cómo reduzco las dependencias entre clases?</td>
+              <td><code>PedidoService</code> depende de la interfaz <code>Notificador</code> en vez de <code>new EmailService()</code>.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">High Cohesion</strong></td>
+              <td>¿Cómo mantengo las responsabilidades enfocadas?</td>
+              <td>Separar <code>SistemaService</code> en <code>PedidoService</code>, <code>FacturaService</code> y <code>UsuarioService</code>.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">Polymorphism</strong></td>
+              <td>¿Cómo manejo comportamientos diferentes sin if/else?</td>
+              <td><code>EnvioService</code> inyecta un <code>Map&lt;String, TipoEnvio&gt;</code> para calcular tarifas de envío.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">Pure Fabrication</strong></td>
+              <td>¿Cuándo necesito crear una clase técnica artificial?</td>
+              <td>Crear <code>PedidoRepository</code> para aislar SQL y JPA del dominio de negocio.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">Indirection</strong></td>
+              <td>¿Cómo conecto dos componentes sin acoplarlos?</td>
+              <td>Colocar <code>PasarelaPago</code> y sus adaptadores entre <code>PagoService</code> y la API de PayPal/Stripe.</td>
+            </tr>
+            <tr>
+              <td><strong style="color:#38bdf8;">Protected Variations</strong></td>
+              <td>¿Cómo protejo el sistema de cambios externos?</td>
+              <td>Envolver la tasa de cambio externa detrás de la interfaz estable <code>TipoCambioProvider</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== 11. SOLID VS GRASP ==================== -->
+    <section id="solid-vs-grasp">
+      <div class="section-header">
+        <h2 class="section-title">⚖️ 11. Diferencia entre SOLID y GRASP</h2>
+        <span class="section-badge">Comparación Arquitectónica</span>
+      </div>
+      <p class="section-subtitle">
+        Una duda muy común entre los estudiantes: ¿Son rivales o compiten entre sí? <strong>¡No, se complementan armónicamente!</strong>
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:250px;">Criterio</th>
+              <th style="color:#c084fc;">SOLID</th>
+              <th style="color:#38bdf8;">GRASP</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Naturaleza</strong></td>
+              <td>5 principios de diseño orientado a objetos.</td>
+              <td>9 patrones para asignar responsabilidades.</td>
+            </tr>
+            <tr>
+              <td><strong>Foco Primario</strong></td>
+              <td>Diseño de clases, herencia y gestión de dependencias.</td>
+              <td><strong>¿Quién debe hacer qué?</strong> Asignación de roles.</td>
+            </tr>
+            <tr>
+              <td><strong>Objetivo</strong></td>
+              <td>Mantener código flexible, extensible y testeable.</td>
+              <td>Distribuir correctamente las responsabilidades en el modelo.</td>
+            </tr>
+            <tr>
+              <td><strong>Momento de Uso</strong></td>
+              <td>Para refactorizar y mejorar la arquitectura técnica.</td>
+              <td>Para tomar decisiones de diseño desde el modelo conceptual.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border:1px solid var(--border-accent); border-radius:16px; padding:24px; margin-top:20px;">
+        <h4 style="color:#34d399; font-size:1.15rem; margin-bottom:12px;">🌟 Ejemplo Práctico de Complementariedad al Construir un Pedido:</h4>
+        <ul style="padding-left:22px; font-size:0.95rem; line-height:1.8; color:#cbd5e1;">
+          <li><strong>GRASP Information Expert:</strong> Te dice que <code>Pedido</code> debe calcular su propio total porque tiene los detalles.</li>
+          <li><strong>GRASP Creator:</strong> Te dice que <code>Pedido</code> debe crear sus propios <code>DetallePedido</code>.</li>
+          <li><strong>GRASP Controller:</strong> Te dice que <code>PedidoService</code> coordina el caso de uso y <code>PedidoController</code> atiende la web.</li>
+          <li><strong>SOLID SRP:</strong> Evita que <code>PedidoService</code> acumule envío de correos y facturación en la misma clase.</li>
+          <li><strong>SOLID DIP:</strong> Garantiza que el servicio dependa de la interfaz <code>Notificador</code> y no de una clase concreta.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ==================== 12. EVALUACIÓN PRÁCTICA INTERACTIVA ==================== -->
+    <section id="evaluacion-interactiva">
+      <div class="quiz-container">
+        <div class="quiz-header">
+          <div>
+            <h3 class="quiz-title">🧪 12. Desafío Práctico: ¿Reconoces los Principios GRASP?</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-top:4px;">Identifica qué principio GRASP se aplica en cada escenario:</p>
+          </div>
+          <div class="quiz-score-badge" id="quizScoreText">Puntuación: 0 / 5</div>
+        </div>
+
+        <!-- Pregunta 1 -->
+        <div class="question-card" id="q1-card">
+          <div class="question-text">
+            <span class="question-num">1</span>
+            <span>Una clase <code>Pedido</code> contiene la lista de productos y cantidades compradas; por lo tanto, ella misma calcula el total de la compra.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(1, 'Creator', false, this)">Creator</button>
+            <button class="opt-btn" onclick="checkAnswer(1, 'Information Expert', true, this)">Information Expert</button>
+            <button class="opt-btn" onclick="checkAnswer(1, 'Controller', false, this)">Controller</button>
+          </div>
+          <div class="explanation-box" id="q1-exp"></div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="question-card" id="q2-card">
+          <div class="question-text">
+            <span class="question-num">2</span>
+            <span>La clase <code>Pedido</code> instancia, inicializa y agrega directamente sus propios objetos <code>DetallePedido</code> a través de su método <code>agregarDetalle()</code>.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(2, 'Creator', true, this)">Creator</button>
+            <button class="opt-btn" onclick="checkAnswer(2, 'Indirection', false, this)">Indirection</button>
+            <button class="opt-btn" onclick="checkAnswer(2, 'Polymorphism', false, this)">Polymorphism</button>
+          </div>
+          <div class="explanation-box" id="q2-exp"></div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="question-card" id="q3-card">
+          <div class="question-text">
+            <span class="question-num">3</span>
+            <span>Un <code>PedidoController</code> recibe la petición HTTP externa y delega inmediatamente la coordinación del caso de uso a <code>PedidoService</code>.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(3, 'Pure Fabrication', false, this)">Pure Fabrication</button>
+            <button class="opt-btn" onclick="checkAnswer(3, 'Controller', true, this)">Controller</button>
+            <button class="opt-btn" onclick="checkAnswer(3, 'Protected Variations', false, this)">Protected Variations</button>
+          </div>
+          <div class="explanation-box" id="q3-exp"></div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="question-card" id="q4-card">
+          <div class="question-text">
+            <span class="question-num">4</span>
+            <span>Creamos la interfaz técnica <code>PedidoRepository</code> para aislar las sentencias SQL y PostgreSQL de las entidades del negocio.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(4, 'Polymorphism', false, this)">Polymorphism</button>
+            <button class="opt-btn" onclick="checkAnswer(4, 'High Cohesion', false, this)">High Cohesion</button>
+            <button class="opt-btn" onclick="checkAnswer(4, 'Pure Fabrication', true, this)">Pure Fabrication</button>
+          </div>
+          <div class="explanation-box" id="q4-exp"></div>
+        </div>
+
+        <!-- Pregunta 5 -->
+        <div class="question-card" id="q5-card">
+          <div class="question-text">
+            <span class="question-num">5</span>
+            <span>Utilizamos una interfaz estable para que el sistema pueda cambiar de proveedor externo de tasas de cambio o pagos sin romper el código del negocio.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(5, 'Protected Variations', true, this)">Protected Variations</button>
+            <button class="opt-btn" onclick="checkAnswer(5, 'Creator', false, this)">Creator</button>
+            <button class="opt-btn" onclick="checkAnswer(5, 'Information Expert', false, this)">Information Expert</button>
+          </div>
+          <div class="explanation-box" id="q5-exp"></div>
+        </div>
+
+        <div class="quiz-actions">
+          <span style="font-size:0.85rem; color:var(--text-muted);" id="quizStatusText">Selecciona una respuesta para cada pregunta.</span>
+          <button class="btn-reset" onclick="resetQuiz()">🔄 Reiniciar Desafío</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 13. RUTA DE ENSEÑANZA ==================== -->
+    <section id="recomendacion-docente">
+      <div class="section-header">
+        <h2 class="section-title">🎓 13. Recomendación Docente: ¿Cómo Enseñar GRASP?</h2>
+        <span class="section-badge">Plan de Cátedra</span>
+      </div>
+      <p class="section-subtitle">
+        Para asignaturas universitarias de Ingeniería de Software, esta secuencia pedagógica estructurada por semanas maximiza la retención y la aplicación práctica:
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:100px;">Sesión</th>
+              <th style="width:280px;">Principios GRASP</th>
+              <th>Actividad Práctica Aplicada</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Clase 1</strong></td>
+              <td>Information Expert & Creator</td>
+              <td>Diseñar el cálculo de totales y la creación de líneas de pedidos en el modelo de dominio.</td>
+            </tr>
+            <tr>
+              <td><strong>Clase 2</strong></td>
+              <td>Controller</td>
+              <td>Construir una API REST en Spring Boot separando el Controlador HTTP del Caso de Uso.</td>
+            </tr>
+            <tr>
+              <td><strong>Clase 3</strong></td>
+              <td>Low Coupling & High Cohesion</td>
+              <td>Refactorizar servicios monolíticos tipo "God Class" en componentes especializados.</td>
+            </tr>
+            <tr>
+              <td><strong>Clase 4</strong></td>
+              <td>Polymorphism</td>
+              <td>Implementar pasarelas de pago y cotizadores de envíos con mapas de Beans inyectados.</td>
+            </tr>
+            <tr>
+              <td><strong>Clase 5</strong></td>
+              <td>Pure Fabrication & Indirection</td>
+              <td>Implementar Repositorios JPA y adaptadores para servicios de terceros (PayPal / SendGrid).</td>
+            </tr>
+            <tr>
+              <td><strong>Clase 6</strong></td>
+              <td>Protected Variations</td>
+              <td>Blindar integraciones con proveedores inestables (tasas de cambio / APIs de aduanas).</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="background:linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(15, 23, 42, 0.9)); border:1px solid var(--border-accent); border-radius:18px; padding:28px;">
+        <h4 style="font-size:1.15rem; font-weight:800; color:#38bdf8; margin-bottom:10px;">💡 Consejo Metodológico para el Aula:</h4>
+        <p style="font-size:0.95rem; color:#cbd5e1; line-height:1.6; margin-bottom:14px;">
+          Primero presenta el <strong>código incorrecto</strong> (el controlador calculando el total o la entidad Pedido con código SQL JDBC). Pregunta a tus estudiantes qué problemas de mantenimiento o testing encuentran. Cuando sientan el dolor del mal diseño, introduce el principio GRASP correspondiente como la solución elegante.
+        </p>
+        <p style="font-size:0.92rem; color:#94a3b8;">
+          De este modo no memorizan definiciones teóricas: aprenden a <strong>tomar decisiones de arquitectura</strong> fundamentadas como ingenieros de software senior.
+        </p>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>Universidad Iberoamericana del Ecuador &middot; UNIBE &middot; Facultad de Ingeniería de Software</p>
+      <p>Diseño y Arquitectura de Software &middot; Período Académico 2026 &middot; Elaborado por: Byron Rodrigo Moreno Moreno</p>
+    </footer>
+
+  </main>
+
+  <script>
+    // Reading Progress Bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+    });
+
+    // Copy to clipboard helper
+    function copyCode(btn) {
+      const pre = btn.closest('.code-container').querySelector('pre code');
+      if (!pre) return;
+      navigator.clipboard.writeText(pre.innerText).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        btn.style.background = '#10b981';
+        btn.style.color = '#fff';
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 2000);
+      });
+    }
+
+    // Interactive Quiz Engine
+    const quizExplanations = {
+      1: {
+        correct: "¡Correcto! (Information Expert) Como la clase Pedido posee los datos de los productos y cantidades, ella es la experta designada para calcular el total.",
+        incorrect: "Incorrecto. Se aplica el principio Information Expert, ya que la responsabilidad se asigna a la clase que posee la información necesaria."
+      },
+      2: {
+        correct: "¡Correcto! (Creator) La clase Pedido contiene y agrega a DetallePedido, por lo que es la responsable natural de instanciarlo mediante su método agregarDetalle().",
+        incorrect: "Incorrecto. Corresponde al principio Creator, pues Pedido contiene y gestiona la colección de DetallePedido."
+      },
+      3: {
+        correct: "¡Correcto! (Controller) El controlador atiende la solicitud HTTP de entrada y coordina el caso de uso delegando a PedidoService.",
+        incorrect: "Incorrecto. Corresponde al principio Controller, ya que asigna la recepción de eventos del sistema y la orquestación a un componente específico."
+      },
+      4: {
+        correct: "¡Correcto! (Pure Fabrication) PedidoRepository es una clase técnica artificial que no existe en el dominio del negocio, creada exclusivamente para gestionar la persistencia.",
+        incorrect: "Incorrecto. Se trata de una Fabricación Pura (Pure Fabrication), pues es una clase artificial diseñada para garantizar alta cohesión y bajo acoplamiento técnico."
+      },
+      5: {
+        correct: "¡Correcto! (Protected Variations) La interfaz aísla y protege la lógica del negocio ante la inestabilidad o variaciones de proveedores externos.",
+        incorrect: "Incorrecto. Corresponde a Protected Variations (Variaciones Protegidas), blindando el sistema mediante interfaces estables contra puntos de cambio predecibles."
+      }
+    };
+
+    let answeredCount = 0;
+    let correctCount = 0;
+    const answeredQuestions = {};
+
+    function checkAnswer(qNum, selectedOption, isCorrect, btn) {
+      if (answeredQuestions[qNum]) return;
+
+      answeredQuestions[qNum] = isCorrect;
+      answeredCount++;
+      if (isCorrect) correctCount++;
+
+      const card = document.getElementById(`q${qNum}-card`);
+      const buttons = card.querySelectorAll('.opt-btn');
+      const expBox = document.getElementById(`q${qNum}-exp`);
+
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.style.cursor = 'default';
+      });
+
+      if (isCorrect) {
+        btn.classList.add('selected-correct');
+        card.classList.add('answered-correct');
+        expBox.className = 'explanation-box exp-correct';
+        expBox.innerHTML = '<strong>✅ ' + quizExplanations[qNum].correct + '</strong>';
+      } else {
+        btn.classList.add('selected-incorrect');
+        card.classList.add('answered-incorrect');
+        expBox.className = 'explanation-box exp-incorrect';
+        expBox.innerHTML = '<strong>❌ ' + quizExplanations[qNum].incorrect + '</strong>';
+      }
+      expBox.style.display = 'block';
+
+      document.getElementById('quizScoreText').innerText = `Puntuación: ${correctCount} / 5`;
+      document.getElementById('quizStatusText').innerText = `${answeredCount} de 5 respondidas (${correctCount} correctas).`;
+    }
+
+    function resetQuiz() {
+      answeredCount = 0;
+      correctCount = 0;
+      for (let i = 1; i <= 5; i++) {
+        delete answeredQuestions[i];
+        const card = document.getElementById(`q${i}-card`);
+        card.className = 'question-card';
+        const buttons = card.querySelectorAll('.opt-btn');
+        buttons.forEach(b => {
+          b.disabled = false;
+          b.className = 'opt-btn';
+          b.style.cursor = 'pointer';
+        });
+        const expBox = document.getElementById(`q${i}-exp`);
+        expBox.style.display = 'none';
+        expBox.innerHTML = '';
+      }
+      document.getElementById('quizScoreText').innerText = 'Puntuación: 0 / 5';
+      document.getElementById('quizStatusText').innerText = 'Selecciona una respuesta para cada pregunta.';
+    }
+
+    // ScrollSpy for Sidebar Links
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section[id], header[id]');
+      const navLinks = document.querySelectorAll('.sidebar-menu li a');
+      let currentSection = '';
+
+      sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (window.pageYOffset >= top) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
