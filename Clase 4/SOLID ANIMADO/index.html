@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="SOLID Animado: Explicación ultra didáctica, creativa y animada con muñecos y metáforas visuales de los Principios SOLID con Java y Spring Boot.">
+  <title>SOLID Animado y Creativo con Muñecos | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Fira+Code:wght@500;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #0a0f1d;
+      --bg-card: rgba(18, 26, 47, 0.85);
+      --bg-card-border: rgba(99, 102, 241, 0.25);
+      
+      --color-s: #38bdf8;
+      --color-o: #a855f7;
+      --color-l: #f59e0b;
+      --color-i: #ec4899;
+      --color-d: #10b981;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --font-fun: 'Fredoka', cursive, sans-serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 90% 25%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 85%, rgba(16, 185, 129, 0.08) 0%, transparent 50%);
+    }
+
+    /* Top Nav Bar */
+    .top-nav {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(10, 15, 29, 0.88); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px; font-family: var(--font-fun); font-size: 1.35rem; font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8, #c084fc, #34d399); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; align-items: center; gap: 16px; }
+    .btn-nav {
+      font-size: 0.85rem; font-weight: 700; padding: 8px 16px; border-radius: 20px; text-decoration: none;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-back { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.12); }
+    .btn-back:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+    .btn-sound {
+      background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);
+      cursor: pointer; font-family: var(--font-fun);
+    }
+    .btn-sound:hover { background: rgba(56, 189, 248, 0.25); transform: scale(1.05); }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1200px; margin: 40px auto 30px; padding: 0 24px; text-align: center;
+    }
+    .hero-pill {
+      font-family: var(--font-fun); font-size: 0.88rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.5px; background: rgba(168, 85, 247, 0.18); color: #d8b4fe;
+      border: 1px solid rgba(168, 85, 247, 0.35); padding: 6px 18px; border-radius: 30px; display: inline-block;
+      margin-bottom: 18px; animation: pulseGlow 3s infinite ease-in-out;
+    }
+    .hero h1 {
+      font-family: var(--font-fun); font-size: 3.5rem; font-weight: 700; line-height: 1.15;
+      letter-spacing: -1px; margin-bottom: 18px;
+    }
+    .hero h1 span.s { color: var(--color-s); }
+    .hero h1 span.o { color: var(--color-o); }
+    .hero h1 span.l { color: var(--color-l); }
+    .hero h1 span.i { color: var(--color-i); }
+    .hero h1 span.d { color: var(--color-d); }
+
+    .hero-subtitle {
+      font-size: 1.25rem; color: #cbd5e1; max-width: 820px; margin: 0 auto 30px; line-height: 1.6;
+    }
+
+    /* Profe Byte Narrator Avatar */
+    .narrator-bubble {
+      max-width: 850px; margin: 0 auto 40px; background: rgba(30, 41, 59, 0.7);
+      border: 2px dashed rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 22px 28px;
+      display: flex; align-items: center; gap: 24px; text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .narrator-avatar {
+      width: 76px; height: 76px; flex-shrink: 0; animation: floatAnim 3s infinite ease-in-out;
+    }
+    .narrator-text h4 { font-family: var(--font-fun); font-size: 1.15rem; color: #38bdf8; margin-bottom: 4px; }
+    .narrator-text p { font-size: 0.98rem; color: #e2e8f0; line-height: 1.5; }
+
+    /* Quick Character Selector */
+    .character-nav {
+      display: flex; justify-content: center; flex-wrap: wrap; gap: 14px; max-width: 1100px;
+      margin: 0 auto 60px; padding: 0 20px;
+    }
+    .char-btn {
+      background: var(--bg-card); border: 2px solid rgba(255, 255, 255, 0.08); border-radius: 18px;
+      padding: 14px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer;
+      text-decoration: none; color: var(--text-main); font-family: var(--font-fun); font-size: 1.05rem;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .char-btn:hover {
+      transform: translateY(-5px) scale(1.03); border-color: currentColor;
+      box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+    }
+    .char-badge {
+      width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 700; color: #fff;
+    }
+
+    /* Container for Modules */
+    .modules-container {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; display: flex; flex-direction: column; gap: 70px;
+    }
+
+    /* Principle Cartoon Stage Box */
+    .stage-card {
+      background: var(--bg-card); border: 2px solid var(--bg-card-border); border-radius: 28px;
+      padding: 38px 36px; position: relative; overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .stage-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;
+      margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 20px;
+    }
+    .stage-title-group { display: flex; align-items: center; gap: 16px; }
+    .stage-letter {
+      width: 58px; height: 58px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-fun); font-size: 2.2rem; font-weight: 700; color: #fff;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+    .stage-titles h2 { font-family: var(--font-fun); font-size: 1.85rem; font-weight: 700; }
+    .stage-titles p { font-size: 0.95rem; color: var(--text-muted); }
+
+    /* Interactive Chaos vs Zen Switcher */
+    .mode-switch-bar {
+      display: flex; align-items: center; background: rgba(10, 15, 29, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 30px; padding: 5px; gap: 4px;
+    }
+    .mode-btn {
+      background: transparent; border: none; padding: 8px 18px; border-radius: 24px;
+      font-family: var(--font-fun); font-size: 0.92rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; gap: 6px;
+    }
+    .mode-btn.active.btn-chaos {
+      background: #ef4444; color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+    .mode-btn.active.btn-zen {
+      background: #10b981; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Cartoon Theater Stage */
+    .theater-display {
+      background: #080c17; border: 2px solid rgba(255, 255, 255, 0.06); border-radius: 20px;
+      padding: 30px 24px; min-height: 280px; display: flex; align-items: center; justify-content: space-around;
+      position: relative; overflow: hidden; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;
+    }
+    .stage-scenery {
+      position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; opacity: 0.15;
+      background-size: cover;
+    }
+
+    /* Comic Speech Bubble */
+    .comic-bubble {
+      background: #ffffff; color: #0f172a; border-radius: 18px; padding: 14px 20px;
+      font-family: var(--font-fun); font-size: 0.98rem; font-weight: 600; max-width: 340px;
+      position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3); line-height: 1.4;
+      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .comic-bubble::after {
+      content: ''; position: absolute; bottom: -10px; left: 30px; width: 0; height: 0;
+      border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid #ffffff;
+    }
+    .comic-bubble.chaos-bubble {
+      background: #fee2e2; color: #991b1b; border: 2px solid #ef4444;
+    }
+    .comic-bubble.chaos-bubble::after { border-top-color: #ef4444; }
+    .comic-bubble.zen-bubble {
+      background: #ecfdf5; color: #065f46; border: 2px solid #10b981;
+    }
+    .comic-bubble.zen-bubble::after { border-top-color: #10b981; }
+
+    /* Metaphor & Explanation Cards */
+    .explanation-split {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;
+    }
+    .metaphor-card {
+      background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px;
+      padding: 22px 24px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .metaphor-card h4 {
+      font-family: var(--font-fun); font-size: 1.18rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .metaphor-card p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 14px; }
+    .metaphor-tag {
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      padding: 4px 10px; border-radius: 8px; align-self: flex-start;
+    }
+
+    .code-card {
+      background: #080d1a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px;
+      padding: 20px; font-family: var(--font-code); font-size: 0.84rem; position: relative;
+    }
+    .code-card-header {
+      font-family: var(--font-fun); font-size: 0.88rem; font-weight: 600; color: #94a3b8;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    pre code { display: block; line-height: 1.6; color: #e2e8f0; overflow-x: auto; }
+    .hl-kw { color: #f43f5e; font-weight: bold; }
+    .hl-ann { color: #f59e0b; font-weight: bold; }
+    .hl-tp { color: #38bdf8; font-weight: bold; }
+    .hl-str { color: #10b981; }
+    .hl-cm { color: #64748b; font-style: italic; }
+
+    /* Interactive Toy Playgrounds */
+    .interactive-toy-box {
+      margin-top: 24px; background: rgba(30, 41, 59, 0.4); border: 2px dashed rgba(255, 255, 255, 0.12);
+      border-radius: 18px; padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;
+    }
+    .toy-title {
+      font-family: var(--font-fun); font-size: 1.05rem; color: #fcd34d; display: flex; align-items: center; gap: 8px;
+    }
+    .toy-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .toy-btn {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff;
+      font-family: var(--font-fun); font-size: 0.88rem; padding: 8px 16px; border-radius: 12px; cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .toy-btn:hover { background: var(--color-s); color: #000; transform: scale(1.05); }
+
+    /* Cartridge Slot Animation for OCP */
+    .console-unit {
+      background: #1e293b; border: 3px solid #475569; border-radius: 16px; padding: 18px 24px;
+      width: 260px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    }
+    .cartridge-slot {
+      height: 24px; background: #0f172a; border: 2px inset #334155; border-radius: 4px;
+      margin: 12px 0; position: relative; overflow: visible;
+    }
+    .cartridge-item {
+      width: 140px; height: 44px; margin: 0 auto; border-radius: 8px; font-family: var(--font-fun);
+      font-size: 0.82rem; font-weight: 700; color: #fff; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.4); cursor: pointer; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* Keyframe Animations */
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes shakeChaos {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-3px, 2px) rotate(-3deg); }
+      40% { transform: translate(3px, -2px) rotate(3deg); }
+      60% { transform: translate(-2px, -3px) rotate(-2deg); }
+      80% { transform: translate(2px, 3px) rotate(2deg); }
+    }
+    @keyframes sweatDrop {
+      0% { opacity: 0; transform: translateY(-5px); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(15px); }
+    }
+    @keyframes smokePuff {
+      0% { opacity: 0.8; transform: translateY(0) scale(0.6); }
+      100% { opacity: 0; transform: translateY(-30px) scale(1.4); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(168, 85, 247, 0.2); }
+      50% { box-shadow: 0 0 25px rgba(168, 85, 247, 0.5); }
+    }
+    @keyframes bounceHappy {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-14px); }
+    }
+
+    .anim-shake { animation: shakeChaos 0.35s infinite ease-in-out; }
+    .anim-bounce { animation: bounceHappy 1.2s infinite ease-in-out; }
+    .anim-float { animation: floatAnim 3s infinite ease-in-out; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 40px 24px; text-align: center;
+      font-size: 0.9rem; color: var(--text-muted); line-height: 1.8;
+    }
+
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 2.5rem; }
+      .explanation-split { grid-template-columns: 1fr; }
+      .narrator-bubble { flex-direction: column; text-align: center; }
+      .comic-bubble::after { display: none; }
+      .stage-card { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="brand">
+      <span>🎨</span> SOLID ANIMADO &middot; UNIBE
+    </div>
+    <div class="nav-links">
+      <button class="btn-nav btn-sound" id="soundToggleBtn" onclick="toggleSound()">
+        🔊 Sonidos: <span id="soundStatusText">Activados</span>
+      </button>
+      <a href="../SOLID/Principios SOLID con Java y Spring Boot.html" class="btn-nav btn-back">
+        📖 Ver Guía Técnica Formal
+      </a>
+      <a href="../../index.html" class="btn-nav btn-back">
+        🏠 Portal UNIBE
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero">
+      <div class="hero-pill">✨ Especial Didáctico para Estudiantes</div>
+      <h1>
+        Aprende <span class="s">S</span><span class="o">O</span><span class="l">L</span><span class="i">I</span><span class="d">D</span> con Muñecos y Animaciones
+      </h1>
+      <p class="hero-subtitle">
+        ¿Cansado de definiciones teóricas aburridas? Aquí entenderás los cinco principios mediante personajes simpáticos, animaciones interactivas, metáforas de la vida diaria y el antes/después en <strong>Java y Spring Boot</strong>.
+      </p>
+
+      <!-- Profe Byte Narrador -->
+      <div class="narrator-bubble">
+        <svg class="narrator-avatar" viewBox="0 0 100 100" fill="none">
+          <!-- Robot Body -->
+          <rect x="25" y="30" width="50" height="45" rx="12" fill="#38bdf8"/>
+          <!-- Screen Face -->
+          <rect x="32" y="38" width="36" height="26" rx="6" fill="#0f172a"/>
+          <!-- Glasses -->
+          <circle cx="43" cy="50" r="6" stroke="#fcd34d" stroke-width="2.5" fill="none"/>
+          <circle cx="57" cy="50" r="6" stroke="#fcd34d" stroke-width="2.5" fill="none"/>
+          <line x1="49" y1="50" x2="51" y2="50" stroke="#fcd34d" stroke-width="2.5"/>
+          <!-- Smiling Eyes -->
+          <path d="M40 50 Q43 47 46 50" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M54 50 Q57 47 60 50" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <!-- Antenna -->
+          <line x1="50" y1="30" x2="50" y2="18" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="50" cy="15" r="5" fill="#f43f5e"/>
+          <!-- Cheeks -->
+          <circle cx="36" cy="56" r="2.5" fill="#f472b6"/>
+          <circle cx="64" cy="56" r="2.5" fill="#f472b6"/>
+          <!-- Smile -->
+          <path d="M46 58 Q50 62 54 58" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <div class="narrator-text">
+          <h4>¡Hola, soy Profe Byte! 🤖</h4>
+          <p>
+            El secreto de SOLID no es memorizar acrónimos, sino <strong>sentir empatía por tu código</strong>. En cada principio tienes un botón para ver el <strong>💥 Desastre Caótico</strong> (cuando violamos el principio) y la <strong>✨ Solución Zen</strong> (cuando aplicamos SOLID). ¡Pruébalos todos!
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Character Jump Menu -->
+      <div class="character-nav">
+        <a href="#stage-srp" class="char-btn" style="color:var(--color-s);">
+          <div class="char-badge" style="background:var(--color-s);">S</div>
+          <span>Boby el Pulpo Chef</span>
+        </a>
+        <a href="#stage-ocp" class="char-btn" style="color:var(--color-o);">
+          <div class="char-badge" style="background:var(--color-o);">O</div>
+          <span>La Consola de Cartuchos</span>
+        </a>
+        <a href="#stage-lsp" class="char-btn" style="color:var(--color-l);">
+          <div class="char-badge" style="background:var(--color-l);">L</div>
+          <span>Pepe el Pingüino</span>
+        </a>
+        <a href="#stage-isp" class="char-btn" style="color:var(--color-i);">
+          <div class="char-badge" style="background:var(--color-i);">I</div>
+          <span>La Navaja de 500 Kg</span>
+        </a>
+        <a href="#stage-dip" class="char-btn" style="color:var(--color-d);">
+          <div class="char-badge" style="background:var(--color-d);">D</div>
+          <span>El Enchufe de Pared</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Content Modules Container -->
+    <div class="modules-container">
+
+      <!-- ==================== 1. SRP: BOBY EL PULPO CHEF ==================== -->
+      <section class="stage-card" id="stage-srp" style="border-color: rgba(56, 189, 248, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-s);">S</div>
+            <div class="stage-titles">
+              <h2>Single Responsibility Principle (SRP)</h2>
+              <p>Metáfora: <em>"El Chef Pulpo que cocina, cobra, limpia y reparte en moto al mismo tiempo."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setSRPState('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setSRPState('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <!-- Animated Theater Stage -->
+        <div class="theater-display" id="srpTheater">
+          <!-- Character SVG (Changes dynamically via JS) -->
+          <div id="srpCharacterBox" class="anim-shake">
+            <svg width="220" height="220" viewBox="0 0 200 200" id="srpSvg">
+              <!-- Octopus Body -->
+              <circle cx="100" cy="90" r="45" fill="#f43f5e"/>
+              <!-- Sweat Drops -->
+              <circle cx="140" cy="55" r="4" fill="#38bdf8" style="animation: sweatDrop 1s infinite;"/>
+              <circle cx="60" cy="55" r="4" fill="#38bdf8" style="animation: sweatDrop 1.2s infinite;"/>
+              <!-- Stressed Dizzy Eyes -->
+              <text x="75" y="85" font-size="22" font-weight="bold" fill="#fff">X</text>
+              <text x="110" y="85" font-size="22" font-weight="bold" fill="#fff">X</text>
+              <!-- Mouth Screaming -->
+              <ellipse cx="100" cy="110" rx="14" ry="10" fill="#7f1d1d"/>
+              <!-- Chef Hat Crooked -->
+              <path d="M75 50 Q100 20 125 50 Z" fill="#ffffff"/>
+              <!-- Arms holding too many tasks -->
+              <!-- Arm 1: Frying pan -->
+              <path d="M60 100 Q30 70 20 90" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <circle cx="15" cy="90" r="12" fill="#334155"/>
+              <text x="10" y="94" font-size="12">🍳</text>
+              <!-- Arm 2: Database Disk -->
+              <path d="M140 100 Q170 70 180 90" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <circle cx="185" cy="90" r="12" fill="#3b82f6"/>
+              <text x="180" y="94" font-size="12">💾</text>
+              <!-- Arm 3: Invoice bill -->
+              <path d="M60 120 Q30 140 35 160" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <rect x="25" y="155" width="22" height="26" fill="#fef08a" rx="3"/>
+              <text x="28" y="172" font-size="12">🧾</text>
+              <!-- Arm 4: Email Envelope -->
+              <path d="M140 120 Q170 140 165 160" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <rect x="155" y="155" width="26" height="18" fill="#e2e8f0" rx="3"/>
+              <text x="158" y="168" font-size="12">✉️</text>
+              <!-- Smoke puff -->
+              <circle cx="100" cy="30" r="8" fill="#94a3b8" style="animation: smokePuff 1.5s infinite;"/>
+            </svg>
+          </div>
+
+          <!-- Speech Bubble -->
+          <div class="comic-bubble chaos-bubble" id="srpBubble">
+            ¡SOCORRO! 😵 ¡Tengo que freír hamburguesas, calcular el IVA, guardar en PostgreSQL y enviar 1,000 correos a la vez! ¡Si el cliente cambia de salsa... se cae la base de datos!
+          </div>
+        </div>
+
+        <!-- Explanation Cards -->
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              Imagina un restaurante donde el <strong>Chef</strong> también cobra en la caja, limpia los baños y hace las entregas en motocicleta. Si se le pincha una llanta en la calle, nadie cocina en el local.
+            </p>
+            <p>
+              <strong>Regla de Oro:</strong> Una clase debe tener <strong>un solo motivo de cambio</strong>. Si el formato de factura cambia, solo debería tocarse la clase de facturación.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(56, 189, 248, 0.15); color:var(--color-s);">Principio: Responsabilidad Única</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="srpCodeTitle">❌ Código Monstruo: PedidoService.java</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="srpCodeBody"><span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">PedidoService</span> {
+    <span class="hl-cm">// ❌ 4 RAZONES PARA CAMBIAR EN UNA SOLA CLASE</span>
+    <span class="hl-kw">public void</span> <span class="hl-tp">crearPedido</span>(<span class="hl-tp">Pedido</span> p) {
+        bd.<span class="hl-tp">save</span>(p);            <span class="hl-cm">// 1. Persistencia</span>
+        <span class="hl-kw">double</span> total = ...;    <span class="hl-cm">// 2. Matemática</span>
+        factura.<span class="hl-tp">emitir</span>(total); <span class="hl-cm">// 3. Facturación</span>
+        email.<span class="hl-tp">enviar</span>(p);       <span class="hl-cm">// 4. Notificaciones</span>
+    }
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 2. OCP: LA CONSOLA DE CARTUCHOS ==================== -->
+      <section class="stage-card" id="stage-ocp" style="border-color: rgba(168, 85, 247, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-o);">O</div>
+            <div class="stage-titles">
+              <h2>Open/Closed Principle (OCP)</h2>
+              <p>Metáfora: <em>"La consola de videojuegos retro: abres una ranura para cartuchos, nunca desueldas la placa madre."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setOCPState('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setOCPState('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <!-- Animated Theater Stage -->
+        <div class="theater-display" id="ocpTheater">
+          <!-- Interactive Console / Frankenstein -->
+          <div id="ocpCharacterBox">
+            <div class="console-unit" id="ocpConsole">
+              <div style="font-family:var(--font-fun); font-size:1.1rem; color:#c084fc; margin-bottom:4px;">
+                🎮 Spring-Console 3000
+              </div>
+              <div class="cartridge-slot" id="ocpSlot">
+                <div class="cartridge-item" id="ocpCartridge" style="background:#ef4444; transform: translateY(-50px);">
+                  <span id="ocpCartLabel">⚡ SOLDANDO CABLES</span>
+                </div>
+              </div>
+              <div id="ocpScreen" style="background:#090d16; border-radius:6px; padding:10px; font-family:var(--font-code); font-size:0.75rem; color:#ef4444; border:1px solid #ef4444;">
+                🚨 ALERTA: MODIFICANDO CODIGO EXISTENTE CON IF/ELSE
+              </div>
+            </div>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="ocpBubble">
+            ¡Cuidado con el cautín! 💥 Para aceptar pagos en Cripto tuve que abrir el archivo que ya funcionaba con Tarjeta y PayPal. ¡Se me escapó una llave y rompí toda la tienda!
+          </div>
+        </div>
+
+        <!-- Interactive Toy: Insert Cartridges -->
+        <div class="interactive-toy-box" id="ocpToyBox" style="display:none;">
+          <div class="toy-title">🕹️ Prueba la Magia OCP: Inserta un nuevo método de pago sin tocar la consola:</div>
+          <div class="toy-controls">
+            <button class="toy-btn" onclick="plugCartridge('Tarjeta', '#3b82f6', '💳 PagoTarjeta.java')">Insertar Tarjeta</button>
+            <button class="toy-btn" onclick="plugCartridge('PayPal', '#06b6d4', '🅿️ PagoPayPal.java')">Insertar PayPal</button>
+            <button class="toy-btn" onclick="plugCartridge('Cripto (BTC)', '#f59e0b', '₿ PagoCripto.java')">Insertar Criptomonedas</button>
+            <button class="toy-btn" onclick="plugCartridge('Apple Pay', '#a855f7', '🍏 PagoApplePay.java')">Insertar Apple Pay</button>
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              ¿Te imaginas que para jugar un nuevo juego en tu Nintendo Switch tuvieras que abrir la carcasa con un destornillador y soldar chips en la placa madre? ¡Qué locura!
+            </p>
+            <p>
+              Tu código debe ser como una consola: <strong>Cerrado a modificaciones</strong> (la consola no se desarma) y <strong>Abierto a extensiones</strong> (puedes crear 1,000 cartuchos nuevos que encajan en la ranura).
+            </p>
+            <span class="metaphor-tag" style="background:rgba(168, 85, 247, 0.15); color:var(--color-o);">Principio: Abierto / Cerrado</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="ocpCodeTitle">❌ Código Frágil: if / else if en PagoService</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="ocpCodeBody"><span class="hl-cm">// ❌ CADA NUEVO PAGO EXIGE MODIFICAR ESTE ARCHIVO</span>
+<span class="hl-kw">if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"TARJETA"</span>)) { ... }
+<span class="hl-kw">else if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"PAYPAL"</span>)) { ... }
+<span class="hl-kw">else if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"CRIPTO"</span>)) { ... } <span class="hl-cm">// ¡Peligro de romper!</span></code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 3. LSP: PEPE EL PINGÜINO ==================== -->
+      <section class="stage-card" id="stage-lsp" style="border-color: rgba(245, 158, 11, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-l);">L</div>
+            <div class="stage-titles">
+              <h2>Liskov Substitution Principle (LSP)</h2>
+              <p>Metáfora: <em>"Pepe el Pingüino y Aquiles el Águila: no obligues a un pingüino a tirarse de un avión."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setLSPState('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setLSPState('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <!-- Animated Theater Stage -->
+        <div class="theater-display" id="lspTheater">
+          <!-- Characters: Eagle and Penguin -->
+          <div id="lspCharacterBox" style="display:flex; align-items:center; gap:20px;">
+            <!-- Pepe the Penguin -->
+            <svg width="130" height="130" viewBox="0 0 100 100" id="lspPenguinSvg" class="anim-shake">
+              <!-- Penguin Body -->
+              <ellipse cx="50" cy="55" rx="30" ry="38" fill="#1e293b"/>
+              <!-- White Belly -->
+              <ellipse cx="50" cy="60" rx="20" ry="28" fill="#ffffff"/>
+              <!-- Scared Eyes -->
+              <circle cx="42" cy="35" r="7" fill="#fff"/>
+              <circle cx="58" cy="35" r="7" fill="#fff"/>
+              <circle cx="42" cy="35" r="3" fill="#000"/>
+              <circle cx="58" cy="35" r="3" fill="#000"/>
+              <!-- Beak -->
+              <polygon points="46,42 54,42 50,52" fill="#f59e0b"/>
+              <!-- Feet -->
+              <ellipse cx="38" cy="92" rx="8" ry="4" fill="#f59e0b"/>
+              <ellipse cx="62" cy="92" rx="8" ry="4" fill="#f59e0b"/>
+              <!-- Falling Sweat / Bandage -->
+              <text x="75" y="45" font-size="20">💥</text>
+            </svg>
+
+            <!-- Eagle Soaring -->
+            <svg width="110" height="110" viewBox="0 0 100 100" class="anim-float">
+              <!-- Wings -->
+              <path d="M10 50 Q50 15 90 50 Q50 40 10 50" fill="#78350f"/>
+              <!-- Head -->
+              <circle cx="50" cy="36" r="14" fill="#ffffff"/>
+              <!-- Beak -->
+              <polygon points="46,38 54,38 60,44 46,42" fill="#f59e0b"/>
+              <!-- Eye -->
+              <circle cx="50" cy="34" r="2.5" fill="#000"/>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="lspBubble">
+            ¡PLAAAFFF! 🚑 El General me ordenó: <em>"¡Todos los que hereden de Ave deben volar!"</em>. Como soy un pingüino, me estrellé y lancé una <strong>UnsupportedOperationException</strong>.
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              En biología un pingüino es un ave. Pero en software, <strong>la herencia se basa en el comportamiento, no en los sustantivos</strong>.
+            </p>
+            <p>
+              Si tienes un método <code>hacerVolar(Ave ave)</code>, debes poder sustituir <code>Ave</code> por <strong>cualquier subclase</strong> sin que el programa explote. Si una subclase no puede cumplir la promesa del padre, la herencia está mal diseñada.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(245, 158, 11, 0.15); color:var(--color-l);">Principio: Sustitución de Liskov</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="lspCodeTitle">❌ Herencia Rota: Pinguino extends Ave</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="lspCodeBody"><span class="hl-kw">public class</span> <span class="hl-tp">Pinguino</span> <span class="hl-kw">extends</span> <span class="hl-tp">Ave</span> {
+    <span class="hl-ann">@Override</span>
+    <span class="hl-kw">public void</span> <span class="hl-tp">volar</span>() {
+        <span class="hl-cm">// ❌ ¡COLAPSO EN RUNTIME!</span>
+        <span class="hl-kw">throw new</span> <span class="hl-tp">UnsupportedOperationException</span>();
+    }
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 4. ISP: LA NAVAJA DE 500 KILOS ==================== -->
+      <section class="stage-card" id="stage-isp" style="border-color: rgba(236, 72, 153, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-i);">I</div>
+            <div class="stage-titles">
+              <h2>Interface Segregation Principle (ISP)</h2>
+              <p>Metáfora: <em>"La navaja suiza de 500 kilos: nadie debería cargar una motosierra solo para cortar un papel."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setISPState('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setISPState('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <!-- Animated Theater Stage -->
+        <div class="theater-display" id="ispTheater">
+          <!-- Tiny Character with Giant Knife -->
+          <div id="ispCharacterBox" class="anim-shake">
+            <svg width="220" height="180" viewBox="0 0 220 180">
+              <!-- Giant Swiss Army Knife -->
+              <rect x="70" y="70" width="120" height="40" rx="15" fill="#e11d48"/>
+              <circle cx="85" cy="90" r="6" fill="#fff"/>
+              <!-- Chainsaw blade coming out -->
+              <rect x="130" y="20" width="18" height="60" fill="#94a3b8" transform="rotate(25 130 20)"/>
+              <text x="145" y="30" font-size="16">🪚</text>
+              <!-- Fax Antenna -->
+              <line x1="160" y1="70" x2="190" y2="20" stroke="#cbd5e1" stroke-width="4"/>
+              <text x="185" y="20" font-size="16">📠</text>
+              <!-- Microwave -->
+              <rect x="90" y="35" width="28" height="24" fill="#334155" rx="4"/>
+              <text x="94" y="52" font-size="14">📻</text>
+              <!-- Small Tired Person underneath -->
+              <circle cx="50" cy="115" r="14" fill="#fcd34d"/>
+              <path d="M50 130 L50 160 M50 140 L30 150 M50 140 L70 145 M40 175 L50 160 L60 175" stroke="#fcd34d" stroke-width="5" stroke-linecap="round"/>
+              <!-- Dizzy eyes -->
+              <text x="44" y="118" font-size="10">x x</text>
+              <!-- Sweat -->
+              <circle cx="36" cy="110" r="3" fill="#38bdf8"/>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="ispBubble">
+            ¡Me pesa demasiado! 🥵 Solo compré una impresora básica de $40 para imprimir tareas, ¡pero la interfaz me obliga a cargar con un escáner industrial y un módem de fax que no tengo!
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              ¿Comprarías una navaja de bolsillo que pesa media tonelada porque incluye una rueda de tractor y un taladro percutor?
+            </p>
+            <p>
+              <strong>Es mucho mejor tener interfaces pequeñas y específicas</strong> (un cinturón con herramientas individuales: tijeritas, destornillador) que una sola interfaz "gorda" que fuerza a las clases a implementar métodos vacíos.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(236, 72, 153, 0.15); color:var(--color-i);">Principio: Segregación de Interfaces</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="ispCodeTitle">❌ Interfaz Monolítica Gorda</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="ispCodeBody"><span class="hl-kw">public interface</span> <span class="hl-tp">Dispositivo</span> {
+    <span class="hl-kw">void</span> <span class="hl-tp">imprimir</span>();
+    <span class="hl-kw">void</span> <span class="hl-tp">escanear</span>();  <span class="hl-cm">// ❌ Basura para la básica</span>
+    <span class="hl-kw">void</span> <span class="hl-tp">enviarFax</span>();  <span class="hl-cm">// ❌ Basura para la básica</span>
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 5. DIP: EL ENCHUFE UNIVERSAL ==================== -->
+      <section class="stage-card" id="stage-dip" style="border-color: rgba(16, 185, 129, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-d);">D</div>
+            <div class="stage-titles">
+              <h2>Dependency Inversion Principle (DIP)</h2>
+              <p>Metáfora: <em>"El enchufe universal de pared: no sueldes tu lámpara a los cables del poste de la calle."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setDIPState('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setDIPState('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <!-- Animated Theater Stage -->
+        <div class="theater-display" id="dipTheater">
+          <!-- Welded Lamp / Universal Socket -->
+          <div id="dipCharacterBox">
+            <svg width="220" height="180" viewBox="0 0 220 180" id="dipSvg" class="anim-shake">
+              <!-- Wall with crack -->
+              <rect x="20" y="20" width="80" height="140" fill="#334155" rx="6"/>
+              <path d="M40 30 L45 70 L35 110 L45 150" stroke="#f43f5e" stroke-width="3" fill="none"/>
+              <!-- Welded thick cable directly into wall with sparks -->
+              <path d="M90 90 L150 90" stroke="#f59e0b" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="120" cy="90" r="10" fill="#ef4444" opacity="0.6"/>
+              <text x="110" y="80" font-size="18">⚡</text>
+              <text x="125" y="115" font-size="14">🔥</text>
+              <!-- Lamp on right -->
+              <path d="M160 50 L190 90 L150 90 Z" fill="#fcd34d"/>
+              <rect x="168" y="90" width="6" height="50" fill="#64748b"/>
+              <ellipse cx="171" cy="140" rx="18" ry="6" fill="#475569"/>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="dipBubble">
+            ¡Qué desastre! 🔨 Soldé el cable de la lámpara directamente a los cables de alta tensión de la pared con <code>new EmailService()</code>. ¡Para poner una lámpara nueva tengo que demoler la casa entera!
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              Nadie suelda los electrodomésticos a los cables de la pared. En su lugar, existe un contrato universal: <strong>el tomacorriente de pared (la interfaz)</strong>.
+            </p>
+            <p>
+              Tanto la pared (módulo de alto nivel) como la lámpara o la tostadora (módulos de bajo nivel) <strong>dependen del enchufe estándar</strong>. Puedes desenchufar el correo y enchufar WhatsApp en 1 segundo.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(16, 185, 129, 0.15); color:var(--color-d);">Principio: Inversión de Dependencias</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="dipCodeTitle">❌ Acoplamiento Soldado con "new"</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="dipCodeBody"><span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">NotificacionService</span> {
+    <span class="hl-cm">// ❌ SOLDADO DE POR VIDA: Imposible cambiar a WhatsApp</span>
+    <span class="hl-kw">private final</span> <span class="hl-tp">EmailService</span> email = <span class="hl-kw">new</span> <span class="hl-tp">EmailService</span>();
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>🎨 <strong>SOLID Animado: Edición Didáctica para Estudiantes de Software</strong></p>
+    <p>Universidad Iberoamericana del Ecuador &middot; UNIBE &middot; Período Académico 2026</p>
+    <p>Diseño y Arquitectura de Software &middot; Creado con ❤️ y pedagogía visual por Byron Rodrigo Moreno Moreno</p>
+  </footer>
+
+  <!-- Interactive Scripts & Web Audio Synthesizer -->
+  <script>
+    // Web Audio API Synthesizer (Zero dependencies!)
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const statusText = document.getElementById('soundStatusText');
+      const btn = document.getElementById('soundToggleBtn');
+      if (soundEnabled) {
+        statusText.innerText = "Activados";
+        btn.style.color = "#38bdf8";
+        playTriumphSound();
+      } else {
+        statusText.innerText = "Silenciado";
+        btn.style.color = "#94a3b8";
+      }
+    }
+
+    // Play funny cartoon buzzer
+    function playChaosSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(160, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(70, audioCtx.currentTime + 0.35);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+    }
+
+    // Play happy triumph chime
+    function playZenSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      const notes = [261.63, 329.63, 392.00, 523.25]; // C chord arpeggio
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.08);
+        gain.gain.setValueAtTime(0.18, audioCtx.currentTime + index * 0.08);
+        gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.08 + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + index * 0.08);
+        osc.stop(audioCtx.currentTime + index * 0.08 + 0.3);
+      });
+    }
+
+    function playTriumphSound() {
+      playZenSound();
+    }
+
+    // ==================== 1. SRP STATE CONTROLLER ====================
+    function setSRPState(mode, btn) {
+      const card = document.getElementById('stage-srp');
+      const buttons = card.querySelectorAll('.mode-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const charBox = document.getElementById('srpCharacterBox');
+      const bubble = document.getElementById('srpBubble');
+      const codeTitle = document.getElementById('srpCodeTitle');
+      const codeBody = document.getElementById('srpCodeBody');
+
+      if (mode === 'chaos') {
+        playChaosSound();
+        charBox.className = 'anim-shake';
+        charBox.innerHTML = `
+          <svg width="220" height="220" viewBox="0 0 200 200">
+            <circle cx="100" cy="90" r="45" fill="#f43f5e"/>
+            <text x="75" y="85" font-size="22" font-weight="bold" fill="#fff">X</text>
+            <text x="110" y="85" font-size="22" font-weight="bold" fill="#fff">X</text>
+            <ellipse cx="100" cy="110" rx="14" ry="10" fill="#7f1d1d"/>
+            <path d="M75 50 Q100 20 125 50 Z" fill="#ffffff"/>
+            <circle cx="140" cy="55" r="4" fill="#38bdf8" style="animation: sweatDrop 1s infinite;"/>
+            <path d="M60 100 Q30 70 20 90" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <text x="10" y="94" font-size="14">🍳</text>
+            <path d="M140 100 Q170 70 180 90" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <text x="180" y="94" font-size="14">💾</text>
+            <path d="M60 120 Q30 140 35 160" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <text x="25" y="170" font-size="14">🧾</text>
+            <path d="M140 120 Q170 140 165 160" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+            <text x="160" y="170" font-size="14">✉️</text>
+            <circle cx="100" cy="30" r="8" fill="#94a3b8" style="animation: smokePuff 1.5s infinite;"/>
+          </svg>
+        `;
+        bubble.className = 'comic-bubble chaos-bubble';
+        bubble.innerHTML = '¡SOCORRO! 😵 Freír, calcular, facturar y enviar correos a la vez me está quemando los circuitos.';
+        codeTitle.innerText = '❌ Código Monstruo: PedidoService.java';
+        codeBody.innerHTML = `<span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">PedidoService</span> {
+    <span class="hl-cm">// ❌ 4 RAZONES PARA CAMBIAR EN UNA SOLA CLASE</span>
+    <span class="hl-kw">public void</span> <span class="hl-tp">crearPedido</span>(<span class="hl-tp">Pedido</span> p) {
+        bd.<span class="hl-tp">save</span>(p);            <span class="hl-cm">// Persistencia</span>
+        <span class="hl-kw">double</span> total = ...;    <span class="hl-cm">// Matemática</span>
+        factura.<span class="hl-tp">emitir</span>(total); <span class="hl-cm">// Facturación</span>
+        email.<span class="hl-tp">enviar</span>(p);       <span class="hl-cm">// Notificaciones</span>
+    }
+}`;
+      } else {
+        playZenSound();
+        charBox.className = 'anim-bounce';
+        charBox.innerHTML = `
+          <div style="display:flex; gap:16px; align-items:center;">
+            <!-- Bot 1: Coordinador -->
+            <div style="text-align:center;">
+              <svg width="70" height="70" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="#38bdf8"/>
+                <text x="35" y="45" font-size="16" fill="#fff">^ ^</text>
+                <path d="M40 60 Q50 70 60 60" stroke="#0f172a" stroke-width="4" stroke-linecap="round" fill="none"/>
+              </svg>
+              <div style="font-family:var(--font-fun); font-size:0.75rem; color:#38bdf8; font-weight:700;">PedidoService</div>
+            </div>
+            <!-- Arrow -->
+            <div style="font-size:1.5rem; color:#94a3b8;">➡️</div>
+            <!-- Bot 2: Factura -->
+            <div style="text-align:center;">
+              <svg width="70" height="70" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="#fcd34d"/>
+                <text x="35" y="45" font-size="16" fill="#000">^ ^</text>
+                <path d="M40 60 Q50 70 60 60" stroke="#000" stroke-width="4" stroke-linecap="round" fill="none"/>
+                <text x="40" y="85" font-size="14">🧾</text>
+              </svg>
+              <div style="font-family:var(--font-fun); font-size:0.75rem; color:#fcd34d; font-weight:700;">FacturaService</div>
+            </div>
+            <!-- Bot 3: Email -->
+            <div style="text-align:center;">
+              <svg width="70" height="70" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="40" fill="#34d399"/>
+                <text x="35" y="45" font-size="16" fill="#000">^ ^</text>
+                <path d="M40 60 Q50 70 60 60" stroke="#000" stroke-width="4" stroke-linecap="round" fill="none"/>
+                <text x="40" y="85" font-size="14">✉️</text>
+              </svg>
+              <div style="font-family:var(--font-fun); font-size:0.75rem; color:#34d399; font-weight:700;">EmailService</div>
+            </div>
+          </div>
+        `;
+        bubble.className = 'comic-bubble zen-bubble';
+        bubble.innerHTML = '¡Qué paz mental! 🧘‍♂️ Ahora somos un equipo especializado: uno guarda en BD, otro factura y otro envía correos. ¡Cero estrés!';
+        codeTitle.innerText = '✅ Solución SOLID: Servicios Coordinados';
+        codeBody.innerHTML = `<span class="hl-ann">@Service</span>
+<span class="hl-ann">@RequiredArgsConstructor</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">PedidoService</span> {
+    <span class="hl-kw">private final</span> <span class="hl-tp">PedidoRepository</span> repository;
+    <span class="hl-kw">private final</span> <span class="hl-tp">FacturaService</span> facturaService;
+    <span class="hl-kw">private final</span> <span class="hl-tp">EmailService</span> emailService;
+
+    <span class="hl-kw">public void</span> <span class="hl-tp">crearPedido</span>(<span class="hl-tp">Pedido</span> p) {
+        <span class="hl-tp">Pedido</span> guardado = repository.<span class="hl-tp">save</span>(p);
+        facturaService.<span class="hl-tp">generar</span>(guardado);
+        emailService.<span class="hl-tp">enviarConfirmacion</span>(guardado);
+    }
+}`;
+      }
+    }
+
+    // ==================== 2. OCP STATE CONTROLLER ====================
+    function setOCPState(mode, btn) {
+      const card = document.getElementById('stage-ocp');
+      const buttons = card.querySelectorAll('.mode-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const slot = document.getElementById('ocpSlot');
+      const cartridge = document.getElementById('ocpCartridge');
+      const screen = document.getElementById('ocpScreen');
+      const bubble = document.getElementById('ocpBubble');
+      const toyBox = document.getElementById('ocpToyBox');
+      const codeTitle = document.getElementById('ocpCodeTitle');
+      const codeBody = document.getElementById('ocpCodeBody');
+
+      if (mode === 'chaos') {
+        playChaosSound();
+        toyBox.style.display = 'none';
+        cartridge.style.background = '#ef4444';
+        cartridge.style.transform = 'translateY(-50px)';
+        cartridge.innerHTML = '<span id="ocpCartLabel">⚡ SOLDANDO CABLES</span>';
+        screen.style.borderColor = '#ef4444';
+        screen.style.color = '#ef4444';
+        screen.innerText = '🚨 ALERTA: MODIFICANDO CODIGO EXISTENTE CON IF/ELSE';
+        bubble.className = 'comic-bubble chaos-bubble';
+        bubble.innerHTML = '¡Se escapó una chispa! 💥 Tuve que abrir PagoService para añadir criptomonedas y dañé los pagos con tarjeta de producción.';
+        codeTitle.innerText = '❌ Código Frágil: if / else if en PagoService';
+        codeBody.innerHTML = `<span class="hl-kw">if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"TARJETA"</span>)) { ... }
+<span class="hl-kw">else if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"PAYPAL"</span>)) { ... }
+<span class="hl-kw">else if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"CRIPTO"</span>)) { ... } <span class="hl-cm">// Modificando archivo</span>`;
+      } else {
+        playZenSound();
+        toyBox.style.display = 'flex';
+        cartridge.style.background = '#10b981';
+        cartridge.style.transform = 'translateY(0px)';
+        cartridge.innerHTML = '<span id="ocpCartLabel">🎮 CARTUCHO INSERTADO</span>';
+        screen.style.borderColor = '#10b981';
+        screen.style.color = '#34d399';
+        screen.innerText = '✅ CONSOLA ABIERTA A EXTENSIONES. CERO MODIFICACIONES';
+        bubble.className = 'comic-bubble zen-bubble';
+        bubble.innerHTML = '¡Maravilloso! 🎮 Solo creas una clase que implementa Pago y Spring la detecta automáticamente. ¡Prueba los botones abajo!';
+        codeTitle.innerText = '✅ Solución OCP: Polimorfismo e Inyección List<Pago>';
+        codeBody.innerHTML = `<span class="hl-kw">public interface</span> <span class="hl-tp">Pago</span> { <span class="hl-kw">void</span> <span class="hl-tp">procesar</span>(<span class="hl-kw">double</span> monto); }
+
+<span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">PagoCripto</span> <span class="hl-kw">implements</span> <span class="hl-tp">Pago</span> { ... }
+
+<span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">PagoService</span> {
+    <span class="hl-cm">// Inyecta automáticamente TODOS los cartuchos (beans)</span>
+    <span class="hl-kw">private final</span> <span class="hl-tp">List</span>&lt;<span class="hl-tp">Pago</span>&gt; metodosPago;
+}`;
+      }
+    }
+
+    function plugCartridge(name, color, file) {
+      playZenSound();
+      const cart = document.getElementById('ocpCartridge');
+      const screen = document.getElementById('ocpScreen');
+      cart.style.transform = 'translateY(-40px)';
+      setTimeout(() => {
+        cart.style.background = color;
+        cart.innerHTML = `<span>✨ ${name}</span>`;
+        cart.style.transform = 'translateY(0px)';
+        screen.innerText = `✅ BEAN ACTIVADO: ${file}`;
+      }, 150);
+    }
+
+    // ==================== 3. LSP STATE CONTROLLER ====================
+    function setLSPState(mode, btn) {
+      const card = document.getElementById('stage-lsp');
+      const buttons = card.querySelectorAll('.mode-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const charBox = document.getElementById('lspCharacterBox');
+      const bubble = document.getElementById('lspBubble');
+      const codeTitle = document.getElementById('lspCodeTitle');
+      const codeBody = document.getElementById('lspCodeBody');
+
+      if (mode === 'chaos') {
+        playChaosSound();
+        charBox.innerHTML = `
+          <svg width="130" height="130" viewBox="0 0 100 100" class="anim-shake">
+            <ellipse cx="50" cy="55" rx="30" ry="38" fill="#1e293b"/>
+            <ellipse cx="50" cy="60" rx="20" ry="28" fill="#ffffff"/>
+            <circle cx="42" cy="35" r="7" fill="#fff"/>
+            <circle cx="58" cy="35" r="7" fill="#fff"/>
+            <circle cx="42" cy="35" r="3" fill="#000"/>
+            <circle cx="58" cy="35" r="3" fill="#000"/>
+            <polygon points="46,42 54,42 50,52" fill="#f59e0b"/>
+            <text x="70" y="45" font-size="20">💥</text>
+          </svg>
+          <div style="color:#ef4444; font-family:var(--font-fun); font-weight:700;">UnsupportedOperationException!</div>
+        `;
+        bubble.className = 'comic-bubble chaos-bubble';
+        bubble.innerHTML = '¡PLAAFFF! 💥 El código asumió que todas las Aves vuelan y me empujó al vacío. ¡Los pingüinos no volamos en tiempo de ejecución!';
+        codeTitle.innerText = '❌ Herencia Rota: Pinguino extends Ave';
+        codeBody.innerHTML = `<span class="hl-kw">public class</span> <span class="hl-tp">Pinguino</span> <span class="hl-kw">extends</span> <span class="hl-tp">Ave</span> {
+    <span class="hl-ann">@Override</span>
+    <span class="hl-kw">public void</span> <span class="hl-tp">volar</span>() {
+        <span class="hl-cm">// ❌ ROMPE EL COMPORTAMIENTO ESPERADO DEL PADRE</span>
+        <span class="hl-kw">throw new</span> <span class="hl-tp">UnsupportedOperationException</span>();
+    }
+}`;
+      } else {
+        playZenSound();
+        charBox.innerHTML = `
+          <div style="display:flex; align-items:center; gap:24px;">
+            <!-- Penguin Swimming Happy -->
+            <div style="text-align:center;">
+              <svg width="110" height="110" viewBox="0 0 100 100" class="anim-bounce">
+                <ellipse cx="50" cy="55" rx="30" ry="38" fill="#1e293b"/>
+                <ellipse cx="50" cy="60" rx="20" ry="28" fill="#ffffff"/>
+                <circle cx="42" cy="35" r="6" fill="#fff"/>
+                <circle cx="58" cy="35" r="6" fill="#fff"/>
+                <circle cx="42" cy="35" r="2.5" fill="#000"/>
+                <circle cx="58" cy="35" r="2.5" fill="#000"/>
+                <polygon points="46,42 54,42 50,50" fill="#f59e0b"/>
+                <!-- Goggles -->
+                <rect x="34" y="30" width="32" height="10" rx="4" fill="none" stroke="#06b6d4" stroke-width="2.5"/>
+              </svg>
+              <div style="color:#38bdf8; font-family:var(--font-fun); font-size:0.8rem; font-weight:700;">Pepe (Ave Nadadora 🏊‍♂️)</div>
+            </div>
+            <!-- Eagle Flying -->
+            <div style="text-align:center;">
+              <svg width="110" height="110" viewBox="0 0 100 100" class="anim-float">
+                <path d="M10 50 Q50 15 90 50 Q50 40 10 50" fill="#78350f"/>
+                <circle cx="50" cy="36" r="14" fill="#ffffff"/>
+                <polygon points="46,38 54,38 60,44 46,42" fill="#f59e0b"/>
+              </svg>
+              <div style="color:#f59e0b; font-family:var(--font-fun); font-size:0.8rem; font-weight:700;">Aquiles (Ave + Volador 🦅)</div>
+            </div>
+          </div>
+        `;
+        bubble.className = 'comic-bubble zen-bubble';
+        bubble.innerHTML = '¡Viva! 🐧 Ahora solo soy un <code>Ave</code> que come y nada, mientras que Aquiles implementa <code>Volador</code>. ¡Nadie se estrella nunca más!';
+        codeTitle.innerText = '✅ Solución LSP: Contratos por Capacidad Real';
+        codeBody.innerHTML = `<span class="hl-kw">public abstract class</span> <span class="hl-tp">Ave</span> { <span class="hl-kw">public abstract void</span> <span class="hl-tp">comer</span>(); }
+<span class="hl-kw">public interface</span> <span class="hl-tp">Volador</span> { <span class="hl-kw">void</span> <span class="hl-tp">volar</span>(); }
+
+<span class="hl-kw">public class</span> <span class="hl-tp">Aguila</span> <span class="hl-kw">extends</span> <span class="hl-tp">Ave</span> <span class="hl-kw">implements</span> <span class="hl-tp">Volador</span> { ... }
+<span class="hl-kw">public class</span> <span class="hl-tp">Pinguino</span> <span class="hl-kw">extends</span> <span class="hl-tp">Ave</span> { ... } <span class="hl-cm">// ¡NO implementa Volador!</span>`;
+      }
+    }
+
+    // ==================== 4. ISP STATE CONTROLLER ====================
+    function setISPState(mode, btn) {
+      const card = document.getElementById('stage-isp');
+      const buttons = card.querySelectorAll('.mode-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const charBox = document.getElementById('ispCharacterBox');
+      const bubble = document.getElementById('ispBubble');
+      const codeTitle = document.getElementById('ispCodeTitle');
+      const codeBody = document.getElementById('ispCodeBody');
+
+      if (mode === 'chaos') {
+        playChaosSound();
+        charBox.className = 'anim-shake';
+        charBox.innerHTML = `
+          <svg width="220" height="180" viewBox="0 0 220 180">
+            <rect x="70" y="70" width="120" height="40" rx="15" fill="#e11d48"/>
+            <text x="145" y="30" font-size="16">🪚</text>
+            <text x="185" y="20" font-size="16">📠</text>
+            <text x="94" y="52" font-size="14">📻</text>
+            <circle cx="50" cy="115" r="14" fill="#fcd34d"/>
+            <path d="M50 130 L50 160 M50 140 L30 150 M50 140 L70 145 M40 175 L50 160 L60 175" stroke="#fcd34d" stroke-width="5" stroke-linecap="round"/>
+            <text x="44" y="118" font-size="10">x x</text>
+          </svg>
+        `;
+        bubble.className = 'comic-bubble chaos-bubble';
+        bubble.innerHTML = '¡Me aplasta la navaja de 500 kilos! 🥵 La interfaz me obligó a meter métodos de fax y escaneo que mi impresora básica no usa.';
+        codeTitle.innerText = '❌ Interfaz Monolítica Gorda (Fat Interface)';
+        codeBody.innerHTML = `<span class="hl-kw">public interface</span> <span class="hl-tp">Dispositivo</span> {
+    <span class="hl-kw">void</span> <span class="hl-tp">imprimir</span>();
+    <span class="hl-kw">void</span> <span class="hl-tp">escanear</span>();
+    <span class="hl-kw">void</span> <span class="hl-tp">enviarFax</span>();
+}`;
+      } else {
+        playZenSound();
+        charBox.className = 'anim-bounce';
+        charBox.innerHTML = `
+          <div style="display:flex; align-items:center; gap:20px;">
+            <div style="background:#1e293b; padding:14px; border-radius:14px; text-align:center; border:2px solid #ec4899;">
+              <div style="font-size:2rem;">✂️</div>
+              <div style="font-family:var(--font-fun); font-size:0.8rem; color:#f472b6; font-weight:700;">Imprimible</div>
+            </div>
+            <div style="background:#1e293b; padding:14px; border-radius:14px; text-align:center; border:2px solid #38bdf8;">
+              <div style="font-size:2rem;">📄</div>
+              <div style="font-family:var(--font-fun); font-size:0.8rem; color:#38bdf8; font-weight:700;">Escaneable</div>
+            </div>
+            <div style="background:#1e293b; padding:14px; border-radius:14px; text-align:center; border:2px solid #34d399;">
+              <div style="font-size:2rem;">📠</div>
+              <div style="font-family:var(--font-fun); font-size:0.8rem; color:#34d399; font-weight:700;">Fax</div>
+            </div>
+          </div>
+        `;
+        bubble.className = 'comic-bubble zen-bubble';
+        bubble.innerHTML = '¡Qué ligereza! ✨ Ahora cada clase solo implementa la interfaz que necesita: la básica solo es <code>Imprimible</code>, y la de oficina implementa las tres.';
+        codeTitle.innerText = '✅ Solución ISP: Interfaces Finas y Segregadas';
+        codeBody.innerHTML = `<span class="hl-kw">public interface</span> <span class="hl-tp">Imprimible</span> { <span class="hl-kw">void</span> <span class="hl-tp">imprimir</span>(); }
+<span class="hl-kw">public interface</span> <span class="hl-tp">Escaneable</span> { <span class="hl-kw">void</span> <span class="hl-tp">escanear</span>(); }
+
+<span class="hl-kw">public class</span> <span class="hl-tp">ImpresoraBasica</span> <span class="hl-kw">implements</span> <span class="hl-tp">Imprimible</span> {
+    <span class="hl-ann">@Override</span> <span class="hl-kw">public void</span> <span class="hl-tp">imprimir</span>() { ... }
+}`;
+      }
+    }
+
+    // ==================== 5. DIP STATE CONTROLLER ====================
+    function setDIPState(mode, btn) {
+      const card = document.getElementById('stage-dip');
+      const buttons = card.querySelectorAll('.mode-btn');
+      buttons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const charBox = document.getElementById('dipCharacterBox');
+      const bubble = document.getElementById('dipBubble');
+      const codeTitle = document.getElementById('dipCodeTitle');
+      const codeBody = document.getElementById('dipCodeBody');
+
+      if (mode === 'chaos') {
+        playChaosSound();
+        charBox.className = 'anim-shake';
+        charBox.innerHTML = `
+          <svg width="220" height="180" viewBox="0 0 220 180">
+            <rect x="20" y="20" width="80" height="140" fill="#334155" rx="6"/>
+            <path d="M40 30 L45 70 L35 110 L45 150" stroke="#f43f5e" stroke-width="3" fill="none"/>
+            <path d="M90 90 L150 90" stroke="#f59e0b" stroke-width="8" stroke-linecap="round"/>
+            <text x="110" y="80" font-size="18">⚡</text>
+            <path d="M160 50 L190 90 L150 90 Z" fill="#fcd34d"/>
+            <rect x="168" y="90" width="6" height="50" fill="#64748b"/>
+          </svg>
+        `;
+        bubble.className = 'comic-bubble chaos-bubble';
+        bubble.innerHTML = '¡El cable está soldado a la pared con <code>new EmailService()</code>! 💥 Para poner WhatsApp tendríamos que picar el concreto con taladros.';
+        codeTitle.innerText = '❌ Dependencia Concreta y Rígida con "new"';
+        codeBody.innerHTML = `<span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">NotificacionService</span> {
+    <span class="hl-cm">// ❌ SOLDADO DE POR VIDA</span>
+    <span class="hl-kw">private final</span> <span class="hl-tp">EmailService</span> email = <span class="hl-kw">new</span> <span class="hl-tp">EmailService</span>();
+}`;
+      } else {
+        playZenSound();
+        charBox.className = 'anim-bounce';
+        charBox.innerHTML = `
+          <div style="display:flex; align-items:center; gap:16px;">
+            <div style="background:#1e293b; border:3px solid #10b981; border-radius:18px; padding:18px 24px; text-align:center;">
+              <div style="font-size:2.2rem;">🔌</div>
+              <div style="font-family:var(--font-fun); font-size:0.85rem; color:#34d399; font-weight:700;">Enchufe: Notificador</div>
+            </div>
+            <div style="font-size:1.8rem; color:#fcd34d;">⚡</div>
+            <div style="background:#0f172a; border:2px dashed #38bdf8; border-radius:18px; padding:16px 20px; text-align:center;">
+              <div style="font-size:1.8rem;">📱 / ✉️</div>
+              <div style="font-family:var(--font-fun); font-size:0.8rem; color:#38bdf8;">WhatsApp / Email</div>
+            </div>
+          </div>
+        `;
+        bubble.className = 'comic-bubble zen-bubble';
+        bubble.innerHTML = '¡Viva el enchufe universal! 🔌 Ahora el servicio depende de la interfaz <code>Notificador</code>. Desenchufas Email y conectas WhatsApp con un simple <code>@Primary</code>.';
+        codeTitle.innerText = '✅ Solución DIP: Inversión de Dependencias en Spring';
+        codeBody.innerHTML = `<span class="hl-kw">public interface</span> <span class="hl-tp">Notificador</span> { <span class="hl-kw">void</span> <span class="hl-tp">enviar</span>(<span class="hl-tp">String</span> msg); }
+
+<span class="hl-ann">@Service</span>
+<span class="hl-ann">@RequiredArgsConstructor</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">NotificacionService</span> {
+    <span class="hl-cm">// Depende del ENCHUFE (interfaz), nunca de la pared soldada</span>
+    <span class="hl-kw">private final</span> <span class="hl-tp">Notificador</span> notificador;
+}`;
+      }
+    }
+  </script>
+
+</body>
+</html>
