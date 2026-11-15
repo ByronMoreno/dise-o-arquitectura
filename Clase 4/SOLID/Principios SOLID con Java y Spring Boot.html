@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Guía interactiva completa de los Principios SOLID con Java 21 y Spring Boot 3.5. Ejemplos de arquitectura empresarial (SRP, OCP, LSP, ISP, DIP) con problemas reales, refactorización y evaluación interactiva.">
+  <title>Principios SOLID con Java 21 y Spring Boot 3.5 | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #080d1a;
+      --bg-surface: #0e172a;
+      --bg-card: rgba(17, 24, 43, 0.75);
+      --bg-card-hover: rgba(30, 41, 69, 0.9);
+      --bg-code: #0b1120;
+      
+      --border-glow: rgba(139, 92, 246, 0.3);
+      --border-light: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(99, 102, 241, 0.35);
+      
+      --color-primary: #8b5cf6;
+      --color-secondary: #3b82f6;
+      --color-accent: #06b6d4;
+      --color-success: #10b981;
+      --color-danger: #ef4444;
+      --color-warning: #f59e0b;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --sidebar-width: 290px;
+      --transition-speed: 0.3s;
+      --font-sans: 'Outfit', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      overflow-x: hidden;
+    }
+
+    /* Ambient Background Glows */
+    .bg-glow-1 { position: fixed; top: -15%; left: -10%; width: 55vw; height: 55vw; background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -15%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-3 { position: fixed; top: 40%; right: 20%; width: 40vw; height: 40vw; background: radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    /* Reading Progress Bar */
+    .progress-bar-container {
+      position: fixed; top: 0; left: var(--sidebar-width); right: 0; height: 4px; background: rgba(0,0,0,0.4); z-index: 101;
+    }
+    .progress-bar {
+      height: 100%; width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent), #38bdf8);
+      box-shadow: 0 0 10px rgba(139, 92, 246, 0.7);
+      transition: width 0.1s ease-out;
+    }
+
+    /* Sticky Sidebar */
+    .sidebar {
+      width: var(--sidebar-width); height: 100vh; position: fixed; left: 0; top: 0;
+      background: rgba(14, 23, 42, 0.95); backdrop-filter: blur(20px); border-right: 1px solid var(--border-light);
+      display: flex; flex-direction: column; z-index: 100;
+    }
+    .sidebar-header {
+      padding: 24px 20px; border-bottom: 1px solid var(--border-light);
+    }
+    .course-badge {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+      color: var(--color-accent); background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.25);
+      padding: 4px 10px; border-radius: 6px; display: inline-block; margin-bottom: 10px;
+    }
+    .sidebar-header h2 { font-size: 1.25rem; font-weight: 800; color: var(--text-bright); line-height: 1.25; }
+    .sidebar-header p { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+    
+    .sidebar-menu {
+      flex: 1; overflow-y: auto; padding: 18px 12px; display: flex; flex-direction: column; gap: 4px;
+      list-style: none;
+    }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+      color: var(--text-muted); text-decoration: none; border-radius: 8px;
+      font-size: 0.88rem; font-weight: 500; transition: all var(--transition-speed);
+    }
+    .sidebar-menu li a:hover, .sidebar-menu li a.active {
+      color: var(--text-bright); background: rgba(139, 92, 246, 0.16); border-left: 3px solid var(--color-primary);
+    }
+    .sidebar-menu .nav-letter {
+      width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+      background: rgba(255, 255, 255, 0.08); border-radius: 6px; font-weight: 700; font-family: var(--font-mono);
+      font-size: 0.78rem; color: var(--color-accent);
+    }
+    .sidebar-footer {
+      padding: 18px 20px; border-top: 1px solid var(--border-light); font-size: 0.78rem; color: var(--text-muted);
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .sidebar-footer a { color: #60a5fa; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+    .sidebar-footer a:hover { text-decoration: underline; }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: var(--sidebar-width); flex: 1; padding: 48px 56px 80px; max-width: 1280px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(30, 27, 75, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 1px solid var(--border-accent); border-radius: 24px; padding: 46px 42px;
+      position: relative; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.45);
+      margin-bottom: 48px;
+    }
+    .hero-banner::after {
+      content: ''; position: absolute; top: -120px; right: -120px; width: 360px; height: 360px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.28) 0%, transparent 70%); pointer-events: none;
+    }
+    .hero-badge-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .hero-pill {
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      padding: 5px 12px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .pill-unibe { background: rgba(59, 130, 246, 0.18); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.35); }
+    .pill-tech { background: rgba(139, 92, 246, 0.2); color: #d8b4fe; border: 1px solid rgba(139, 92, 246, 0.35); }
+    .pill-java { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
+
+    .hero-title {
+      font-size: 2.7rem; font-weight: 900; letter-spacing: -1.2px; line-height: 1.15;
+      background: linear-gradient(135deg, #ffffff 40%, #c4b5fd 80%, #67e8f9 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 16px;
+    }
+    .hero-desc {
+      font-size: 1.1rem; color: #cbd5e1; line-height: 1.7; max-width: 900px; margin-bottom: 24px;
+    }
+    .hero-callout {
+      background: rgba(15, 23, 42, 0.65); border-left: 4px solid var(--color-warning);
+      border-radius: 10px; padding: 14px 20px; font-size: 0.95rem; color: #e2e8f0; line-height: 1.6;
+    }
+
+    /* Section Styles */
+    section { margin-bottom: 64px; scroll-margin-top: 30px; }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between; gap: 16px;
+      margin-bottom: 24px; border-bottom: 1px solid var(--border-light); padding-bottom: 16px;
+    }
+    .section-title {
+      font-size: 1.9rem; font-weight: 800; color: var(--text-bright); display: flex; align-items: center; gap: 12px;
+      letter-spacing: -0.5px;
+    }
+    .section-badge {
+      font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 20px;
+      background: rgba(139, 92, 246, 0.15); color: var(--color-accent); border: 1px solid rgba(139, 92, 246, 0.3);
+    }
+    .section-subtitle {
+      font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 24px;
+    }
+
+    /* Videos Section Grid */
+    .video-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; margin-bottom: 36px;
+    }
+    .video-card {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 18px;
+      overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.3); transition: transform 0.3s ease;
+      display: flex; flex-direction: column;
+    }
+    .video-card:hover { transform: translateY(-3px); border-color: var(--border-glow); }
+    .video-wrapper {
+      position: relative; width: 100%; padding-top: 56.25%; background: #000;
+    }
+    .video-wrapper iframe {
+      position: absolute; top:0; left:0; width:100%; height:100%; border:none;
+    }
+    .video-info { padding: 20px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .video-info h4 { font-size: 1.05rem; font-weight: 700; color: var(--text-bright); margin-bottom: 8px; }
+    .video-info p { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+    .video-link-btn {
+      display: inline-flex; align-items: center; gap: 8px; font-size: 0.82rem; font-weight: 600;
+      color: #38bdf8; text-decoration: none; align-self: flex-start;
+    }
+    .video-link-btn:hover { text-decoration: underline; }
+
+    /* SOLID Letters Banner */
+    .solid-acronym-grid {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin-bottom: 32px;
+    }
+    .solid-letter-card {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 16px;
+      padding: 20px 16px; text-align: center; transition: all 0.3s ease; position: relative; overflow: hidden;
+      cursor: pointer; text-decoration: none; display: flex; flex-direction: column; align-items: center;
+    }
+    .solid-letter-card:hover {
+      background: var(--bg-card-hover); border-color: var(--color-primary); transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(139, 92, 246, 0.25);
+    }
+    .solid-letter {
+      font-size: 2.8rem; font-weight: 900; line-height: 1; font-family: var(--font-mono);
+      background: linear-gradient(135deg, #a78bfa, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .solid-name { font-size: 0.95rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .solid-sub { font-size: 0.74rem; color: var(--text-muted); line-height: 1.3; }
+
+    /* Benefits Grid */
+    .benefits-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin: 24px 0 36px;
+    }
+    .benefit-card {
+      background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-light); border-radius: 14px;
+      padding: 18px 20px; display: flex; align-items: flex-start; gap: 12px;
+    }
+    .benefit-icon {
+      font-size: 1.5rem; line-height: 1; background: rgba(139, 92, 246, 0.15); padding: 8px; border-radius: 10px;
+    }
+    .benefit-content h5 { font-size: 0.95rem; font-weight: 700; color: var(--text-bright); margin-bottom: 4px; }
+    .benefit-content p { font-size: 0.82rem; color: var(--text-muted); line-height: 1.4; }
+
+    /* Architecture Tree Box */
+    .arch-tree-card {
+      background: var(--bg-code); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 16px;
+      padding: 24px; margin: 24px 0; font-family: var(--font-mono); font-size: 0.88rem; color: #e2e8f0;
+      position: relative; overflow-x: auto;
+    }
+    .arch-tree-card .tree-header {
+      font-family: var(--font-sans); font-size: 0.85rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 1px; color: var(--color-accent); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
+    }
+
+    /* Principle Section Detail Container */
+    .principle-box {
+      background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: 20px;
+      padding: 36px; margin-bottom: 48px; position: relative; box-shadow: 0 12px 30px rgba(0,0,0,0.3);
+    }
+    .principle-box::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 6px; height: 100%; border-radius: 20px 0 0 20px;
+    }
+    .box-s::before { background: #3b82f6; }
+    .box-o::before { background: #8b5cf6; }
+    .box-l::before { background: #06b6d4; }
+    .box-i::before { background: #ec4899; }
+    .box-d::before { background: #10b981; }
+
+    .principle-headline {
+      display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 12px;
+    }
+    .principle-letter-badge {
+      font-family: var(--font-mono); font-size: 1.8rem; font-weight: 900; padding: 4px 14px;
+      border-radius: 10px; background: rgba(255, 255, 255, 0.08); color: var(--text-bright);
+    }
+    .principle-name-full { font-size: 1.7rem; font-weight: 800; color: var(--text-bright); }
+    .principle-axiom {
+      font-size: 1.1rem; font-weight: 600; color: #cbd5e1; margin-bottom: 24px; padding-left: 4px;
+      font-style: italic; border-left: 3px solid rgba(255, 255, 255, 0.2); padding-left: 12px;
+    }
+
+    /* Problem vs Solution Split */
+    .step-box {
+      margin-bottom: 28px; border-radius: 14px; overflow: hidden;
+    }
+    .step-header {
+      padding: 14px 20px; font-weight: 700; font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;
+    }
+    .step-header-problem {
+      background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #fca5a5;
+    }
+    .step-header-solution {
+      background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #6ee7b7;
+    }
+
+    .code-container {
+      background: var(--bg-code); border: 1px solid var(--border-light); border-top: none;
+      padding: 20px; position: relative;
+    }
+    .code-title {
+      font-family: var(--font-mono); font-size: 0.76rem; color: var(--text-muted);
+      margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .copy-btn {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-light); border-radius: 6px;
+      color: var(--text-main); font-size: 0.72rem; padding: 4px 10px; cursor: pointer; font-family: var(--font-sans);
+      transition: all 0.2s;
+    }
+    .copy-btn:hover { background: var(--color-primary); color: #fff; }
+
+    pre code {
+      font-family: var(--font-mono); font-size: 0.85rem; line-height: 1.6; display: block;
+      color: #e2e8f0; overflow-x: auto; tab-size: 2;
+    }
+
+    /* Syntax Highlighting Fake Tokens */
+    .kw { color: #f43f5e; font-weight: 600; } /* Java keyword */
+    .ann { color: #f59e0b; font-weight: 600; } /* Annotation */
+    .tp { color: #38bdf8; font-weight: 600; } /* Class/Type */
+    .fn { color: #a855f7; } /* Method */
+    .str { color: #10b981; } /* String */
+    .cm { color: #64748b; font-style: italic; } /* Comment */
+    .num { color: #fb923c; } /* Number */
+
+    /* Analysis callouts */
+    .analysis-list {
+      background: rgba(15, 23, 42, 0.5); border: 1px solid var(--border-light); border-radius: 12px;
+      padding: 18px 22px; margin: 16px 0;
+    }
+    .analysis-list h5 { font-size: 0.95rem; font-weight: 700; color: var(--text-bright); margin-bottom: 10px; }
+    .analysis-list ul { padding-left: 20px; font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; }
+    .analysis-list li { margin-bottom: 6px; }
+
+    /* Checklist Badge */
+    .checklist-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.85));
+      border: 1px dashed rgba(139, 92, 246, 0.4); border-radius: 14px; padding: 20px 24px;
+      margin-top: 24px; display: flex; align-items: flex-start; gap: 16px;
+    }
+    .checklist-icon {
+      font-size: 1.8rem; line-height: 1; color: var(--color-warning);
+    }
+    .checklist-text h5 { font-size: 1rem; font-weight: 700; color: var(--text-bright); margin-bottom: 6px; }
+    .checklist-text p { font-size: 0.92rem; color: #cbd5e1; line-height: 1.55; }
+
+    /* Summary Comparison Table */
+    .table-container {
+      overflow-x: auto; margin: 28px 0; border: 1px solid var(--border-light); border-radius: 16px;
+      background: var(--bg-surface);
+    }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.92rem; }
+    th {
+      background: rgba(30, 41, 59, 0.8); color: var(--text-bright); font-weight: 700; padding: 16px 20px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #cbd5e1; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255, 255, 255, 0.02); }
+    .badge-principle {
+      font-family: var(--font-mono); font-weight: 800; font-size: 0.82rem; padding: 4px 10px; border-radius: 6px;
+      display: inline-block;
+    }
+
+    /* Spring Boot Relations Card */
+    .spring-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin: 24px 0;
+    }
+    .spring-card {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 14px; padding: 22px;
+      border-top: 3px solid var(--color-primary);
+    }
+    .spring-tool-name {
+      font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700; color: #fcd34d; margin-bottom: 8px;
+    }
+    .spring-card h5 { font-size: 0.9rem; font-weight: 600; color: var(--color-accent); margin-bottom: 6px; }
+    .spring-card p { font-size: 0.84rem; color: var(--text-muted); line-height: 1.5; }
+
+    /* Interactive Quiz */
+    .quiz-container {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.6));
+      border: 1px solid var(--border-accent); border-radius: 20px; padding: 36px; margin: 36px 0;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+    }
+    .quiz-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 28px; border-bottom: 1px solid var(--border-light); padding-bottom: 16px;
+    }
+    .quiz-title { font-size: 1.5rem; font-weight: 800; color: var(--text-bright); }
+    .quiz-score-badge {
+      font-size: 0.9rem; font-weight: 700; padding: 6px 16px; border-radius: 20px;
+      background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+
+    .question-card {
+      background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-light); border-radius: 14px;
+      padding: 24px; margin-bottom: 20px; transition: border-color 0.2s;
+    }
+    .question-card.answered-correct { border-color: rgba(16, 185, 129, 0.5); }
+    .question-card.answered-incorrect { border-color: rgba(239, 68, 68, 0.5); }
+
+    .question-text {
+      font-size: 1rem; font-weight: 600; color: var(--text-bright); line-height: 1.6; margin-bottom: 16px;
+      display: flex; gap: 10px;
+    }
+    .question-num {
+      width: 28px; height: 28px; border-radius: 50%; background: rgba(139, 92, 246, 0.2);
+      color: #c4b5fd; display: inline-flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 800; flex-shrink: 0;
+    }
+
+    .options-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 14px;
+    }
+    .opt-btn {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-light); border-radius: 10px;
+      color: var(--text-main); font-family: var(--font-mono); font-size: 0.88rem; font-weight: 700;
+      padding: 10px 14px; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .opt-btn:hover:not(:disabled) {
+      background: rgba(139, 92, 246, 0.2); border-color: var(--color-primary); color: #fff;
+    }
+    .opt-btn.selected-correct {
+      background: rgba(16, 185, 129, 0.3) !important; border-color: #10b981 !important; color: #6ee7b7 !important;
+    }
+    .opt-btn.selected-incorrect {
+      background: rgba(239, 68, 68, 0.3) !important; border-color: #ef4444 !important; color: #fca5a5 !important;
+    }
+
+    .explanation-box {
+      font-size: 0.88rem; line-height: 1.5; padding: 12px 16px; border-radius: 8px; margin-top: 10px; display: none;
+    }
+    .exp-correct { background: rgba(16, 185, 129, 0.12); border-left: 3px solid #10b981; color: #a7f3d0; }
+    .exp-incorrect { background: rgba(239, 68, 68, 0.12); border-left: 3px solid #ef4444; color: #fecaca; }
+
+    .quiz-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 24px; flex-wrap: wrap; gap: 12px;
+    }
+    .btn-reset {
+      background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-light); color: var(--text-muted);
+      padding: 10px 18px; border-radius: 10px; font-weight: 600; font-size: 0.86rem; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-reset:hover { background: rgba(255, 255, 255, 0.15); color: #fff; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-light); padding: 36px 0 20px; text-align: center; font-size: 0.85rem;
+      color: var(--text-muted); line-height: 1.8;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .main-content { padding: 36px 28px 60px; }
+      .solid-acronym-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; position: static; }
+      .main-content { margin-left: 0; padding: 24px 18px 48px; }
+      .progress-bar-container { left: 0; }
+      .hero-title { font-size: 2rem; }
+      .solid-acronym-grid { grid-template-columns: repeat(2, 1fr); }
+      .video-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+  <div class="bg-glow-3"></div>
+
+  <!-- Progress Bar -->
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="course-badge">Diseño y Arquitectura &middot; UNIBE</div>
+      <h2>Principios SOLID</h2>
+      <p>Java 21 &middot; Spring Boot 3.5 &middot; PostgreSQL</p>
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="#introduccion" class="active"><span class="nav-letter">📌</span> 1. Introducción y Videos</a></li>
+      <li><a href="#que-es-solid"><span class="nav-letter">🧱</span> 2. ¿Qué es SOLID?</a></li>
+      <li><a href="#proyecto-ejemplo"><span class="nav-letter">🛒</span> 3. Dominio: Tienda Virtual</a></li>
+      <li><a href="#srp"><span class="nav-letter">S</span> 4. S — Single Responsibility</a></li>
+      <li><a href="#ocp"><span class="nav-letter">O</span> 5. O — Open / Closed</a></li>
+      <li><a href="#lsp"><span class="nav-letter">L</span> 6. L — Liskov Substitution</a></li>
+      <li><a href="#isp"><span class="nav-letter">I</span> 7. I — Interface Segregation</a></li>
+      <li><a href="#dip"><span class="nav-letter">D</span> 8. D — Dependency Inversion</a></li>
+      <li><a href="#resumen-comparativo"><span class="nav-letter">📊</span> 9. Resumen Comparativo</a></li>
+      <li><a href="#spring-relations"><span class="nav-letter">🍃</span> 10. SOLID en Spring Boot</a></li>
+      <li><a href="#evaluacion-interactiva"><span class="nav-letter">🧪</span> 11. Evaluación Interactiva</a></li>
+      <li><a href="#recomendaciones"><span class="nav-letter">🚀</span> 12. Ruta de Aprendizaje</a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <a href="../Clase 4.0 - Seguridad y Errores.html">⬅ Clase 4 Principal</a>
+      <a href="../../index.html">🏠 Volver al Portal UNIBE</a>
+      <span style="font-size:0.7rem; color:#64748b; margin-top:4px;">Periodo Académico 2026</span>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Hero Banner -->
+    <header class="hero-banner" id="introduccion">
+      <div class="hero-badge-group">
+        <span class="hero-pill pill-unibe">Universidad Iberoamericana del Ecuador</span>
+        <span class="hero-pill pill-tech">Ingeniería de Software &middot; Nivel 5</span>
+        <span class="hero-pill pill-java">Java 21 LTS &middot; Spring Boot 3.5</span>
+      </div>
+      <h1 class="hero-title">Principios SOLID paso a paso con Java y Spring Boot</h1>
+      <p class="hero-desc">
+        Estudiaremos los cinco principios de diseño orientado a objetos desde una perspectiva eminentemente práctica, como si estuviéramos desarrollando una plataforma empresarial escalable con Spring Data JPA, Inyección de Dependencias y PostgreSQL.
+      </p>
+      <div class="hero-callout">
+        💡 <strong>Enfoque Pedagógico:</strong> No se trata de memorizar definiciones abstractas. Lo verdaderamente crucial en la industria es <strong>reconocer cuándo tu código está mal diseñado</strong> (Code Smells, alto acoplamiento, rigidez) y cómo transformarlo paso a paso en software mantenible y testeable.
+      </div>
+    </header>
+
+    <!-- Videos Didácticos de Referencia -->
+    <section>
+      <div class="section-header">
+        <h2 class="section-title">🎬 Videos Didácticos Recomendados</h2>
+        <span class="section-badge">Recurso Audiovisual</span>
+      </div>
+      <p class="section-subtitle">
+        Visualiza las explicaciones audiovisuales complementarias para afianzar los conceptos clave de diseño limpio y refactorización orientada a objetos:
+      </p>
+      
+      <div class="video-grid">
+        <!-- Video 1 -->
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube-nocookie.com/embed/lUPvI-Kv9UI" title="Principios SOLID paso a paso" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="video-info">
+            <h4>Principios SOLID: Explicación Práctica de Diseño</h4>
+            <p>Comprende la transición del problema real al diseño desacoplado, identificando anti-patrones y refactorizaciones directas.</p>
+            <a href="https://www.youtube.com/watch?v=lUPvI-Kv9UI" target="_blank" class="video-link-btn">
+              <span>Ver directamente en YouTube</span> ↗
+            </a>
+          </div>
+        </div>
+
+        <!-- Video 2 -->
+        <div class="video-card">
+          <div class="video-wrapper">
+            <iframe src="https://www.youtube-nocookie.com/embed/g1shhx5Nvv8" title="Explicación Didáctica SOLID" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <div class="video-info">
+            <h4>Fundamentos Didácticos de SOLID</h4>
+            <p>Metáforas claras y modelos mentales para interiorizar Liskov, Inversión de Dependencias y Responsabilidad Única.</p>
+            <a href="https://www.youtube.com/watch?v=g1shhx5Nvv8" target="_blank" class="video-link-btn">
+              <span>Ver directamente en YouTube</span> ↗
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ¿Qué es SOLID? -->
+    <section id="que-es-solid">
+      <div class="section-header">
+        <h2 class="section-title">🧱 1. ¿Qué es SOLID?</h2>
+        <span class="section-badge">Fundamentos de Diseño</span>
+      </div>
+      <p class="section-subtitle">
+        SOLID es un acrónimo mnemotécnico acuñado por Robert C. Martin (Uncle Bob) que consolida cinco principios fundamentales para el diseño orientado a objetos:
+      </p>
+
+      <div class="solid-acronym-grid">
+        <a href="#srp" class="solid-letter-card">
+          <div class="solid-letter">S</div>
+          <div class="solid-name">SRP</div>
+          <div class="solid-sub">Single Responsibility Principle (Responsabilidad Única)</div>
+        </a>
+        <a href="#ocp" class="solid-letter-card">
+          <div class="solid-letter">O</div>
+          <div class="solid-name">OCP</div>
+          <div class="solid-sub">Open/Closed Principle (Abierto / Cerrado)</div>
+        </a>
+        <a href="#lsp" class="solid-letter-card">
+          <div class="solid-letter">L</div>
+          <div class="solid-name">LSP</div>
+          <div class="solid-sub">Liskov Substitution Principle (Sustitución de Liskov)</div>
+        </a>
+        <a href="#isp" class="solid-letter-card">
+          <div class="solid-letter">I</div>
+          <div class="solid-name">ISP</div>
+          <div class="solid-sub">Interface Segregation Principle (Segregación de Interfaces)</div>
+        </a>
+        <a href="#dip" class="solid-letter-card">
+          <div class="solid-letter">D</div>
+          <div class="solid-name">DIP</div>
+          <div class="solid-sub">Dependency Inversion Principle (Inversión de Dependencias)</div>
+        </a>
+      </div>
+
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">🛠️</div>
+          <div class="benefit-content">
+            <h5>Mantenibilidad</h5>
+            <p>Localización inmediata de errores sin efectos colaterales imprevistos.</p>
+          </div>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">🧩</div>
+          <div class="benefit-content">
+            <h5>Extensibilidad</h5>
+            <p>Adición de nuevas funcionalidades empresariales sin reescribir código previo.</p>
+          </div>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">🔗</div>
+          <div class="benefit-content">
+            <h5>Bajo Acoplamiento</h5>
+            <p>Módulos independientes que interactúan mediante contratos formales.</p>
+          </div>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">🧪</div>
+          <div class="benefit-content">
+            <h5>Testabilidad</h5>
+            <p>Aislamiento total para inyectar mocks o stubs en pruebas unitarias con JUnit 5.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Nuestro proyecto de ejemplo -->
+    <section id="proyecto-ejemplo">
+      <div class="section-header">
+        <h2 class="section-title">🛒 2. Nuestro Proyecto de Ejemplo: Tienda Virtual</h2>
+        <span class="section-badge">Caso de Estudio Unificado</span>
+      </div>
+      <p class="section-subtitle">
+        Para no estudiar cada principio con ejemplos aislados o desconectados, construiremos progresivamente el núcleo transaccional de una <strong>Tienda Virtual en Spring Boot</strong> que debe:
+      </p>
+
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 24px;">
+        <div style="background:var(--bg-card); padding:16px; border-radius:12px; border:1px solid var(--border-light); font-size:0.9rem;">
+          📦 <strong>1. Registrar Productos</strong> (catálogo de inventario).
+        </div>
+        <div style="background:var(--bg-card); padding:16px; border-radius:12px; border:1px solid var(--border-light); font-size:0.9rem;">
+          🛒 <strong>2. Crear Pedidos</strong> (asociar cliente y líneas de compra).
+        </div>
+        <div style="background:var(--bg-card); padding:16px; border-radius:12px; border:1px solid var(--border-light); font-size:0.9rem;">
+          🧮 <strong>3. Calcular el Total</strong> (aplicar sumas y reglas impositivas).
+        </div>
+        <div style="background:var(--bg-card); padding:16px; border-radius:12px; border:1px solid var(--border-light); font-size:0.9rem;">
+          💳 <strong>4. Procesar Pagos</strong> (múltiples pasarelas y medios).
+        </div>
+        <div style="background:var(--bg-card); padding:16px; border-radius:12px; border:1px solid var(--border-light); font-size:0.9rem;">
+          📧 <strong>5. Enviar Notificaciones</strong> (confirmaciones multicanal).
+        </div>
+      </div>
+
+      <div class="arch-tree-card">
+        <div class="tree-header">📁 Estructura Empresarial de Paquetes en Spring Boot</div>
+<pre><code>src/main/java/com/tienda/
+│
+├── <span class="kw">controller</span>/
+│   └── <span class="tp">PedidoController</span>.java       <span class="cm">// Endpoints REST (@RestController)</span>
+│
+├── <span class="kw">service</span>/
+│   ├── <span class="tp">PedidoService</span>.java          <span class="cm">// Orquestación y casos de uso (@Service)</span>
+│   ├── <span class="tp">FacturaService</span>.java         <span class="cm">// Lógica fiscal y cálculo de facturas</span>
+│   └── <span class="tp">PagoService</span>.java            <span class="cm">// Gestión de pagos polimórficos</span>
+│
+├── <span class="kw">repository</span>/
+│   └── <span class="tp">PedidoRepository</span>.java       <span class="cm">// Capa de persistencia (Spring Data JPA)</span>
+│
+├── <span class="kw">entity</span>/
+│   ├── <span class="tp">Pedido</span>.java                 <span class="cm">// Entidad JPA mapeada a PostgreSQL</span>
+│   └── <span class="tp">Producto</span>.java               <span class="cm">// Entidad JPA del ítem</span>
+│
+└── <span class="kw">dto</span>/
+    ├── <span class="tp">PedidoRequest</span>.java          <span class="cm">// DTO inmutable con Java Records</span>
+    └── <span class="tp">PedidoResponse</span>.java         <span class="cm">// DTO de salida para clientes API</span></code></pre>
+      </div>
+    </section>
+
+    <!-- ==================== PRINCIPIO 1: SRP ==================== -->
+    <section id="srp">
+      <div class="principle-box box-s">
+        <div class="principle-headline">
+          <span class="principle-letter-badge" style="color:#60a5fa;">S</span>
+          <h3 class="principle-name-full">Single Responsibility Principle (SRP)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Una clase debe tener una única razón para cambiar." — Robert C. Martin
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">
+          Esto no significa que una clase deba tener únicamente un método. Significa que debe responsabilizarse de un único actor de negocio o subsistema tecnológico bien delimitado.
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Anti-patrón God Class / Servicio Monolítico)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>PedidoService.java (Versión Violatoria de SRP)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+
+    <span class="ann">@Autowired</span>
+    <span class="kw">private</span> <span class="tp">PedidoRepository</span> repository;
+
+    <span class="kw">public void</span> <span class="fn">crearPedido</span>(<span class="tp">Pedido</span> pedido) {
+        <span class="cm">// 1. Persistencia: Guardar pedido en base de datos PostgreSQL</span>
+        repository.<span class="fn">save</span>(pedido);
+
+        <span class="cm">// 2. Lógica matemática de negocio: Calcular total sumando ítems</span>
+        <span class="kw">double</span> total = pedido.<span class="fn">getProductos</span>()
+                .<span class="fn">stream</span>()
+                .<span class="fn">mapToDouble</span>(p -> p.<span class="fn">getPrecio</span>())
+                .<span class="fn">sum</span>();
+
+        <span class="cm">// 3. Generación y formateo de factura fiscal</span>
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Generando factura: "</span> + total);
+
+        <span class="cm">// 4. Notificaciones: Envío de correo electrónico</span>
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Enviando correo al cliente"</span>);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="analysis-list">
+          <h5>⚠️ ¿Qué graves problemas de arquitectura tenemos aquí?</h5>
+          <ul>
+            <li><strong>Múltiples razones para cambiar:</strong> Si mañana el área de contabilidad cambia el formato o los impuestos de la factura, se debe modificar <code>PedidoService</code>.</li>
+            <li>Si el equipo de infraestructura migra de SMTP a SendGrid o AWS SES para enviar correos, se debe modificar <code>PedidoService</code>.</li>
+            <li>Si cambian las reglas de descuentos sobre los productos, nuevamente se modifica la misma clase.</li>
+            <li><strong>Imposible de testear en aislamiento:</strong> Probar la lógica de guardado arrastra necesariamente la emisión de facturas y los correos.</li>
+          </ul>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Separación Estricta de Responsabilidades)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <!-- 1. PedidoService -->
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>1. PedidoService.java (Solo coordina el caso de uso de creación)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span> <span class="cm">// Lombok: Genera constructor para inyección inmutable</span>
+<span class="kw">public class</span> <span class="tp">PedidoService</span> {
+
+    <span class="kw">private final</span> <span class="tp">PedidoRepository</span> repository;
+    <span class="kw">private final</span> <span class="tp">FacturaService</span> facturaService;
+    <span class="kw">private final</span> <span class="tp">EmailService</span> emailService;
+
+    <span class="kw">public void</span> <span class="fn">crearPedido</span>(<span class="tp">Pedido</span> pedido) {
+        <span class="tp">Pedido</span> guardado = repository.<span class="fn">save</span>(pedido);
+        facturaService.<span class="fn">generar</span>(guardado);
+        emailService.<span class="fn">enviarConfirmacion</span>(guardado);
+    }
+}</code></pre>
+          </div>
+
+          <!-- 2. FacturaService -->
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>2. FacturaService.java (Responsabilidad exclusiva: Facturación)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">FacturaService</span> {
+
+    <span class="kw">public void</span> <span class="fn">generar</span>(<span class="tp">Pedido</span> pedido) {
+        <span class="kw">double</span> total = pedido.<span class="fn">getProductos</span>()
+                .<span class="fn">stream</span>()
+                .<span class="fn">mapToDouble</span>(<span class="tp">Producto</span>::<span class="fn">getPrecio</span>)
+                .<span class="fn">sum</span>();
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Factura generada con total: $"</span> + total);
+    }
+}</code></pre>
+          </div>
+
+          <!-- 3. EmailService -->
+          <div class="code-container">
+            <div class="code-title">
+              <span>3. EmailService.java (Responsabilidad exclusiva: Enviar correos)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">EmailService</span> {
+
+    <span class="kw">public void</span> <span class="fn">enviarConfirmacion</span>(<span class="tp">Pedido</span> pedido) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Correo enviado al cliente para pedido ID: "</span> + pedido.<span class="fn">getId</span>());
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de SRP en tu código?</h5>
+            <p>Pregúntate: <em>"¿Esta clase tiene diferentes motivos de negocio independientes por los que tendría que ser modificada?"</em> Si respondes afirmativamente, divide las responsabilidades en servicios especializados coordinados mediante composición.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PRINCIPIO 2: OCP ==================== -->
+    <section id="ocp">
+      <div class="principle-box box-o">
+        <div class="principle-headline">
+          <span class="principle-letter-badge" style="color:#c084fc;">O</span>
+          <h3 class="principle-name-full">Open/Closed Principle (OCP)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Las entidades de software deben estar abiertas para su extensión, pero cerradas para su modificación." — Bertrand Meyer
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">
+          Debemos ser capaces de añadir nuevo comportamiento al sistema sin tocar ni alterar las líneas de código que ya están probadas y operando en producción.
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Cadenas frágiles de if / else / switch)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>PagoService.java (Violación de OCP mediante cadenas de if-else)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PagoService</span> {
+
+    <span class="kw">public void</span> <span class="fn">procesarPago</span>(<span class="tp">String</span> tipo, <span class="kw">double</span> monto) {
+        <span class="kw">if</span> (tipo.<span class="fn">equals</span>(<span class="str">"TARJETA"</span>)) {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Procesando pago con tarjeta: "</span> + monto);
+        } <span class="kw">else if</span> (tipo.<span class="fn">equals</span>(<span class="str">"PAYPAL"</span>)) {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Procesando pago con PayPal: "</span> + monto);
+        } <span class="kw">else if</span> (tipo.<span class="fn">equals</span>(<span class="str">"TRANSFERENCIA"</span>)) {
+            <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Procesando transferencia bancaria: "</span> + monto);
+        }
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="analysis-list">
+          <h5>⚠️ ¿Qué sucede cuando el negocio solicita aceptar pagos con Criptomonedas o Apple Pay?</h5>
+          <ul>
+            <li>Estamos obligados a abrir <code>PagoService.java</code> y añadir otro bloque <code>else if</code>.</li>
+            <li>Existe alto riesgo de romper por error el flujo de tarjeta o PayPal que ya estaba funcionando.</li>
+            <li>El archivo crece indefinidamente violando la modularidad y dificultando el control de versiones.</li>
+          </ul>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Contrato Polimórfico y Auto-registro en Spring)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <!-- Interfaz Pago -->
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>1. Pago.java (Contrato abstracto)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public interface</span> <span class="tp">Pago</span> {
+    <span class="kw">void</span> <span class="fn">procesar</span>(<span class="kw">double</span> monto);
+}</code></pre>
+          </div>
+
+          <!-- Implementaciones -->
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>2. Implementaciones Concretas Registradas como Beans de Spring</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PagoTarjeta</span> <span class="kw">implements</span> <span class="tp">Pago</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">procesar</span>(<span class="kw">double</span> monto) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Pago con tarjeta: $"</span> + monto);
+    }
+}
+
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PagoPayPal</span> <span class="kw">implements</span> <span class="tp">Pago</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">procesar</span>(<span class="kw">double</span> monto) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Pago con PayPal: $"</span> + monto);
+    }
+}
+
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PagoTransferencia</span> <span class="kw">implements</span> <span class="tp">Pago</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">procesar</span>(<span class="kw">double</span> monto) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Transferencia bancaria: $"</span> + monto);
+    }
+}</code></pre>
+          </div>
+
+          <!-- Servicio con Inyección de Colección -->
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>3. PagoService.java (Inyecta automáticamente List&lt;Pago&gt; sin ifs)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">PagoService</span> {
+
+    <span class="cm">// Spring inyecta automáticamente TODOS los beans que implementan Pago</span>
+    <span class="kw">private final</span> <span class="tp">List</span>&lt;<span class="tp">Pago</span>&gt; metodosPago;
+
+    <span class="kw">public void</span> <span class="fn">procesarPago</span>(<span class="tp">String</span> tipo, <span class="kw">double</span> monto) {
+        <span class="tp">Pago</span> metodo = metodosPago.<span class="fn">stream</span>()
+                .<span class="fn">filter</span>(p -> p.<span class="fn">getClass</span>().<span class="fn">getSimpleName</span>().<span class="fn">equalsIgnoreCase</span>(tipo))
+                .<span class="fn">findFirst</span>()
+                .<span class="fn">orElseThrow</span>(() -> <span class="kw">new</span> <span class="tp">IllegalArgumentException</span>(<span class="str">"Método de pago no soportado: "</span> + tipo));
+
+        metodo.<span class="fn">procesar</span>(monto);
+    }
+}</code></pre>
+          </div>
+
+          <!-- Nueva Extensión: PagoCripto -->
+          <div class="code-container">
+            <div class="code-title">
+              <span>4. ¿El negocio pide pagos con Criptomonedas? ¡Solo creas una clase nueva!</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">PagoCripto</span> <span class="kw">implements</span> <span class="tp">Pago</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">procesar</span>(<span class="kw">double</span> monto) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Procesando pago con criptomonedas (BTC/USDT): $"</span> + monto);
+    }
+}
+<span class="cm">// ¡CERO modificaciones a PagoService, PagoTarjeta o PagoPayPal! Totalmente extensible.</span></code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de OCP en tu código?</h5>
+            <p>Pregúntate: <em>"Si necesito agregar una nueva regla de negocio o variante, ¿tengo que modificar clases existentes que ya funcionan y están testeadas?"</em> Si la respuesta es sí, reemplaza las sentencias condicionales por polimorfismo o el patrón Strategy.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PRINCIPIO 3: LSP ==================== -->
+    <section id="lsp">
+      <div class="principle-box box-l">
+        <div class="principle-headline">
+          <span class="principle-letter-badge" style="color:#67e8f9;">L</span>
+          <h3 class="principle-name-full">Liskov Substitution Principle (LSP)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Los objetos de una superclase deben poder ser reemplazados por objetos de sus subclases sin alterar el comportamiento correcto del programa." — Barbara Liskov (Turing Award)
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">
+          Una subclase no solo debe compartir la sintaxis de los métodos del padre; <strong>debe respetar el contrato semántico y las expectativas de comportamiento</strong> sin lanzar excepciones inesperadas al ser invocada.
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Herencia Rota con UnsupportedOperationException)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>El clásico dilema: Aves que vuelan y pingüinos que lanzan excepciones</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="cm">// Clase Base</span>
+<span class="kw">public class</span> <span class="tp">Ave</span> {
+    <span class="kw">public void</span> <span class="fn">volar</span>() {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"El ave está volando por los cielos"</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="tp">Aguila</span> <span class="kw">extends</span> <span class="tp">Ave</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">volar</span>() {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"El águila vuela a gran altura"</span>);
+    }
+}
+
+<span class="kw">public class</span> <span class="tp">Pinguino</span> <span class="kw">extends</span> <span class="tp">Ave</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">volar</span>() {
+        <span class="cm">// ¡VIOLACIÓN GRAVE DE LSP! Rompe el contrato de la clase padre</span>
+        <span class="kw">throw new</span> <span class="tp">UnsupportedOperationException</span>(<span class="str">"Los pingüinos no pueden volar biológicamente"</span>);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="analysis-list">
+          <h5>⚠️ ¿Qué catástrofe produce esto en tiempo de ejecución?</h5>
+          <ul>
+            <li>Si un cliente escribe: <code>public void hacerVolar(Ave ave) { ave.volar(); }</code> y le pasa una lista polimórfica de aves, la aplicación <strong>colapsará con un error en runtime</strong> cuando el turno sea del pingüino.</li>
+            <li>Obliga a ensuciar el código cliente con verificaciones feas tipo <code>if (ave instanceof Pinguino)</code>.</li>
+            <li>La herencia no debe basarse en taxonomías de la vida real si el <em>comportamiento esperado</em> del software difiere.</li>
+          </ul>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Segregación de Capacidades en Interfaces)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>Jerarquía coherente basada en capacidades reales</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="cm">// Clase Base con lo común a TODAS las aves</span>
+<span class="kw">public abstract class</span> <span class="tp">Ave</span> {
+    <span class="kw">public abstract void</span> <span class="fn">comer</span>();
+}
+
+<span class="cm">// Capacidad aislada en interfaz</span>
+<span class="kw">public interface</span> <span class="tp">Volador</span> {
+    <span class="kw">void</span> <span class="fn">volar</span>();
+}
+
+<span class="cm">// El Águila come y vuela</span>
+<span class="kw">public class</span> <span class="tp">Aguila</span> <span class="kw">extends</span> <span class="tp">Ave</span> <span class="kw">implements</span> <span class="tp">Volador</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">comer</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"El águila caza y come peces"</span>); }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">volar</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"El águila planea alto"</span>); }
+}
+
+<span class="cm">// El Pingüino solo implementa Ave, ¡NO implementa Volador!</span>
+<span class="kw">public class</span> <span class="tp">Pinguino</span> <span class="kw">extends</span> <span class="tp">Ave</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">comer</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"El pingüino come krill"</span>); }
+}
+
+<span class="cm">// Clientes desacoplados que NUNCA fallan por sustitución:</span>
+<span class="kw">public void</span> <span class="fn">alimentar</span>(<span class="tp">Ave</span> ave) { ave.<span class="fn">comer</span>(); } <span class="cm">// Funciona para cualquier Ave</span>
+<span class="kw">public void</span> <span class="fn">hacerVolar</span>(<span class="tp">Volador</span> v) { v.<span class="fn">volar</span>(); } <span class="cm">// Solo acepta entidades que garantizan vuelo</span></code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de LSP en tu código?</h5>
+            <p>Pregúntate: <em>"Si sustituyo una referencia a la clase padre por cualquiera de sus clases hijas, ¿el programa mantiene su comportamiento correcto sin arrojar UnsupportedOperationException ni violar precondiciones?"</em> Si una subclase deja métodos en blanco o arroja excepciones, revisa tu jerarquía de herencia.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PRINCIPIO 4: ISP ==================== -->
+    <section id="isp">
+      <div class="principle-box box-i">
+        <div class="principle-headline">
+          <span class="principle-letter-badge" style="color:#f472b6;">I</span>
+          <h3 class="principle-name-full">Interface Segregation Principle (ISP)</h3>
+        </div>
+        <p class="principle-axiom">
+          "Ningún cliente debe ser forzado a depender de métodos que no utiliza." — Robert C. Martin
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">
+          Es inmensamente preferible tener <strong>múltiples interfaces pequeñas, granulares y altamente cohesivas</strong> que una sola interfaz "gorda" cargada de responsabilidades dispares.
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Interfaz "Gorda" / Fat Interface)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>Dispositivo.java forzando operaciones no soportadas</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public interface</span> <span class="tp">Dispositivo</span> {
+    <span class="kw">void</span> <span class="fn">imprimir</span>();
+    <span class="kw">void</span> <span class="fn">escanear</span>();
+    <span class="kw">void</span> <span class="fn">enviarFax</span>();
+}
+
+<span class="kw">public class</span> <span class="tp">ImpresoraBasica</span> <span class="kw">implements</span> <span class="tp">Dispositivo</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">imprimir</span>() {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Imprimiendo documento físico..."</span>);
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">escanear</span>() {
+        <span class="cm">// ¡Esta impresora no tiene escáner óptico! Obligada a meter código basura</span>
+        <span class="kw">throw new</span> <span class="tp">UnsupportedOperationException</span>(<span class="str">"Escaneo no disponible"</span>);
+    }
+
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">enviarFax</span>() {
+        <span class="cm">// ¡Tampoco tiene módem de fax!</span>
+        <span class="kw">throw new</span> <span class="tp">UnsupportedOperationException</span>(<span class="str">"Fax no soportado"</span>);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="analysis-list">
+          <h5>⚠️ Consecuencias de una Interfaz Demasiado Grande:</h5>
+          <ul>
+            <li><strong>Métodos fantasmas o vacíos:</strong> Clases llenas de implementaciones que solo lanzan excepciones o no hacen nada.</li>
+            <li><strong>Acoplamiento artificial:</strong> Si la firma de <code>enviarFax()</code> cambia para admitir número de país, la clase <code>ImpresoraBasica</code> se ve forzada a recompilarse y cambiar a pesar de ni siquiera tener fax.</li>
+          </ul>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Interfaces Granulares y Específicas por Rol)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <div class="code-container">
+            <div class="code-title">
+              <span>Interfaces modulares según capacidades individuales</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="cm">// Interfaces finas y cohesivas</span>
+<span class="kw">public interface</span> <span class="tp">Imprimible</span> {
+    <span class="kw">void</span> <span class="fn">imprimir</span>();
+}
+
+<span class="kw">public interface</span> <span class="tp">Escaneable</span> {
+    <span class="kw">void</span> <span class="fn">escanear</span>();
+}
+
+<span class="kw">public interface</span> <span class="tp">Fax</span> {
+    <span class="kw">void</span> <span class="fn">enviarFax</span>();
+}
+
+<span class="cm">// 1. Impresora básica: Solo implementa lo que verdaderamente hace</span>
+<span class="kw">public class</span> <span class="tp">ImpresoraBasica</span> <span class="kw">implements</span> <span class="tp">Imprimible</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">imprimir</span>() {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Imprimiendo en blanco y negro con tóner..."</span>);
+    }
+}
+
+<span class="cm">// 2. Impresora Multifuncional de Oficina: Combina múltiples interfaces con flexibilidad</span>
+<span class="kw">public class</span> <span class="tp">ImpresoraMultifuncional</span> <span class="kw">implements</span> <span class="tp">Imprimible</span>, <span class="tp">Escaneable</span>, <span class="tp">Fax</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">imprimir</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Imprimiendo a color dúplex..."</span>); }
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">escanear</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Escaneando a PDF en alta resolución..."</span>); }
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">enviarFax</span>() { <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Transmitiendo fax digitalizado..."</span>); }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de ISP en tu código?</h5>
+            <p>Pregúntate: <em>"¿Estoy obligando a alguna clase a implementar métodos en blanco, lanzar UnsupportedOperationException o retornar null solo para complacer a una interfaz gigantesca?"</em> Si es así, divide la interfaz en contratos más pequeños y específicos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PRINCIPIO 5: DIP ==================== -->
+    <section id="dip">
+      <div class="principle-box box-d">
+        <div class="principle-headline">
+          <span class="principle-letter-badge" style="color:#34d399;">D</span>
+          <h3 class="principle-name-full">Dependency Inversion Principle (DIP)</h3>
+        </div>
+        <p class="principle-axiom">
+          "1. Los módulos de alto nivel no deben depender de módulos de bajo nivel; ambos deben depender de abstracciones.<br>
+          2. Las abstracciones no deben depender de los detalles; los detalles deben depender de las abstracciones." — Robert C. Martin
+        </p>
+        <p style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:20px;">
+          Este principio es el <strong>corazón arquitectónico de Spring Boot</strong>. Es la base conceptual que permite a los contenedores de Inversión de Control (IoC) gestionar el ciclo de vida de los componentes.
+        </p>
+
+        <!-- Problema -->
+        <div class="step-box">
+          <div class="step-header step-header-problem">
+            <span>❌ Paso 1: Identificar el Problema (Instanciación directa con operador `new`)</span>
+            <span>Código Incorrecto</span>
+          </div>
+          <div class="code-container">
+            <div class="code-title">
+              <span>NotificacionService.java amarrado fuertemente a EmailService</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">NotificacionService</span> {
+
+    <span class="cm">// ¡VIOLACIÓN DIRECTA DE DIP! Instancia concreta con "new"</span>
+    <span class="kw">private final</span> <span class="tp">EmailService</span> emailService = <span class="kw">new</span> <span class="tp">EmailService</span>();
+
+    <span class="kw">public void</span> <span class="fn">notificar</span>(<span class="tp">String</span> mensaje) {
+        emailService.<span class="fn">enviar</span>(mensaje);
+    }
+}
+
+<span class="kw">public class</span> <span class="tp">EmailService</span> {
+    <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="tp">String</span> mensaje) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Enviando correo: "</span> + mensaje);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div class="analysis-list">
+          <h5>⚠️ ¿Qué graves problemas introduce este diseño?</h5>
+          <ul>
+            <li><strong>Acoplamiento concreto e irreversible:</strong> <code>NotificacionService</code> (módulo de alto nivel) depende directamente de la clase concreta <code>EmailService</code> (módulo de bajo nivel).</li>
+            <li>Si el negocio decide enviar notificaciones por <strong>WhatsApp, SMS o Push Notifications</strong>, estamos forzados a modificar el código interno de <code>NotificacionService</code>.</li>
+            <li><strong>Pérdida de la potencia de Spring:</strong> Al instanciar con <code>new</code>, el objeto queda fuera del contenedor de Spring (sin proxies transaccionales, sin métricas, sin inyección de configuración <code>@Value</code>).</li>
+          </ul>
+        </div>
+
+        <!-- Solución -->
+        <div class="step-box">
+          <div class="step-header step-header-solution">
+            <span>✅ Paso 2: Aplicar la Solución (Abstracción + Inyección de Dependencias por Constructor)</span>
+            <span>Diseño Refactorizado</span>
+          </div>
+
+          <!-- Interfaz Notificador -->
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>1. Notificador.java (La abstracción / contrato intermedio)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="kw">public interface</span> <span class="tp">Notificador</span> {
+    <span class="kw">void</span> <span class="fn">enviar</span>(<span class="tp">String</span> mensaje);
+}</code></pre>
+          </div>
+
+          <!-- Servicios concretos -->
+          <div class="code-container" style="border-bottom:1px solid var(--border-light);">
+            <div class="code-title">
+              <span>2. Implementaciones Concretas con @Service y @Primary</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@Primary</span> <span class="cm">// Spring inyecta este bean por defecto ante ambigüedad</span>
+<span class="kw">public class</span> <span class="tp">EmailService</span> <span class="kw">implements</span> <span class="tp">Notificador</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="tp">String</span> mensaje) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Enviando correo electrónico corporativo: "</span> + mensaje);
+    }
+}
+
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="tp">WhatsAppService</span> <span class="kw">implements</span> <span class="tp">Notificador</span> {
+    <span class="ann">@Override</span>
+    <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="tp">String</span> mensaje) {
+        <span class="tp">System</span>.out.<span class="fn">println</span>(<span class="str">"Enviando mensaje por WhatsApp Business Cloud API: "</span> + mensaje);
+    }
+}</code></pre>
+          </div>
+
+          <!-- NotificacionService refactorizado -->
+          <div class="code-container">
+            <div class="code-title">
+              <span>3. NotificacionService.java (Solo conoce la abstracción Notificador)</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+<pre><code><span class="ann">@Service</span>
+<span class="ann">@RequiredArgsConstructor</span>
+<span class="kw">public class</span> <span class="tp">NotificacionService</span> {
+
+    <span class="cm">// Dependencia hacia la ABSTRACCIÓN (interfaz), NUNCA hacia la clase concreta</span>
+    <span class="kw">private final</span> <span class="tp">Notificador</span> notificador;
+
+    <span class="kw">public void</span> <span class="fn">notificar</span>(<span class="tp">String</span> mensaje) {
+        notificador.<span class="fn">enviar</span>(mensaje);
+    }
+}</code></pre>
+          </div>
+        </div>
+
+        <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.25); border-radius:12px; padding:18px 22px; margin-top:20px;">
+          <h5 style="color:#6ee7b7; font-size:0.95rem; margin-bottom:6px;">🎯 Clarificación Crucial: DIP vs Inyección de Dependencias (DI)</h5>
+          <p style="font-size:0.88rem; color:#cbd5e1; line-height:1.6;">
+            <strong>DIP</strong> es un <em>principio de diseño de software</em> de alto nivel que postula depender de abstracciones. La <strong>Inyección de Dependencias (DI)</strong> es el <em>patrón técnico / mecanismo de Spring Boot</em> que inyecta la instancia concreta en tiempo de ejecución. Spring facilita aplicar DIP mediante DI, pero son conceptos complementarios.
+          </p>
+        </div>
+
+        <div class="checklist-card">
+          <div class="checklist-icon">🔍</div>
+          <div class="checklist-text">
+            <h5>¿Cómo diagnosticar una violación de DIP en tu código?</h5>
+            <p>Pregúntate: <em>"¿Mis servicios empresariales dependen directamente de clases concretas o crean objetos con 'new' cuando podrían depender de contratos e interfaces inyectadas por el contenedor de Spring?"</em> Si es así, extrae la interfaz y delega la instanciación al framework.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== RESUMEN COMPARATIVO ==================== -->
+    <section id="resumen-comparativo">
+      <div class="section-header">
+        <h2 class="section-title">📊 6. Resumen Comparativo de los Cinco Principios</h2>
+        <span class="section-badge">Tabla de Síntesis</span>
+      </div>
+      <p class="section-subtitle">
+        Utiliza esta tabla de referencia rápida para identificar y mitigar de inmediato los anti-patrones en cualquier pull request o proyecto:
+      </p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:120px;">Principio</th>
+              <th>Problema que Evita</th>
+              <th>Solución Arquitectónica</th>
+              <th>Ejemplo en Nuestra Tienda</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge-principle" style="background:rgba(59, 130, 246, 0.2); color:#60a5fa;">SRP</span></td>
+              <td>Clases gigantescas ("God classes") que hacen demasiadas cosas a la vez.</td>
+              <td>Separar responsabilidades en servicios con un único motivo de cambio.</td>
+              <td><code>PedidoService</code> solo coordina; la persistencia va a <code>PedidoRepository</code> y facturación a <code>FacturaService</code>.</td>
+            </tr>
+            <tr>
+              <td><span class="badge-principle" style="background:rgba(139, 92, 246, 0.2); color:#c084fc;">OCP</span></td>
+              <td>Modificar y quebrar código existente cada vez que se agrega una funcionalidad.</td>
+              <td>Extender el comportamiento mediante polimorfismo e interfaces.</td>
+              <td>Añadir <code>PagoCripto</code> creando una nueva clase que implementa <code>Pago</code>, sin tocar <code>PagoService</code>.</td>
+            </tr>
+            <tr>
+              <td><span class="badge-principle" style="background:rgba(6, 182, 212, 0.2); color:#67e8f9;">LSP</span></td>
+              <td>Subclases que rompen el comportamiento o arrojan <code>UnsupportedOperationException</code>.</td>
+              <td>Asegurar la sustitución correcta de clases respetando el contrato de la jerarquía.</td>
+              <td>Separar la capacidad <code>Volador</code> de <code>Ave</code>; el pingüino es un ave que come, pero no implementa vuelo.</td>
+            </tr>
+            <tr>
+              <td><span class="badge-principle" style="background:rgba(236, 72, 153, 0.2); color:#f472b6;">ISP</span></td>
+              <td>Interfaces monolíticas ("fat interfaces") que obligan a implementar métodos innecesarios.</td>
+              <td>Diseñar interfaces pequeñas, cohesivas y especializadas por rol.</td>
+              <td>Dividir <code>Dispositivo</code> en <code>Imprimible</code>, <code>Escaneable</code> y <code>Fax</code>.</td>
+            </tr>
+            <tr>
+              <td><span class="badge-principle" style="background:rgba(16, 185, 129, 0.2); color:#6ee7b7;">DIP</span></td>
+              <td>Acoplamiento directo y rígido a clases concretas mediante el operador <code>new</code>.</td>
+              <td>Depender de contratos/abstracciones e inyectar las dependencias.</td>
+              <td><code>NotificacionService</code> depende de <code>Notificador</code>; Spring inyecta <code>EmailService</code> o <code>WhatsAppService</code>.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ==================== SOLID EN SPRING BOOT ==================== -->
+    <section id="spring-relations">
+      <div class="section-header">
+        <h2 class="section-title">🍃 7. ¿Cómo se Relaciona SOLID con el Ecosistema Spring Boot?</h2>
+        <span class="section-badge">Framework & Patrones</span>
+      </div>
+      <p class="section-subtitle">
+        Spring Boot ofrece herramientas integradas de primera clase diseñadas para facilitar el cumplimiento estricto de SOLID:
+      </p>
+
+      <div class="spring-grid">
+        <div class="spring-card">
+          <div class="spring-tool-name">@Service / @Repository</div>
+          <h5>Relacionado con: SRP</h5>
+          <p>Organiza tu aplicación en capas limpias (Controlador REST, Lógica de Negocio y Persistencia Spring Data JPA), delimitando claramente los roles de cada componente.</p>
+        </div>
+
+        <div class="spring-card">
+          <div class="spring-tool-name">Interfaces + List&lt;T&gt;</div>
+          <h5>Relacionado con: OCP</h5>
+          <p>Spring recolecta e inyecta automáticamente colecciones de beans que implementan la misma interfaz, permitiendo implementar Strategy sin modificar las clases clientes.</p>
+        </div>
+
+        <div class="spring-card">
+          <div class="spring-tool-name">Polimorfismo & Herencia</div>
+          <h5>Relacionado con: LSP</h5>
+          <p>La sustitución pura de beans a nivel de contrato en el contenedor IoC garantiza que cualquier bean sustituto cumpla estrictamente con el contrato del tipo inyectado.</p>
+        </div>
+
+        <div class="spring-card">
+          <div class="spring-tool-name">Interfaces Finas (@FunctionalInterface)</div>
+          <h5>Relacionado con: ISP</h5>
+          <p>Creación de interfaces específicas para servicios de solo lectura, escritores o transformadores funcionales que desacoplan los módulos clientes.</p>
+        </div>
+
+        <div class="spring-card">
+          <div class="spring-tool-name">@RequiredArgsConstructor & @Primary</div>
+          <h5>Relacionado con: DIP</h5>
+          <p>Inyección limpia de dependencias por constructor inmutable, complementada con <code>@Primary</code> y <code>@Qualifier</code> para resolver abstracciones en tiempo de arranque.</p>
+        </div>
+      </div>
+
+      <div style="background:rgba(245, 158, 11, 0.1); border-left:4px solid var(--color-warning); padding:16px 20px; border-radius:10px; font-size:0.92rem; color:#fde68a;">
+        ⚠️ <strong>Atención crítica:</strong> Utilizar estas anotaciones de Spring <em>no garantiza automáticamente</em> que tu arquitectura sea SOLID. Las anotaciones son únicamente facilitadores tecnológicos; la calidad depende de tu análisis de responsabilidades y del diseño de las relaciones entre clases.
+      </div>
+    </section>
+
+    <!-- ==================== EVALUACIÓN INTERACTIVA ==================== -->
+    <section id="evaluacion-interactiva">
+      <div class="quiz-container">
+        <div class="quiz-header">
+          <div>
+            <h3 class="quiz-title">🧪 8. Pongamos a Prueba lo Aprendido</h3>
+            <p style="color:var(--text-muted); font-size:0.88rem; margin-top:4px;">Identifica qué principio SOLID se está violando en cada una de las siguientes situaciones reales:</p>
+          </div>
+          <div class="quiz-score-badge" id="quizScoreText">Puntuación: 0 / 5</div>
+        </div>
+
+        <!-- Pregunta 1 -->
+        <div class="question-card" id="q1-card">
+          <div class="question-text">
+            <span class="question-num">1</span>
+            <span>Una clase <code>UsuarioService</code> registra nuevos usuarios en la BD, envía correos de bienvenida, genera reportes en PDF y gestiona archivos en AWS S3.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(1, 'SRP', true, this)">SRP</button>
+            <button class="opt-btn" onclick="checkAnswer(1, 'OCP', false, this)">OCP</button>
+            <button class="opt-btn" onclick="checkAnswer(1, 'LSP', false, this)">LSP</button>
+            <button class="opt-btn" onclick="checkAnswer(1, 'DIP', false, this)">DIP</button>
+          </div>
+          <div class="explanation-box" id="q1-exp"></div>
+        </div>
+
+        <!-- Pregunta 2 -->
+        <div class="question-card" id="q2-card">
+          <div class="question-text">
+            <span class="question-num">2</span>
+            <span>Cada vez que la empresa agrega un nuevo método de pago, el desarrollador se ve forzado a modificar una larga cadena de <code>if / else if</code> dentro de <code>PagoService</code>.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(2, 'ISP', false, this)">ISP</button>
+            <button class="opt-btn" onclick="checkAnswer(2, 'OCP', true, this)">OCP</button>
+            <button class="opt-btn" onclick="checkAnswer(2, 'LSP', false, this)">LSP</button>
+            <button class="opt-btn" onclick="checkAnswer(2, 'SRP', false, this)">SRP</button>
+          </div>
+          <div class="explanation-box" id="q2-exp"></div>
+        </div>
+
+        <!-- Pregunta 3 -->
+        <div class="question-card" id="q3-card">
+          <div class="question-text">
+            <span class="question-num">3</span>
+            <span>Una clase hija sobreescribe un método heredado de la clase base y lanza <code>UnsupportedOperationException</code> porque físicamente no puede soportar esa acción.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(3, 'DIP', false, this)">DIP</button>
+            <button class="opt-btn" onclick="checkAnswer(3, 'LSP', true, this)">LSP</button>
+            <button class="opt-btn" onclick="checkAnswer(3, 'ISP', false, this)">ISP</button>
+            <button class="opt-btn" onclick="checkAnswer(3, 'SRP', false, this)">SRP</button>
+          </div>
+          <div class="explanation-box" id="q3-exp"></div>
+        </div>
+
+        <!-- Pregunta 4 -->
+        <div class="question-card" id="q4-card">
+          <div class="question-text">
+            <span class="question-num">4</span>
+            <span>Una impresora básica económica está obligada por contrato a implementar métodos de escaneo y envío de fax que no posee en su hardware.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(4, 'OCP', false, this)">OCP</button>
+            <button class="opt-btn" onclick="checkAnswer(4, 'SRP', false, this)">SRP</button>
+            <button class="opt-btn" onclick="checkAnswer(4, 'ISP', true, this)">ISP</button>
+            <button class="opt-btn" onclick="checkAnswer(4, 'DIP', false, this)">DIP</button>
+          </div>
+          <div class="explanation-box" id="q4-exp"></div>
+        </div>
+
+        <!-- Pregunta 5 -->
+        <div class="question-card" id="q5-card">
+          <div class="question-text">
+            <span class="question-num">5</span>
+            <span>La clase de negocio <code>PedidoService</code> crea directamente un objeto concreto mediante <code>new MySQLRepository()</code>, impidiendo la inyección y desacoplamiento.</span>
+          </div>
+          <div class="options-grid">
+            <button class="opt-btn" onclick="checkAnswer(5, 'LSP', false, this)">LSP</button>
+            <button class="opt-btn" onclick="checkAnswer(5, 'OCP', false, this)">OCP</button>
+            <button class="opt-btn" onclick="checkAnswer(5, 'DIP', true, this)">DIP</button>
+            <button class="opt-btn" onclick="checkAnswer(5, 'ISP', false, this)">ISP</button>
+          </div>
+          <div class="explanation-box" id="q5-exp"></div>
+        </div>
+
+        <div class="quiz-actions">
+          <span style="font-size:0.85rem; color:var(--text-muted);" id="quizStatusText">Responde las 5 preguntas seleccionando una opción.</span>
+          <button class="btn-reset" onclick="resetQuiz()">🔄 Reiniciar Evaluación</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== RUTA DE APRENDIZAJE ==================== -->
+    <section id="recomendaciones">
+      <div class="section-header">
+        <h2 class="section-title">🚀 9. Mi Recomendación para Aprenderlos Realmente</h2>
+        <span class="section-badge">Estrategia Profesional</span>
+      </div>
+      <p class="section-subtitle">
+        No intentes implementar los cinco principios todos al mismo tiempo desde el día uno. Aprende primero a <strong>reconocer el síntoma o dolor en el código</strong> y después aplica la refactorización quirúrgica:
+      </p>
+
+      <div style="display:flex; flex-direction:column; gap:14px; margin-bottom:32px;">
+        <div style="background:var(--bg-card); padding:18px 24px; border-radius:14px; border-left:4px solid #3b82f6; display:flex; align-items:center; gap:16px;">
+          <span style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:#60a5fa;">1. SRP</span>
+          <div style="font-size:0.92rem; color:#cbd5e1;"><strong>Refactorizar un servicio sobrecargado:</strong> Toma una clase de más de 300 líneas y extrae la persistencia, notificaciones y cálculos en servicios coordinados.</div>
+        </div>
+        <div style="background:var(--bg-card); padding:18px 24px; border-radius:14px; border-left:4px solid #8b5cf6; display:flex; align-items:center; gap:16px;">
+          <span style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:#c084fc;">2. OCP</span>
+          <div style="font-size:0.92rem; color:#cbd5e1;"><strong>Eliminar cadenas if/else:</strong> Transforma un procesador de tipos o estados en una interfaz polimórfica inyectada por colección.</div>
+        </div>
+        <div style="background:var(--bg-card); padding:18px 24px; border-radius:14px; border-left:4px solid #06b6d4; display:flex; align-items:center; gap:16px;">
+          <span style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:#67e8f9;">3. LSP</span>
+          <div style="font-size:0.92rem; color:#cbd5e1;"><strong>Sanear la jerarquía de herencia:</strong> Elimina las clases hijas que lanzan excepciones al llamar métodos del padre y migra a contratos por capacidades.</div>
+        </div>
+        <div style="background:var(--bg-card); padding:18px 24px; border-radius:14px; border-left:4px solid #ec4899; display:flex; align-items:center; gap:16px;">
+          <span style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:#f472b6;">4. ISP</span>
+          <div style="font-size:0.92rem; color:#cbd5e1;"><strong>Segregar interfaces hinchadas:</strong> Divide contratos grandes en interfaces finas donde ningún cliente implemente métodos inútiles.</div>
+        </div>
+        <div style="background:var(--bg-card); padding:18px 24px; border-radius:14px; border-left:4px solid #10b981; display:flex; align-items:center; gap:16px;">
+          <span style="font-family:var(--font-mono); font-size:1.3rem; font-weight:800; color:#6ee7b7;">5. DIP</span>
+          <div style="font-size:0.92rem; color:#cbd5e1;"><strong>Desacoplar con Inyección de Dependencias:</strong> Reemplaza todas las creaciones con <code>new</code> por interfaces e inyección por constructor en Spring Boot.</div>
+        </div>
+      </div>
+
+      <div style="background:linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95)); border:1px solid var(--border-accent); border-radius:18px; padding:28px; text-align:center;">
+        <h4 style="font-size:1.25rem; font-weight:800; color:var(--text-bright); margin-bottom:10px;">🎯 Objetivo de Ingeniería Cumplido</h4>
+        <p style="font-size:0.95rem; color:#cbd5e1; max-width:800px; margin:0 auto 18px; line-height:1.6;">
+          Has transformado una aplicación Spring Boot frágil en una arquitectura limpia, desacoplada, testeable y lista para escalar en producción con Java 21, Spring Data JPA y PostgreSQL.
+        </p>
+        <a href="../../index.html" style="display:inline-flex; align-items:center; gap:8px; background:var(--color-primary); color:#fff; text-decoration:none; padding:12px 24px; border-radius:10px; font-weight:700; font-size:0.92rem; transition:background 0.2s;">
+          <span>🏠 Volver al Portal Académico del Curso</span> &rarr;
+        </a>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>Universidad Iberoamericana del Ecuador &middot; UNIBE &middot; Facultad de Ingeniería de Software</p>
+      <p>Diseño y Arquitectura de Software &middot; Período Académico 2026 &middot; Docente: Byron Rodrigo Moreno Moreno</p>
+    </footer>
+
+  </main>
+
+  <script>
+    // Reading Progress Bar
+    window.addEventListener('scroll', () => {
+      const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+      const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrolled = (winScroll / height) * 100;
+      document.getElementById('progressBar').style.width = scrolled + '%';
+    });
+
+    // Copy to clipboard helper
+    function copyCode(btn) {
+      const pre = btn.closest('.code-container').querySelector('pre code');
+      if (!pre) return;
+      navigator.clipboard.writeText(pre.innerText).then(() => {
+        const originalText = btn.innerText;
+        btn.innerText = '¡Copiado!';
+        btn.style.background = '#10b981';
+        btn.style.color = '#fff';
+        setTimeout(() => {
+          btn.innerText = originalText;
+          btn.style.background = '';
+          btn.style.color = '';
+        }, 2000);
+      });
+    }
+
+    // Interactive Quiz Engine
+    const quizExplanations = {
+      1: {
+        correct: "¡Correcto! (SRP) La clase UsuarioService tiene 4 responsabilidades distintas (persistencia, correos, reportes y archivos) y por tanto 4 razones independientes para cambiar.",
+        incorrect: "Incorrecto. Se está violando el Principio de Responsabilidad Única (SRP), porque la clase abarca múltiples responsabilidades que deberían estar separadas en servicios especializados."
+      },
+      2: {
+        correct: "¡Correcto! (OCP) Cada nuevo requerimiento obliga a abrir y modificar PagoService. La solución es abrirlo a la extensión con la interfaz Pago e implementaciones polimórficas.",
+        incorrect: "Incorrecto. Se viola el Principio Abierto/Cerrado (OCP), ya que cada extensión del sistema fuerza la modificación del código ya probado en lugar de extenderlo mediante polimorfismo."
+      },
+      3: {
+        correct: "¡Correcto! (LSP) Al arrojar UnsupportedOperationException, la subclase rompe la garantía de comportamiento esperada de la superclase, violando la sustitución de Liskov.",
+        incorrect: "Incorrecto. Se viola el Principio de Sustitución de Liskov (LSP), porque una clase hija no puede sustituir a su clase padre sin causar excepciones inesperadas en tiempo de ejecución."
+      },
+      4: {
+        correct: "¡Correcto! (ISP) La interfaz Dispositivo es demasiado amplia ('gorda') y fuerza a la impresora básica a depender y escribir código para métodos que su hardware no utiliza.",
+        incorrect: "Incorrecto. Se viola el Principio de Segregación de Interfaces (ISP), ya que se fuerza al cliente a implementar métodos que no necesita. La solución es dividirla en Imprimible, Escaneable y Fax."
+      },
+      5: {
+        correct: "¡Correcto! (DIP) Al usar 'new', el servicio de alto nivel queda acoplado de por vida a la implementación concreta MySQLRepository. Debe depender de una interfaz inyectada.",
+        incorrect: "Incorrecto. Se viola el Principio de Inversión de Dependencias (DIP), porque el módulo de alto nivel depende directamente de una clase concreta en lugar de una abstracción."
+      }
+    };
+
+    let answeredCount = 0;
+    let correctCount = 0;
+    const answeredQuestions = {};
+
+    function checkAnswer(qNum, selectedOption, isCorrect, btn) {
+      if (answeredQuestions[qNum]) return; // Ya respondida
+
+      answeredQuestions[qNum] = isCorrect;
+      answeredCount++;
+      if (isCorrect) correctCount++;
+
+      const card = document.getElementById(`q${qNum}-card`);
+      const buttons = card.querySelectorAll('.opt-btn');
+      const expBox = document.getElementById(`q${qNum}-exp`);
+
+      buttons.forEach(b => {
+        b.disabled = true;
+        b.style.cursor = 'default';
+      });
+
+      if (isCorrect) {
+        btn.classList.add('selected-correct');
+        card.classList.add('answered-correct');
+        expBox.className = 'explanation-box exp-correct';
+        expBox.innerHTML = '<strong>✅ ' + quizExplanations[qNum].correct + '</strong>';
+      } else {
+        btn.classList.add('selected-incorrect');
+        card.classList.add('answered-incorrect');
+        expBox.className = 'explanation-box exp-incorrect';
+        expBox.innerHTML = '<strong>❌ ' + quizExplanations[qNum].incorrect + '</strong>';
+      }
+      expBox.style.display = 'block';
+
+      // Actualizar contador
+      document.getElementById('quizScoreText').innerText = `Puntuación: ${correctCount} / 5`;
+      document.getElementById('quizStatusText').innerText = `${answeredCount} de 5 respondidas (${correctCount} correctas).`;
+    }
+
+    function resetQuiz() {
+      answeredCount = 0;
+      correctCount = 0;
+      for (let i = 1; i <= 5; i++) {
+        delete answeredQuestions[i];
+        const card = document.getElementById(`q${i}-card`);
+        card.className = 'question-card';
+        const buttons = card.querySelectorAll('.opt-btn');
+        buttons.forEach(b => {
+          b.disabled = false;
+          b.className = 'opt-btn';
+          b.style.cursor = 'pointer';
+        });
+        const expBox = document.getElementById(`q${i}-exp`);
+        expBox.style.display = 'none';
+        expBox.innerHTML = '';
+      }
+      document.getElementById('quizScoreText').innerText = 'Puntuación: 0 / 5';
+      document.getElementById('quizStatusText').innerText = 'Responde las 5 preguntas seleccionando una opción.';
+    }
+
+    // ScrollSpy for Sidebar Links
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('section[id], header[id]');
+      const navLinks = document.querySelectorAll('.sidebar-menu li a');
+      let currentSection = '';
+
+      sections.forEach(section => {
+        const top = section.offsetTop - 120;
+        if (window.pageYOffset >= top) {
+          currentSection = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${currentSection}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>
