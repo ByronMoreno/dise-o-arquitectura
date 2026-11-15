@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="GRASP Animado: Explicación ultra didáctica, divertida y animada con muñecos, sonidos y analogías de la vida real de los 9 principios GRASP en Java 21 y Spring Boot.">
+  <title>GRASP Animado y Creativo con Muñecos | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Fira+Code:wght@500;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #070b16;
+      --bg-card: rgba(15, 23, 42, 0.88);
+      --bg-card-border: rgba(56, 189, 248, 0.25);
+      
+      --color-g1: #38bdf8;
+      --color-g2: #818cf8;
+      --color-g3: #a855f7;
+      --color-g4: #ec4899;
+      --color-g5: #f43f5e;
+      --color-g6: #fb923c;
+      --color-g7: #facc15;
+      --color-g8: #4ade80;
+      --color-g9: #2dd4bf;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --font-fun: 'Fredoka', cursive, sans-serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 15% 10%, rgba(56, 189, 248, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 85% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 90%, rgba(45, 212, 191, 0.08) 0%, transparent 50%);
+    }
+
+    /* Top Nav Bar */
+    .top-nav {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(7, 11, 22, 0.9); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px; font-family: var(--font-fun); font-size: 1.35rem; font-weight: 700;
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #2dd4bf); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; align-items: center; gap: 14px; }
+    .btn-nav {
+      font-size: 0.85rem; font-weight: 700; padding: 8px 16px; border-radius: 20px; text-decoration: none;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-back { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.12); }
+    .btn-back:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+    .btn-sound {
+      background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);
+      cursor: pointer; font-family: var(--font-fun);
+    }
+    .btn-sound:hover { background: rgba(56, 189, 248, 0.25); transform: scale(1.05); }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1200px; margin: 40px auto 30px; padding: 0 24px; text-align: center;
+    }
+    .hero-pill {
+      font-family: var(--font-fun); font-size: 0.88rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.5px; background: rgba(56, 189, 248, 0.15); color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.35); padding: 6px 18px; border-radius: 30px; display: inline-block;
+      margin-bottom: 18px; animation: pulseGlow 3s infinite ease-in-out;
+    }
+    .hero h1 {
+      font-family: var(--font-fun); font-size: 3.4rem; font-weight: 700; line-height: 1.15;
+      letter-spacing: -1px; margin-bottom: 18px;
+    }
+    .hero-subtitle {
+      font-size: 1.25rem; color: #cbd5e1; max-width: 860px; margin: 0 auto 30px; line-height: 1.6;
+    }
+
+    /* Profe Byte Narrator Avatar */
+    .narrator-bubble {
+      max-width: 900px; margin: 0 auto 40px; background: rgba(30, 41, 59, 0.7);
+      border: 2px dashed rgba(56, 189, 248, 0.4); border-radius: 24px; padding: 22px 28px;
+      display: flex; align-items: center; gap: 24px; text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .narrator-avatar {
+      width: 76px; height: 76px; flex-shrink: 0; animation: floatAnim 3s infinite ease-in-out;
+    }
+    .narrator-text h4 { font-family: var(--font-fun); font-size: 1.2rem; color: #38bdf8; margin-bottom: 4px; }
+    .narrator-text p { font-size: 0.98rem; color: #e2e8f0; line-height: 1.5; }
+
+    /* Character Jump Menu Grid */
+    .character-nav {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; max-width: 1150px;
+      margin: 0 auto 60px; padding: 0 20px;
+    }
+    .char-btn {
+      background: var(--bg-card); border: 2px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
+      padding: 12px 16px; display: flex; align-items: center; gap: 10px; cursor: pointer;
+      text-decoration: none; color: var(--text-main); font-family: var(--font-fun); font-size: 0.95rem;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .char-btn:hover {
+      transform: translateY(-4px) scale(1.02); border-color: currentColor;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.4);
+    }
+    .char-badge {
+      width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.95rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+
+    /* Container for Modules */
+    .modules-container {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; display: flex; flex-direction: column; gap: 70px;
+    }
+
+    /* Principle Cartoon Stage Box */
+    .stage-card {
+      background: var(--bg-card); border: 2px solid var(--bg-card-border); border-radius: 28px;
+      padding: 38px 36px; position: relative; overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+    }
+    .stage-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 18px;
+      margin-bottom: 24px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 20px;
+    }
+    .stage-title-group { display: flex; align-items: center; gap: 16px; }
+    .stage-letter {
+      width: 58px; height: 58px; border-radius: 18px; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-fun); font-size: 1.8rem; font-weight: 700; color: #fff;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3); flex-shrink: 0;
+    }
+    .stage-titles h2 { font-family: var(--font-fun); font-size: 1.85rem; font-weight: 700; }
+    .stage-titles p { font-size: 0.95rem; color: var(--text-muted); }
+
+    /* Interactive Chaos vs Zen Switcher */
+    .mode-switch-bar {
+      display: flex; align-items: center; background: rgba(10, 15, 29, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 30px; padding: 5px; gap: 4px;
+    }
+    .mode-btn {
+      background: transparent; border: none; padding: 8px 18px; border-radius: 24px;
+      font-family: var(--font-fun); font-size: 0.92rem; font-weight: 600; color: var(--text-muted);
+      cursor: pointer; transition: all 0.25s ease; display: flex; align-items: center; gap: 6px;
+    }
+    .mode-btn.active.btn-chaos {
+      background: #ef4444; color: #fff; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.4);
+    }
+    .mode-btn.active.btn-zen {
+      background: #10b981; color: #fff; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+    }
+
+    /* Cartoon Theater Stage */
+    .theater-display {
+      background: #080c17; border: 2px solid rgba(255, 255, 255, 0.06); border-radius: 20px;
+      padding: 30px 24px; min-height: 270px; display: flex; align-items: center; justify-content: space-around;
+      position: relative; overflow: hidden; margin-bottom: 24px; flex-wrap: wrap; gap: 20px;
+    }
+
+    /* Comic Speech Bubble */
+    .comic-bubble {
+      background: #ffffff; color: #0f172a; border-radius: 18px; padding: 16px 22px;
+      font-family: var(--font-fun); font-size: 1rem; font-weight: 600; max-width: 380px;
+      position: relative; box-shadow: 0 10px 25px rgba(0,0,0,0.3); line-height: 1.45;
+      animation: popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .comic-bubble::after {
+      content: ''; position: absolute; bottom: -10px; left: 30px; width: 0; height: 0;
+      border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 10px solid #ffffff;
+    }
+    .comic-bubble.chaos-bubble {
+      background: #fee2e2; color: #991b1b; border: 2px solid #ef4444;
+    }
+    .comic-bubble.chaos-bubble::after { border-top-color: #ef4444; }
+    .comic-bubble.zen-bubble {
+      background: #ecfdf5; color: #065f46; border: 2px solid #10b981;
+    }
+    .comic-bubble.zen-bubble::after { border-top-color: #10b981; }
+
+    /* Metaphor & Explanation Cards */
+    .explanation-split {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 24px;
+    }
+    .metaphor-card {
+      background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px;
+      padding: 22px 24px; display: flex; flex-direction: column; justify-content: space-between;
+    }
+    .metaphor-card h4 {
+      font-family: var(--font-fun); font-size: 1.18rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;
+    }
+    .metaphor-card p { font-size: 0.95rem; color: #cbd5e1; line-height: 1.6; margin-bottom: 14px; }
+    .metaphor-tag {
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;
+      padding: 4px 10px; border-radius: 8px; align-self: flex-start;
+    }
+
+    .code-card {
+      background: #080d1a; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px;
+      padding: 20px; font-family: var(--font-code); font-size: 0.84rem; position: relative;
+    }
+    .code-card-header {
+      font-family: var(--font-fun); font-size: 0.88rem; font-weight: 600; color: #94a3b8;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+      padding-bottom: 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    pre code { display: block; line-height: 1.6; color: #e2e8f0; overflow-x: auto; }
+    .hl-kw { color: #f43f5e; font-weight: bold; }
+    .hl-ann { color: #f59e0b; font-weight: bold; }
+    .hl-tp { color: #38bdf8; font-weight: bold; }
+    .hl-str { color: #10b981; }
+    .hl-cm { color: #64748b; font-style: italic; }
+
+    /* Animations */
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes shakeChaos {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      20% { transform: translate(-3px, 2px) rotate(-3deg); }
+      40% { transform: translate(3px, -2px) rotate(3deg); }
+      60% { transform: translate(-2px, -3px) rotate(-2deg); }
+      80% { transform: translate(2px, 3px) rotate(2deg); }
+    }
+    @keyframes sweatDrop {
+      0% { opacity: 0; transform: translateY(-5px); }
+      50% { opacity: 1; }
+      100% { opacity: 0; transform: translateY(15px); }
+    }
+    @keyframes popIn {
+      0% { transform: scale(0.7); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(56, 189, 248, 0.2); }
+      50% { box-shadow: 0 0 25px rgba(56, 189, 248, 0.5); }
+    }
+    @keyframes bounceHappy {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    .anim-shake { animation: shakeChaos 0.35s infinite ease-in-out; }
+    .anim-bounce { animation: bounceHappy 1.2s infinite ease-in-out; }
+    .anim-float { animation: floatAnim 3s infinite ease-in-out; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 40px 24px; text-align: center;
+      font-size: 0.9rem; color: var(--text-muted); line-height: 1.8;
+    }
+
+    @media (max-width: 900px) {
+      .hero h1 { font-size: 2.5rem; }
+      .explanation-split { grid-template-columns: 1fr; }
+      .narrator-bubble { flex-direction: column; text-align: center; }
+      .comic-bubble::after { display: none; }
+      .stage-card { padding: 24px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="top-nav">
+    <div class="brand">
+      <span>🎭</span> GRASP ANIMADO &middot; UNIBE
+    </div>
+    <div class="nav-links">
+      <button class="btn-nav btn-sound" id="soundToggleBtn" onclick="toggleSound()">
+        🔊 Sonidos: <span id="soundStatusText">Activados</span>
+      </button>
+      <a href="../GRASP/Principios GRASP paso a paso con Java 21 y Spring Boot.html" class="btn-nav btn-back">
+        📖 Guía Técnica Formal
+      </a>
+      <a href="../SOLID ANIMADO/index.html" class="btn-nav btn-back" style="color:#ec4899;">
+        🎨 SOLID Animado
+      </a>
+      <a href="../../index.html" class="btn-nav btn-back">
+        🏠 Portal UNIBE
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main>
+    <section class="hero">
+      <div class="hero-pill">✨ Especial Didáctico de Responsabilidades</div>
+      <h1>
+        Aprende los 9 Principios <span style="color:#38bdf8;">G</span><span style="color:#818cf8;">R</span><span style="color:#a855f7;">A</span><span style="color:#ec4899;">S</span><span style="color:#2dd4bf;">P</span> con Muñecos
+      </h1>
+      <p class="hero-subtitle">
+        Si SOLID te enseña a escribir clases flexibles, <strong>GRASP te enseña a quién darle cada trabajo</strong>. Explora los 9 principios con personajes simpáticos, efectos de sonido y la comparación en vivo entre el <strong>💥 Caos</strong> y la <strong>✨ Solución Zen</strong>.
+      </p>
+
+      <!-- Profe Byte Narrador -->
+      <div class="narrator-bubble">
+        <svg class="narrator-avatar" viewBox="0 0 100 100" fill="none">
+          <rect x="25" y="30" width="50" height="45" rx="12" fill="#38bdf8"/>
+          <rect x="32" y="38" width="36" height="26" rx="6" fill="#0f172a"/>
+          <circle cx="43" cy="50" r="6" stroke="#fcd34d" stroke-width="2.5" fill="none"/>
+          <circle cx="57" cy="50" r="6" stroke="#fcd34d" stroke-width="2.5" fill="none"/>
+          <line x1="49" y1="50" x2="51" y2="50" stroke="#fcd34d" stroke-width="2.5"/>
+          <path d="M40 50 Q43 47 46 50" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M54 50 Q57 47 60 50" stroke="#38bdf8" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <line x1="50" y1="30" x2="50" y2="18" stroke="#38bdf8" stroke-width="3"/>
+          <circle cx="50" cy="15" r="5" fill="#f43f5e"/>
+          <circle cx="36" cy="56" r="2.5" fill="#f472b6"/>
+          <circle cx="64" cy="56" r="2.5" fill="#f472b6"/>
+          <path d="M46 58 Q50 62 54 58" stroke="#34d399" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+        </svg>
+        <div class="narrator-text">
+          <h4>¡Bienvenidos a la función de títeres de GRASP! 🤖</h4>
+          <p>
+            Craig Larman descubrió que los programadores sufrían eligiendo dónde poner cada método. ¡No sufras más! En cada principio tienes un botón para desatar el <strong>💥 Desastre</strong> y otro para activar la <strong>✨ Solución Zen</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Jump Menu for all 9 Principles -->
+      <div class="character-nav">
+        <a href="#g1-expert" class="char-btn" style="color:var(--color-g1);">
+          <div class="char-badge" style="background:var(--color-g1);">01</div>
+          <span>Information Expert</span>
+        </a>
+        <a href="#g2-creator" class="char-btn" style="color:var(--color-g2);">
+          <div class="char-badge" style="background:var(--color-g2);">02</div>
+          <span>Creator</span>
+        </a>
+        <a href="#g3-controller" class="char-btn" style="color:var(--color-g3);">
+          <div class="char-badge" style="background:var(--color-g3);">03</div>
+          <span>Controller</span>
+        </a>
+        <a href="#g4-lowcoupling" class="char-btn" style="color:var(--color-g4);">
+          <div class="char-badge" style="background:var(--color-g4);">04</div>
+          <span>Low Coupling</span>
+        </a>
+        <a href="#g5-highcohesion" class="char-btn" style="color:var(--color-g5);">
+          <div class="char-badge" style="background:var(--color-g5);">05</div>
+          <span>High Cohesion</span>
+        </a>
+        <a href="#g6-polymorphism" class="char-btn" style="color:var(--color-g6);">
+          <div class="char-badge" style="background:var(--color-g6);">06</div>
+          <span>Polymorphism</span>
+        </a>
+        <a href="#g7-purefabrication" class="char-btn" style="color:var(--color-g7);">
+          <div class="char-badge" style="background:var(--color-g7);">07</div>
+          <span>Pure Fabrication</span>
+        </a>
+        <a href="#g8-indirection" class="char-btn" style="color:var(--color-g8);">
+          <div class="char-badge" style="background:var(--color-g8);">08</div>
+          <span>Indirection</span>
+        </a>
+        <a href="#g9-protectedvariations" class="char-btn" style="color:var(--color-g9);">
+          <div class="char-badge" style="background:var(--color-g9);">09</div>
+          <span>Protected Variations</span>
+        </a>
+      </div>
+    </section>
+
+    <!-- Modules Container -->
+    <div class="modules-container">
+
+      <!-- ==================== 01: INFORMATION EXPERT ==================== -->
+      <section class="stage-card" id="g1-expert" style="border-color: rgba(56, 189, 248, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g1);">01</div>
+            <div class="stage-titles">
+              <h2>Information Expert (Experto en Información)</h2>
+              <p>Metáfora: <em>"Don Ramón el cajero metiéndole la mano al bolsillo al cliente en vez de dejar que el cliente cuente su dinero."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG1State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG1State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g1Theater">
+          <div id="g1CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Waiter / Controller reaching into customer's wallet -->
+              <circle cx="60" cy="70" r="22" fill="#38bdf8"/>
+              <text x="50" y="75" font-size="14">👀</text>
+              <rect x="52" y="95" width="16" height="50" fill="#0284c7"/>
+              <!-- Stretched Arm reaching across -->
+              <path d="M68 110 Q110 80 140 100" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" fill="none"/>
+              <!-- Scared Customer on right with flying coins -->
+              <circle cx="160" cy="70" r="22" fill="#fcd34d"/>
+              <text x="150" y="75" font-size="14">😱</text>
+              <rect x="152" y="95" width="16" height="50" fill="#d97706"/>
+              <!-- Flying Coins falling to floor -->
+              <circle cx="130" cy="115" r="7" fill="#fbbf24"/>
+              <circle cx="145" cy="135" r="7" fill="#fbbf24"/>
+              <circle cx="115" cy="145" r="7" fill="#fbbf24"/>
+              <text x="110" y="60" font-size="20">💥</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g1Bubble">
+            ¡OIGA! 😡 ¿Por qué el controlador me mete la mano en el bolsillo, saca mis productos y hace las cuentas con los dedos? ¡Si soy el Pedido, yo sé cuánto sumo!
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              Cuando vas a comprar un helado, el cajero no te saca la billetera del pantalón para contar tus monedas. <strong>Tú eres el experto en tu dinero</strong>: cuentas y entregas el valor total.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> La responsabilidad de calcular el total le pertenece a <code>Pedido</code> y <code>DetallePedido</code>, porque ellos tienen los datos.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(56, 189, 248, 0.15); color:var(--color-g1);">Principio: Experto en Información</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g1CodeTitle">❌ Violación: Controlador sumando productos</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g1CodeBody"><span class="hl-ann">@PostMapping</span>(<span class="hl-str">"/total"</span>)
+<span class="hl-kw">public double</span> <span class="hl-tp">calcularTotal</span>(<span class="hl-tp">Pedido</span> p) {
+    <span class="hl-kw">double</span> total = <span class="hl-num">0</span>;
+    <span class="hl-cm">// ❌ El controlador hace un trabajo ajeno</span>
+    <span class="hl-kw">for</span> (<span class="hl-tp">Producto</span> prod : p.<span class="hl-tp">getProductos</span>()) {
+        total += prod.<span class="hl-tp">getPrecio</span>() * prod.<span class="hl-tp">getCantidad</span>();
+    }
+    <span class="hl-kw">return</span> total;
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 02: CREATOR ==================== -->
+      <section class="stage-card" id="g2-creator" style="border-color: rgba(129, 140, 248, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g2);">02</div>
+            <div class="stage-titles">
+              <h2>Creator (Creador)</h2>
+              <p>Metáfora: <em>"El mesero corriendo a la mesa con una lechuga cruda y pan frío para armar la hamburguesa frente al cliente."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG2State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG2State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g2Theater">
+          <div id="g2CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Clumsy Waiter holding bread in ear and meat in hands -->
+              <circle cx="100" cy="50" r="22" fill="#818cf8"/>
+              <text x="90" y="55" font-size="14">😵</text>
+              <rect x="92" y="75" width="16" height="50" fill="#4f46e5"/>
+              <!-- Bread on ear -->
+              <ellipse cx="65" cy="45" rx="14" ry="8" fill="#f59e0b"/>
+              <!-- Flying tomato -->
+              <circle cx="135" cy="45" r="9" fill="#ef4444"/>
+              <!-- Dropping meat on foot -->
+              <ellipse cx="100" cy="145" rx="16" ry="6" fill="#78350f"/>
+              <circle cx="120" cy="35" r="4" fill="#38bdf8" style="animation: sweatDrop 1s infinite;"/>
+              <text x="135" y="85" font-size="18">🍔💥</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g2Bubble">
+            ¡Qué desastre en el comedor! 😱 El controlador intenta crear cada <code>DetallePedido</code> a mano y ensamblarlos en la mesa. ¡Si olvida la lechuga, la hamburguesa explota!
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              El mesero no cocina ni arma los ingredientes en la mesa. <strong>La cocina (el Pedido)</strong> recibe los ingredientes y ensambla la hamburguesa de forma segura y completa.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> <code>Pedido</code> contiene y agrega a <code>DetallePedido</code>, por lo tanto <code>Pedido</code> debe tener el método <code>agregarDetalle(producto, cantidad)</code>.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(129, 140, 248, 0.15); color:var(--color-g2);">Principio: Creador</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g2CodeTitle">❌ Violación: Controlador instanciando detalles</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g2CodeBody"><span class="hl-cm">// ❌ El controlador conoce cómo instanciar cada parte</span>
+<span class="hl-tp">DetallePedido</span> d = <span class="hl-kw">new</span> <span class="hl-tp">DetallePedido</span>();
+d.<span class="hl-tp">setCantidad</span>(item.<span class="hl-tp">cantidad</span>());
+d.<span class="hl-tp">setProducto</span>(prod);
+pedido.<span class="hl-tp">getDetalles</span>().<span class="hl-tp">add</span>(d);</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 03: CONTROLLER ==================== -->
+      <section class="stage-card" id="g3-controller" style="border-color: rgba(168, 85, 247, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g3);">03</div>
+            <div class="stage-titles">
+              <h2>Controller (Controlador)</h2>
+              <p>Metáfora: <em>"El piloto de avión que intenta despachar boletos, cargar combustible y pilotar al mismo tiempo."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG3State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG3State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g3Theater">
+          <div id="g3CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Pilot with 4 hands -->
+              <circle cx="100" cy="50" r="22" fill="#c084fc"/>
+              <text x="90" y="55" font-size="14">😵</text>
+              <rect x="92" y="75" width="16" height="50" fill="#7e22ce"/>
+              <!-- Airplane wheel in hand 1 -->
+              <circle cx="50" cy="80" r="14" fill="none" stroke="#fff" stroke-width="4"/>
+              <!-- Fuel bucket in hand 2 -->
+              <rect x="135" y="75" width="20" height="24" fill="#ef4444"/>
+              <text x="138" y="92" font-size="12">⛽</text>
+              <!-- Ticket machine -->
+              <rect x="40" y="115" width="22" height="16" fill="#fcd34d"/>
+              <text x="44" y="128" font-size="10">🎟️</text>
+              <!-- Coffee pot -->
+              <text x="140" y="135" font-size="16">☕</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g3Bubble">
+            ¡Nos vamos a estrellar! ✈️💥 El <code>PedidoController</code> está recibiendo el HTTP, consultando SQL, calculando impuestos y enviando correos todo dentro del endpoint.
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              El piloto vuela el avión; no vende refrigerios en la puerta de abordaje. La <strong>Torre de Control</strong> recibe la señal de radio y coordina a los equipos de pista.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> El <code>@RestController</code> solo recibe la petición HTTP y delega inmediatamente a <code>PedidoService</code> (el controlador de caso de uso).
+            </p>
+            <span class="metaphor-tag" style="background:rgba(168, 85, 247, 0.15); color:var(--color-g3);">Principio: Controlador</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g3CodeTitle">❌ Violación: Endpoint con 100 líneas de lógica</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g3CodeBody"><span class="hl-ann">@PostMapping</span>
+<span class="hl-kw">public</span> <span class="hl-tp">Pedido</span> <span class="hl-tp">crear</span>(<span class="hl-ann">@RequestBody</span> <span class="hl-tp">PedidoRequest</span> req) {
+    <span class="hl-cm">// ❌ Busca en BD, calcula, envía correos...</span>
+    <span class="hl-cm">// ¡El controlador hace el trabajo de toda la empresa!</span>
+    <span class="hl-kw">return</span> repository.<span class="hl-tp">save</span>(pedido);
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 04: LOW COUPLING ==================== -->
+      <section class="stage-card" id="g4-lowcoupling" style="border-color: rgba(236, 72, 153, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g4);">04</div>
+            <div class="stage-titles">
+              <h2>Low Coupling (Bajo Acoplamiento)</h2>
+              <p>Metáfora: <em>"El astronauta pegado con cemento a la turbina del cohete."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG4State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG4State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g4Theater">
+          <div id="g4CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Rocket -->
+              <polygon points="120,20 150,80 90,80" fill="#cbd5e1"/>
+              <rect x="95" y="80" width="50" height="60" fill="#e2e8f0"/>
+              <!-- Welded / Glued Astronaut directly to rocket -->
+              <circle cx="65" cy="90" r="18" fill="#f472b6"/>
+              <text x="58" y="95" font-size="12">x_x</text>
+              <rect x="80" y="85" width="20" height="20" fill="#f59e0b"/>
+              <text x="82" y="100" font-size="12">🧱</text>
+              <!-- Fire -->
+              <polygon points="105,140 120,170 135,140" fill="#f97316"/>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g4Bubble">
+            ¡Estoy atrapado! 🚀 Me pegaron al cohete con <code>new EmailService()</code>. Si queremos viajar a Marte usando WhatsApp, ¡tienen que desarmarme entero!
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              Nadie suelda su cargador de celular a la batería del auto. Usas un cable USB estándar: si cambias de celular o de auto, <strong>el conector sigue funcionando</strong>.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> Diseña las clases para que conozcan abstracciones (`Notificador`) y no implementaciones concretas, minimizando el impacto de los cambios.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(236, 72, 153, 0.15); color:var(--color-g4);">Principio: Bajo Acoplamiento</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g4CodeTitle">❌ Violación: new EmailService() soldado</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g4CodeBody"><span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">PedidoService</span> {
+    <span class="hl-cm">// ❌ Atado de por vida a Email</span>
+    <span class="hl-kw">private final</span> <span class="hl-tp">EmailService</span> email = <span class="hl-kw">new</span> <span class="hl-tp">EmailService</span>();
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 05: HIGH COHESION ==================== -->
+      <section class="stage-card" id="g5-highcohesion" style="border-color: rgba(244, 63, 94, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g5);">05</div>
+            <div class="stage-titles">
+              <h2>High Cohesion (Alta Cohesión)</h2>
+              <p>Metáfora: <em>"El Doctor-Mecánico-Peluquero que te arregla los frenos y te opera el apéndice con la misma llave inglesa."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG5State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG5State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g5Theater">
+          <div id="g5CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Frankendoctor with stethoscope, wrench, hair trimmer -->
+              <circle cx="100" cy="50" r="22" fill="#fb7185"/>
+              <text x="90" y="55" font-size="14">🤪</text>
+              <rect x="92" y="75" width="16" height="50" fill="#e11d48"/>
+              <!-- Stethoscope around neck -->
+              <path d="M85 65 Q100 85 115 65" stroke="#38bdf8" stroke-width="4" fill="none"/>
+              <!-- Wrench in hand -->
+              <text x="45" y="95" font-size="20">🔧</text>
+              <!-- Hair scissors in other hand -->
+              <text x="140" y="95" font-size="20">✂️</text>
+              <!-- Oil dripping -->
+              <circle cx="55" cy="120" r="4" fill="#000"/>
+              <!-- Tax calculator -->
+              <text x="100" y="150" font-size="16">🧮</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g5Bubble">
+            ¡Tranquilo, no se mueva! 💉🔧 Mientras le cambio las bujías al motor, le saco una muela y le declaro los impuestos en <code>SistemaService</code>.
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              ¿Dejarías que un mecánico te haga una endodoncia con su taladro de llantas? <strong>Cada profesión tiene su campo y su instrumental</strong>.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> Una clase altamente cohesiva solo contiene métodos estrechamente relacionados con su especialidad (`PedidoService` solo atiende pedidos).
+            </p>
+            <span class="metaphor-tag" style="background:rgba(244, 63, 94, 0.15); color:var(--color-g5);">Principio: Alta Cohesión</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g5CodeTitle">❌ Violación: Clase "Bolsa de Gatos"</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g5CodeBody"><span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">SistemaService</span> {
+    <span class="hl-kw">void</span> <span class="hl-tp">crearPedido</span>() { ... }
+    <span class="hl-kw">void</span> <span class="hl-tp">declararImpuestos</span>() { ... }
+    <span class="hl-kw">void</span> <span class="hl-tp">cambiarAceite</span>() { ... }
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 06: POLYMORPHISM ==================== -->
+      <section class="stage-card" id="g6-polymorphism" style="border-color: rgba(251, 146, 60, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g6);">06</div>
+            <div class="stage-titles">
+              <h2>Polymorphism (Polimorfismo)</h2>
+              <p>Metáfora: <em>"El auto con 3 volantes diferentes: uno para doblar en asfalto, otro en tierra y otro en nieve."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG6State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG6State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g6Theater">
+          <div id="g6CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Driver with 3 steering wheels -->
+              <circle cx="100" cy="50" r="22" fill="#fb923c"/>
+              <text x="90" y="55" font-size="14">😵</text>
+              <rect x="92" y="75" width="16" height="50" fill="#ea580c"/>
+              <!-- Wheel 1: Normal -->
+              <circle cx="50" cy="90" r="14" stroke="#38bdf8" stroke-width="4" fill="none"/>
+              <text x="40" y="120" font-size="9" fill="#38bdf8">if NORMAL</text>
+              <!-- Wheel 2: Express -->
+              <circle cx="100" cy="110" r="14" stroke="#f59e0b" stroke-width="4" fill="none"/>
+              <text x="85" y="140" font-size="9" fill="#f59e0b">if EXPRESS</text>
+              <!-- Wheel 3: International -->
+              <circle cx="150" cy="90" r="14" stroke="#ef4444" stroke-width="4" fill="none"/>
+              <text x="135" y="120" font-size="9" fill="#ef4444">if INTER</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g6Bubble">
+            ¡Voy a chocar! 🚗💥 Para cada tipo de envío tengo que soltar el volante y buscar otra palanca en una cadena infinita de <code>if / else if</code>.
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              Un auto moderno tiene un <strong>solo volante universal</strong>. No cambias de timón según la calle: el auto delega la tracción a sus ruedas inteligentemente.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> Cuando el comportamiento varía según el tipo, crea una interfaz (`TipoEnvio`) y delega el cálculo a cada clase especialista.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(251, 146, 60, 0.15); color:var(--color-g6);">Principio: Polimorfismo</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g6CodeTitle">❌ Violación: if/else por tipo</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g6CodeBody"><span class="hl-kw">if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"NORMAL"</span>)) <span class="hl-kw">return</span> p * <span class="hl-num">2</span>;
+<span class="hl-kw">else if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"EXPRESS"</span>)) <span class="hl-kw">return</span> p * <span class="hl-num">5</span>;
+<span class="hl-kw">else if</span> (tipo.<span class="hl-tp">equals</span>(<span class="hl-str">"INTER"</span>)) <span class="hl-kw">return</span> p * <span class="hl-num">10</span>;</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 07: PURE FABRICATION ==================== -->
+      <section class="stage-card" id="g7-purefabrication" style="border-color: rgba(250, 204, 21, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g7); color:#000;">07</div>
+            <div class="stage-titles">
+              <h2>Pure Fabrication (Fabricación Pura)</h2>
+              <p>Metáfora: <em>"El cliente cargando archivadores de metal en la espalda vs El Robot Bibliotecario inventado."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG7State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG7State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g7Theater">
+          <div id="g7CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Customer crushed by heavy metal server rack -->
+              <rect x="70" y="30" width="80" height="70" fill="#334155" rx="6"/>
+              <text x="80" y="55" font-size="12" fill="#38bdf8">POSTGRESQL</text>
+              <line x1="80" y1="65" x2="140" y2="65" stroke="#94a3b8" stroke-width="2"/>
+              <line x1="80" y1="80" x2="140" y2="80" stroke="#94a3b8" stroke-width="2"/>
+              <!-- Bent customer underneath -->
+              <circle cx="60" cy="120" r="16" fill="#facc15"/>
+              <text x="54" y="125" font-size="12">x_x</text>
+              <path d="M60 136 L60 165 M60 145 L40 155 M60 145 L80 140" stroke="#facc15" stroke-width="4" stroke-linecap="round"/>
+              <text x="140" y="140" font-size="18">💾🔥</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g7Bubble">
+            ¡Me aplasta la base de datos! 🗄️ La entidad <code>Pedido</code> representa una compra, pero le metieron código JDBC, transacciones SQL y conexiones de red en su cuerpo.
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              En el mundo real no existe un "Repositorio". Los clientes compran productos, no repositorios. Pero inventar ese <strong>robot archivador artificial</strong> evita que el cliente cargue el peso de la base de datos.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> Crea clases que no existan en el negocio (`PedidoRepository`) para encargarse de aspectos puramente técnicos (SQL, serialización).
+            </p>
+            <span class="metaphor-tag" style="background:rgba(250, 204, 21, 0.15); color:var(--color-g7);">Principio: Fabricación Pura</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g7CodeTitle">❌ Violación: Pedido con código SQL JDBC</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g7CodeBody"><span class="hl-kw">public class</span> <span class="hl-tp">Pedido</span> {
+    <span class="hl-cm">// ❌ La entidad de negocio maneja base de datos</span>
+    <span class="hl-kw">public void</span> <span class="hl-tp">guardarEnPostgres</span>() {
+        <span class="hl-tp">Connection</span> con = <span class="hl-tp">DriverManager</span>.<span class="hl-tp">getConnection</span>(...);
+    }
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 08: INDIRECTION ==================== -->
+      <section class="stage-card" id="g8-indirection" style="border-color: rgba(74, 222, 128, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g8); color:#000;">08</div>
+            <div class="stage-titles">
+              <h2>Indirection (Indirección)</h2>
+              <p>Metáfora: <em>"Gritarle directamente en español a un banquero japonés vs Contratar a un traductor de la ONU."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG8State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG8State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g8Theater">
+          <div id="g8CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Service shouting at 2 external foreign APIs -->
+              <circle cx="50" cy="80" r="20" fill="#4ade80"/>
+              <text x="40" y="85" font-size="12">🗣️</text>
+              <text x="35" y="125" font-size="10" fill="#4ade80">PagoService</text>
+              <!-- Lightning bolt connecting directly to complex PayPal SDK -->
+              <path d="M75 80 L135 50" stroke="#f43f5e" stroke-width="4" stroke-dasharray="4"/>
+              <rect x="140" y="30" width="45" height="35" fill="#003087" rx="6"/>
+              <text x="145" y="52" font-size="11" fill="#fff">PayPal</text>
+              <!-- Direct wire to Stripe SDK -->
+              <path d="M75 85 L135 110" stroke="#f43f5e" stroke-width="4" stroke-dasharray="4"/>
+              <rect x="140" y="95" width="45" height="35" fill="#635bff" rx="6"/>
+              <text x="145" y="118" font-size="11" fill="#fff">Stripe</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g8Bubble">
+            ¡No entiendo nada! 🤯 <code>PagoService</code> tiene que saber hablar el dialecto exacto de PayPal y Stripe. ¡Si PayPal actualiza su API, mi tienda quiebra!
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              En la asamblea de la ONU los presidentes no aprenden 193 idiomas. Usan un <strong>auricular con traductor simultáneo</strong>. El traductor es el intermediario.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> Pon un adaptador intermediario (`PasarelaPago`) entre tu negocio y la API de terceros. Tu código solo habla con el adaptador.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(74, 222, 128, 0.15); color:var(--color-g8);">Principio: Indirección</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g8CodeTitle">❌ Violación: Acoplado al SDK externo</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g8CodeBody"><span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">PagoService</span> {
+    <span class="hl-cm">// ❌ Conoce la API propietaria de PayPal</span>
+    <span class="hl-tp">PayPalApi</span> api = <span class="hl-kw">new</span> <span class="hl-tp">PayPalApi</span>();
+    api.<span class="hl-tp">realizarPago</span>(monto);
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== 09: PROTECTED VARIATIONS ==================== -->
+      <section class="stage-card" id="g9-protectedvariations" style="border-color: rgba(45, 212, 191, 0.4);">
+        <div class="stage-header">
+          <div class="stage-title-group">
+            <div class="stage-letter" style="background:var(--color-g9); color:#000;">09</div>
+            <div class="stage-titles">
+              <h2>Protected Variations (Variaciones Protegidas)</h2>
+              <p>Metáfora: <em>"Construir una casa con techo de cristal que se inunda con cada llovizna vs Poner un paraguas blindado."</em></p>
+            </div>
+          </div>
+          <div class="mode-switch-bar">
+            <button class="mode-btn active btn-chaos" onclick="setG9State('chaos', this)">💥 ¡El Desastre!</button>
+            <button class="mode-btn btn-zen" onclick="setG9State('zen', this)">✨ ¡Solución Zen!</button>
+          </div>
+        </div>
+
+        <div class="theater-display" id="g9Theater">
+          <div id="g9CharBox" class="anim-shake">
+            <svg width="200" height="180" viewBox="0 0 200 180">
+              <!-- Storm cloud with rain -->
+              <path d="M40 30 Q60 10 90 20 Q120 10 140 30 Q160 50 140 60 L50 60 Z" fill="#64748b"/>
+              <line x1="60" y1="70" x2="50" y2="90" stroke="#38bdf8" stroke-width="3"/>
+              <line x1="90" y1="70" x2="80" y2="90" stroke="#38bdf8" stroke-width="3"/>
+              <line x1="120" y1="70" x2="110" y2="90" stroke="#38bdf8" stroke-width="3"/>
+              <!-- Soaked shivering developer underneath without umbrella -->
+              <circle cx="85" cy="115" r="16" fill="#2dd4bf"/>
+              <text x="78" y="120" font-size="12">🥶</text>
+              <rect x="80" y="132" width="10" height="35" fill="#0f766e"/>
+              <circle cx="105" cy="115" r="4" fill="#38bdf8" style="animation: sweatDrop 0.8s infinite;"/>
+              <text x="120" y="145" font-size="14">⚡API DOWN</text>
+            </svg>
+          </div>
+
+          <div class="comic-bubble chaos-bubble" id="g9Bubble">
+            ¡Nos inundamos! 🌧️ El proveedor del precio del dólar cambió su JSON sin avisar y nuestra lógica de compras dejó de funcionar en producción.
+          </div>
+        </div>
+
+        <div class="explanation-split">
+          <div class="metaphor-card">
+            <h4>📖 La Metáfora de la Vida Real</h4>
+            <p>
+              Si sabes que en tu ciudad llueve mucho, no sales en camisa de papel. Llevas un <strong>paraguas impermeable</strong>.
+            </p>
+            <p>
+              <strong>Regla de Asignación:</strong> Identifica los puntos inestables (cotizaciones, aduanas, pasarelas) y <strong>crea una interfaz blindada alrededor de ellos</strong>. Si el proveedor cambia, tu negocio ni se entera.
+            </p>
+            <span class="metaphor-tag" style="background:rgba(45, 212, 191, 0.15); color:var(--color-g9);">Principio: Variaciones Protegidas</span>
+          </div>
+
+          <div class="code-card">
+            <div class="code-card-header">
+              <span id="g9CodeTitle">❌ Violación: Consulta cruda a API inestable</span>
+              <span>Java 21 / Spring Boot</span>
+            </div>
+<pre><code id="g9CodeBody"><span class="hl-ann">@Service</span>
+<span class="hl-kw">public class</span> <span class="hl-tp">CompraService</span> {
+    <span class="hl-cm">// ❌ Sin protección ante caídas o cambios del tercero</span>
+    <span class="hl-tp">BigDecimal</span> tasa = <span class="hl-tp">HttpClient</span>.<span class="hl-tp">get</span>(<span class="hl-str">"https://api-volatil.com"</span>);
+}</code></pre>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <p>🎭 <strong>GRASP Animado: Edición Didáctica con Muñecos para Estudiantes de Software</strong></p>
+    <p>Universidad Iberoamericana del Ecuador &middot; UNIBE &middot; Período Académico 2026</p>
+    <p>Diseño y Arquitectura de Software &middot; Creado con ❤️ y pedagogía visual por Byron Rodrigo Moreno Moreno</p>
+  </footer>
+
+  <!-- Scripts & Web Audio Synthesizer -->
+  <script>
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function toggleSound() {
+      soundEnabled = !soundEnabled;
+      const statusText = document.getElementById('soundStatusText');
+      const btn = document.getElementById('soundToggleBtn');
+      if (soundEnabled) {
+        statusText.innerText = "Activados";
+        btn.style.color = "#38bdf8";
+        playZenSound();
+      } else {
+        statusText.innerText = "Silenciado";
+        btn.style.color = "#94a3b8";
+      }
+    }
+
+    function playChaosSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(60, audioCtx.currentTime + 0.3);
+      gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+      gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function playZenSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      const notes = [329.63, 392.00, 493.88, 587.33]; // Em7 arpeggio
+      notes.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + index * 0.07);
+        gain.gain.setValueAtTime(0.16, audioCtx.currentTime + index * 0.07);
+        gain.gain.linearRampToValueAtTime(0.001, audioCtx.currentTime + index * 0.07 + 0.28);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + index * 0.07);
+        osc.stop(audioCtx.currentTime + index * 0.07 + 0.28);
+      });
+    }
+
+    function genericToggle(cardId, charBoxId, bubbleId, codeTitleId, codeBodyId, mode, btn, chaosHtml, zenHtml, chaosText, zenText, chaosCodeTitle, zenCodeTitle, chaosCode, zenCode) {
+      const card = document.getElementById(cardId);
+      card.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const charBox = document.getElementById(charBoxId);
+      const bubble = document.getElementById(bubbleId);
+      const codeTitle = document.getElementById(codeTitleId);
+      const codeBody = document.getElementById(codeBodyId);
+
+      if (mode === 'chaos') {
+        playChaosSound();
+        charBox.className = 'anim-shake';
+        charBox.innerHTML = chaosHtml;
+        bubble.className = 'comic-bubble chaos-bubble';
+        bubble.innerHTML = chaosText;
+        codeTitle.innerText = chaosCodeTitle;
+        codeBody.innerHTML = chaosCode;
+      } else {
+        playZenSound();
+        charBox.className = 'anim-bounce';
+        charBox.innerHTML = zenHtml;
+        bubble.className = 'comic-bubble zen-bubble';
+        bubble.innerHTML = zenText;
+        codeTitle.innerText = zenCodeTitle;
+        codeBody.innerHTML = zenCode;
+      }
+    }
+
+    // G1 Information Expert
+    function setG1State(mode, btn) {
+      genericToggle('g1-expert', 'g1CharBox', 'g1Bubble', 'g1CodeTitle', 'g1CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><circle cx="60" cy="70" r="22" fill="#38bdf8"/><path d="M68 110 Q110 80 140 100" stroke="#38bdf8" stroke-width="8" stroke-linecap="round" fill="none"/><circle cx="160" cy="70" r="22" fill="#fcd34d"/><text x="150" y="75" font-size="14">😱</text><circle cx="130" cy="115" r="7" fill="#fbbf24"/><circle cx="145" cy="135" r="7" fill="#fbbf24"/><text x="110" y="60" font-size="20">💥</text></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="background:#0f172a; border:2px solid #38bdf8; border-radius:16px; padding:16px; text-align:center;"><div style="font-size:2.5rem;">👛✨</div><div style="font-family:var(--font-fun); font-size:0.85rem; color:#38bdf8; font-weight:700;">Pedido.calcularTotal()</div></div></div>`,
+        '¡OIGA! 😡 ¿Por qué el controlador me mete la mano en el bolsillo? Si soy el Pedido, ¡yo sé cuánto sumo!',
+        '¡Excelente! 👛 El Pedido es el experto: suma los subtotales de sus detalles y le entrega el monto listo al controlador.',
+        '❌ Violación: Controlador sumando productos',
+        '✅ Solución: Pedido es el Experto en Información',
+        `<span class="hl-ann">@PostMapping</span>("/total")\n<span class="hl-kw">double</span> total = 0;\nfor (Producto p : pedido.getProductos()) total += p.getPrecio() * p.getCantidad();`,
+        `// ✅ Pedido calcula su total\npublic BigDecimal calcularTotal() {\n    return detalles.stream()\n        .map(DetallePedido::calcularSubtotal)\n        .reduce(BigDecimal.ZERO, BigDecimal::add);\n}`
+      );
+    }
+
+    // G2 Creator
+    function setG2State(mode, btn) {
+      genericToggle('g2-creator', 'g2CharBox', 'g2Bubble', 'g2CodeTitle', 'g2CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><circle cx="100" cy="50" r="22" fill="#818cf8"/><text x="90" y="55" font-size="14">😵</text><ellipse cx="65" cy="45" rx="14" ry="8" fill="#f59e0b"/><circle cx="135" cy="45" r="9" fill="#ef4444"/><text x="135" y="85" font-size="18">🍔💥</text></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="background:#0f172a; border:2px solid #818cf8; border-radius:16px; padding:16px; text-align:center;"><div style="font-size:2.5rem;">🍔✨</div><div style="font-family:var(--font-fun); font-size:0.85rem; color:#818cf8; font-weight:700;">pedido.agregarDetalle()</div></div></div>`,
+        '¡Qué desastre! 😱 El controlador intenta crear cada DetallePedido en la mesa frente al cliente con ingredientes sueltos.',
+        '¡Delicioso y ordenado! 🍔 Pedido tiene la cocina y la lista, así que él mismo crea y encapsula sus DetallePedido.',
+        '❌ Violación: Controlador instanciando detalles',
+        '✅ Solución: Pedido es el Creador natural',
+        `<span class="hl-tp">DetallePedido</span> d = <span class="hl-kw">new</span> <span class="hl-tp">DetallePedido</span>();\nd.setCantidad(item.cantidad());\npedido.getDetalles().add(d);`,
+        `// ✅ Pedido crea y almacena sus propios detalles\npublic void agregarDetalle(Producto prod, Integer cant) {\n    this.detalles.add(new DetallePedido(prod, cant));\n}`
+      );
+    }
+
+    // G3 Controller
+    function setG3State(mode, btn) {
+      genericToggle('g3-controller', 'g3CharBox', 'g3Bubble', 'g3CodeTitle', 'g3CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><circle cx="100" cy="50" r="22" fill="#c084fc"/><text x="90" y="55" font-size="14">😵</text><text x="45" y="95" font-size="16">🎟️</text><text x="140" y="95" font-size="16">⛽</text></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="text-align:center;"><div style="font-size:2rem;">📡</div><div style="font-size:0.75rem; color:#c084fc; font-weight:700;">PedidoController</div></div><div style="font-size:1.5rem;">➡️</div><div style="text-align:center;"><div style="font-size:2rem;">🧑‍✈️</div><div style="font-size:0.75rem; color:#34d399; font-weight:700;">PedidoService</div></div></div>`,
+        '¡Nos vamos a estrellar! ✈️💥 El controlador está atendiendo el HTTP, haciendo consultas SQL y enviando correos todo junto.',
+        '¡Vuelo despejado! 🛫 El controlador atiende la radio HTTP y delega a PedidoService como coordinador del caso de uso.',
+        '❌ Violación: Endpoint con 100 líneas de lógica',
+        '✅ Solución: Separación clara de Controlador y Caso de Uso',
+        `@PostMapping\npublic Pedido crear() {\n    // Buscar productos, calcular, guardar en SQL, enviar emails...\n}`,
+        `@PostMapping\npublic ResponseEntity<Pedido> crear(@RequestBody PedidoRequest req) {\n    return ResponseEntity.ok(pedidoService.crear(req));\n}`
+      );
+    }
+
+    // G4 Low Coupling
+    function setG4State(mode, btn) {
+      genericToggle('g4-lowcoupling', 'g4CharBox', 'g4Bubble', 'g4CodeTitle', 'g4CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><rect x="95" y="80" width="50" height="60" fill="#e2e8f0"/><circle cx="65" cy="90" r="18" fill="#f472b6"/><text x="82" y="100" font-size="12">🧱</text></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="font-size:2.5rem;">🔌✨</div><div style="font-family:var(--font-fun); font-size:0.85rem; color:#ec4899; font-weight:700;">Interfaz Notificador</div></div>`,
+        '¡Pegado con cemento! 🚀 Con new EmailService() quedé soldado al cohete para siempre.',
+        '¡Bajo acoplamiento total! 🔌 Con la interfaz Notificador podemos cambiar de Email a WhatsApp sin tocar el servicio.',
+        '❌ Violación: new EmailService() soldado',
+        '✅ Solución: Contrato abstracto Notificador',
+        `private final EmailService email = new EmailService();`,
+        `private final Notificador notificador;\n// Spring inyecta la implementación por constructor`
+      );
+    }
+
+    // G5 High Cohesion
+    function setG5State(mode, btn) {
+      genericToggle('g5-highcohesion', 'g5CharBox', 'g5Bubble', 'g5CodeTitle', 'g5CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><circle cx="100" cy="50" r="22" fill="#fb7185"/><text x="45" y="95" font-size="20">🔧</text><text x="140" y="95" font-size="20">✂️</text></svg>`,
+        `<div style="display:flex; gap:12px;"><div style="background:#1e293b; padding:12px; border-radius:12px; text-align:center;"><div style="font-size:1.8rem;">📦</div><div style="font-size:0.7rem; color:#fb7185;">PedidoService</div></div><div style="background:#1e293b; padding:12px; border-radius:12px; text-align:center;"><div style="font-size:1.8rem;">🧾</div><div style="font-size:0.7rem; color:#facc15;">FacturaService</div></div><div style="background:#1e293b; padding:12px; border-radius:12px; text-align:center;"><div style="font-size:1.8rem;">👤</div><div style="font-size:0.7rem; color:#38bdf8;">UsuarioService</div></div></div>`,
+        '¡Peligro! 💉🔧 Un mismo servicio te corta el pelo, te arregla los frenos y te opera el apéndice.',
+        '¡Alta cohesión! 🏥 Cada clase atiende una única especialidad con métodos enfocados en un objetivo unificado.',
+        '❌ Violación: Clase "Bolsa de Gatos"',
+        '✅ Solución: Servicios especializados y enfocados',
+        `class SistemaService {\n    void crearPedido() {}\n    void calcularImpuestos() {}\n}`,
+        `class PedidoService {\n    // Solo operaciones de ciclo de vida del pedido\n}`
+      );
+    }
+
+    // G6 Polymorphism
+    function setG6State(mode, btn) {
+      genericToggle('g6-polymorphism', 'g6CharBox', 'g6Bubble', 'g6CodeTitle', 'g6CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><circle cx="100" cy="50" r="22" fill="#fb923c"/><circle cx="50" cy="90" r="14" stroke="#38bdf8" stroke-width="4" fill="none"/><circle cx="150" cy="90" r="14" stroke="#ef4444" stroke-width="4" fill="none"/></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="font-size:2.5rem;">🎮✨</div><div style="font-family:var(--font-fun); font-size:0.85rem; color:#fb923c; font-weight:700;">Map&lt;String, TipoEnvio&gt;</div></div>`,
+        '¡Voy a chocar! 🚗💥 Para cada tipo de tarifa tengo que soltar el timón y buscar otra palanca con if/else.',
+        '¡Elegancia polimórfica! 🏎️ Una sola interfaz TipoEnvio y Spring inyecta todas las tarifas en un Map.',
+        '❌ Violación: if/else por tipo',
+        '✅ Solución: Polimorfismo con Map de Beans',
+        `if (tipo.equals("NORMAL")) ...\nelse if (tipo.equals("EXPRESS")) ...`,
+        `private final Map<String, TipoEnvio> estrategias;\nreturn estrategias.get(tipo).calcularCosto(peso);`
+      );
+    }
+
+    // G7 Pure Fabrication
+    function setG7State(mode, btn) {
+      genericToggle('g7-purefabrication', 'g7CharBox', 'g7Bubble', 'g7CodeTitle', 'g7CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><rect x="70" y="30" width="80" height="70" fill="#334155"/><circle cx="60" cy="120" r="16" fill="#facc15"/><text x="140" y="140" font-size="18">💾🔥</text></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="font-size:2.5rem;">🤖🗄️</div><div style="font-family:var(--font-fun); font-size:0.85rem; color:#facc15; font-weight:700;">PedidoRepository (JPA)</div></div>`,
+        '¡Me aplasta la base de datos! 🗄️ La entidad de negocio Pedido está cargando con sentencias SQL JDBC.',
+        '¡Alivio total! 🤖 Creamos una Fabricación Pura: PedidoRepository. Es artificial, pero salva la pureza del negocio.',
+        '❌ Violación: Entidad con código SQL',
+        '✅ Solución: PedidoRepository como Fabricación Pura',
+        `class Pedido {\n    public void guardarEnSQL() { ... }\n}`,
+        `@Repository\npublic interface PedidoRepository extends JpaRepository<Pedido, Long> {}`
+      );
+    }
+
+    // G8 Indirection
+    function setG8State(mode, btn) {
+      genericToggle('g8-indirection', 'g8CharBox', 'g8Bubble', 'g8CodeTitle', 'g8CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><circle cx="50" cy="80" r="20" fill="#4ade80"/><rect x="140" y="30" width="45" height="35" fill="#003087"/><rect x="140" y="95" width="45" height="35" fill="#635bff"/></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="font-size:2.5rem;">🎧🌐</div><div style="font-family:var(--font-fun); font-size:0.85rem; color:#4ade80; font-weight:700;">PasarelaPago (Adapter)</div></div>`,
+        '¡No entiendo nada! 🤯 PagoService llamando a APIs extranjeras directamente sin ningún traductor en medio.',
+        '¡Traducción perfecta! 🎧 El adaptador PasarelaPago media la comunicación: si PayPal cambia su API, solo se ajusta el adaptador.',
+        '❌ Violación: Acoplado al SDK externo',
+        '✅ Solución: Indirección mediante PasarelaPago',
+        `PayPalApi api = new PayPalApi();\napi.realizarPago(monto);`,
+        `private final PasarelaPago pasarela;\npasarela.realizarPago(monto); // Intermediario limpio`
+      );
+    }
+
+    // G9 Protected Variations
+    function setG9State(mode, btn) {
+      genericToggle('g9-protectedvariations', 'g9CharBox', 'g9Bubble', 'g9CodeTitle', 'g9CodeBody', mode, btn,
+        `<svg width="200" height="180" viewBox="0 0 200 180"><path d="M40 30 Q60 10 90 20 Q120 10 140 30 L50 60 Z" fill="#64748b"/><circle cx="85" cy="115" r="16" fill="#2dd4bf"/><text x="120" y="145" font-size="14">⚡DOWN</text></svg>`,
+        `<div style="display:flex; align-items:center; gap:16px;"><div style="font-size:2.5rem;">🛡️☂️</div><div style="font-family:var(--font-fun); font-size:0.85rem; color:#2dd4bf; font-weight:700;">TipoCambioProvider</div></div>`,
+        '¡Nos inundamos! 🌧️ El proveedor externo de divisas cambió su formato sin avisar y quebró toda la tienda.',
+        '¡Paraguas blindado! 🛡️ Protegimos el punto inestable detrás de la interfaz TipoCambioProvider. ¡Cero caídas en producción!',
+        '❌ Violación: Llamada directa a API inestable',
+        '✅ Solución: Variación Protegida con Contrato',
+        `BigDecimal tasa = HttpClient.get("https://api-inestable.com");`,
+        `private final TipoCambioProvider provider;\n// Si la API cambia, el negocio sigue blindado`
+      );
+    }
+  </script>
+
+</body>
+</html>
