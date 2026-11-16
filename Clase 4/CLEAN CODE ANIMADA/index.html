@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Clean Code Animado: Explicación 100% didáctica, animada y visual con muñecos, sonidos nativos y analogías de Clean Code, KISS, DRY y YAGNI en Java 21 y Spring Boot.">
+  <title>Clean Code Animado: KISS, DRY y YAGNI | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Fira+Code:wght@500;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #050d14;
+      --bg-card: rgba(12, 26, 36, 0.9);
+      --bg-card-border: rgba(16, 185, 129, 0.28);
+      
+      --color-clean: #10b981;
+      --color-kiss: #06b6d4;
+      --color-dry: #8b5cf6;
+      --color-yagni: #f59e0b;
+      --color-danger: #ef4444;
+      --color-success: #10b981;
+      
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      
+      --font-fun: 'Fredoka', cursive, sans-serif;
+      --font-body: 'Outfit', sans-serif;
+      --font-code: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-body);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 15%, rgba(16, 185, 129, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 90% 25%, rgba(6, 182, 212, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 50% 85%, rgba(245, 158, 11, 0.08) 0%, transparent 50%);
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(5, 13, 20, 0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px; font-family: var(--font-fun); font-size: 1.35rem; font-weight: 700;
+      background: linear-gradient(135deg, #10b981, #06b6d4, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .nav-links { display: flex; align-items: center; gap: 14px; }
+    .btn-nav {
+      font-size: 0.85rem; font-weight: 700; padding: 8px 16px; border-radius: 20px; text-decoration: none;
+      transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-back { background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.12); }
+    .btn-back:hover { background: rgba(255, 255, 255, 0.16); color: #fff; }
+    .btn-sound {
+      background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);
+      cursor: pointer; font-family: var(--font-fun);
+    }
+    .btn-sound:hover { background: rgba(16, 185, 129, 0.25); transform: scale(1.05); }
+
+    /* Hero Section */
+    .hero {
+      max-width: 1200px; margin: 40px auto 30px; padding: 0 24px; text-align: center;
+    }
+    .hero-pill {
+      font-family: var(--font-fun); font-size: 0.88rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 1.5px; background: rgba(16, 185, 129, 0.15); color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35); padding: 6px 18px; border-radius: 30px; display: inline-block;
+      margin-bottom: 18px; animation: pulseGlow 3s infinite ease-in-out;
+    }
+    .hero h1 {
+      font-family: var(--font-fun); font-size: 3.4rem; font-weight: 700; line-height: 1.15;
+      letter-spacing: -1px; margin-bottom: 18px;
+    }
+    .hero-subtitle {
+      font-size: 1.22rem; color: #cbd5e1; max-width: 860px; margin: 0 auto 30px; line-height: 1.6;
+    }
+
+    /* Profe Byte Narrator Avatar */
+    .narrator-bubble {
+      max-width: 900px; margin: 0 auto 40px; background: rgba(14, 30, 42, 0.75);
+      border: 2px dashed rgba(16, 185, 129, 0.4); border-radius: 24px; padding: 22px 28px;
+      display: flex; align-items: center; gap: 24px; text-align: left;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+    .narrator-avatar {
+      width: 80px; height: 80px; flex-shrink: 0; animation: floatAnim 3s infinite ease-in-out;
+    }
+    .narrator-text h4 {
+      font-family: var(--font-fun); font-size: 1.25rem; color: #34d399; margin-bottom: 6px;
+    }
+    .narrator-text p {
+      font-size: 0.98rem; color: #cbd5e1; line-height: 1.55;
+    }
+
+    /* Interactive Pillar Tabs */
+    .tabs-container {
+      max-width: 1200px; margin: 0 auto 30px; padding: 0 24px;
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+    }
+    .tab-btn {
+      font-family: var(--font-fun); font-size: 1.05rem; font-weight: 600;
+      padding: 12px 24px; border-radius: 16px; border: 2px solid transparent;
+      background: rgba(255, 255, 255, 0.05); color: var(--text-muted);
+      cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .tab-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; transform: translateY(-2px); }
+    .tab-btn.active {
+      color: #fff; transform: translateY(-4px); box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+    }
+    .tab-btn[data-target="p1"].active { background: rgba(16, 185, 129, 0.2); border-color: var(--color-clean); color: #6ee7b7; }
+    .tab-btn[data-target="p2"].active { background: rgba(6, 182, 212, 0.2); border-color: var(--color-kiss); color: #67e8f9; }
+    .tab-btn[data-target="p3"].active { background: rgba(139, 92, 246, 0.2); border-color: var(--color-dry); color: #c4b5fd; }
+    .tab-btn[data-target="p4"].active { background: rgba(245, 158, 11, 0.2); border-color: var(--color-yagni); color: #fde68a; }
+
+    /* Pillar Content Panels */
+    .panel-container { max-width: 1200px; margin: 0 auto 60px; padding: 0 24px; }
+    .pillar-panel {
+      display: none; background: var(--bg-card); border-radius: 28px; border: 1px solid var(--bg-card-border);
+      padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+      animation: fadeInScale 0.4s ease-out;
+    }
+    .pillar-panel.active { display: block; }
+
+    /* Character & Analogy Stage */
+    .stage-card {
+      display: grid; grid-template-columns: 340px 1fr; gap: 32px;
+      background: rgba(7, 18, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 20px; padding: 28px; margin-bottom: 32px; align-items: center;
+    }
+    .character-box {
+      text-align: center; position: relative;
+    }
+    .character-svg {
+      width: 220px; height: 220px; margin: 0 auto 12px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.4));
+    }
+    .character-name {
+      font-family: var(--font-fun); font-size: 1.3rem; font-weight: 700; color: #fff; margin-bottom: 4px;
+    }
+    .character-tag {
+      font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);
+    }
+
+    .bubble-container {
+      position: relative; background: rgba(15, 30, 42, 0.9); border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px; padding: 22px 26px; font-size: 1.05rem; line-height: 1.6;
+    }
+    .bubble-container::before {
+      content: ''; position: absolute; left: -14px; top: 50%; transform: translateY(-50%);
+      border-top: 10px solid transparent; border-bottom: 10px solid transparent;
+      border-right: 14px solid rgba(255, 255, 255, 0.1);
+    }
+    .bubble-analogy-title {
+      font-family: var(--font-fun); font-size: 1.15rem; font-weight: 700; color: #fbbf24;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+
+    /* Toggle Chaos vs Zen Switch */
+    .toggle-section {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 24px; padding-bottom: 18px; border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .toggle-title-group h3 {
+      font-family: var(--font-fun); font-size: 1.7rem; font-weight: 700; color: #fff;
+    }
+    .toggle-title-group p { font-size: 0.92rem; color: var(--text-muted); }
+
+    .switch-btn {
+      font-family: var(--font-fun); font-size: 0.95rem; font-weight: 700;
+      padding: 10px 22px; border-radius: 30px; cursor: pointer; border: none;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: inline-flex; align-items: center; gap: 8px;
+    }
+    .switch-btn.is-chaos {
+      background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff;
+      box-shadow: 0 4px 18px rgba(239, 68, 68, 0.4); animation: shakeSubtle 4s infinite;
+    }
+    .switch-btn.is-zen {
+      background: linear-gradient(135deg, #10b981, #059669); color: #fff;
+      box-shadow: 0 4px 18px rgba(16, 185, 129, 0.4); animation: pulseZen 2.5s infinite;
+    }
+
+    /* Code & Architecture Display */
+    .code-grid {
+      display: grid; grid-template-columns: 1fr; gap: 20px;
+    }
+    .code-box {
+      background: #04090e; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
+      overflow: hidden;
+    }
+    .code-box-header {
+      padding: 12px 20px; font-size: 0.82rem; font-weight: 700; font-family: var(--font-code);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .code-chaos-header { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border-bottom: 1px solid rgba(239, 68, 68, 0.3); }
+    .code-zen-header { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border-bottom: 1px solid rgba(16, 185, 129, 0.3); }
+
+    pre {
+      padding: 20px; font-family: var(--font-code); font-size: 0.88rem; line-height: 1.65;
+      overflow-x: auto; color: #e2e8f0;
+    }
+    .kw { color: #f472b6; font-weight: 600; }
+    .ann { color: #fbbf24; font-weight: 600; }
+    .type { color: #38bdf8; }
+    .fn { color: #a78bfa; }
+    .str { color: #a3e635; }
+    .cm { color: #64748b; font-style: italic; }
+    .num { color: #fb923c; }
+
+    /* Takeaways & Bullet Highlights */
+    .takeaway-box {
+      margin-top: 24px; padding: 18px 24px; border-radius: 14px;
+      background: rgba(255, 255, 255, 0.03); border-left: 4px solid var(--color-clean);
+      font-size: 0.95rem; line-height: 1.6;
+    }
+
+    /* Interactive Machine Simulator */
+    .simulator-section {
+      max-width: 1200px; margin: 60px auto; padding: 0 24px;
+    }
+    .machine-card {
+      background: linear-gradient(135deg, rgba(14, 30, 42, 0.95), rgba(7, 18, 26, 0.95));
+      border: 2px solid rgba(16, 185, 129, 0.4); border-radius: 28px; padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6); position: relative; overflow: hidden;
+    }
+    .machine-title {
+      font-family: var(--font-fun); font-size: 2.2rem; font-weight: 700; color: #fff;
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px;
+    }
+    .machine-desc { color: #cbd5e1; font-size: 1.05rem; margin-bottom: 28px; max-width: 800px; }
+    
+    .machine-controls {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px;
+    }
+    .lever-btn {
+      font-family: var(--font-fun); font-size: 0.92rem; font-weight: 600; padding: 10px 20px;
+      border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.15); background: rgba(255, 255, 255, 0.05);
+      color: #fff; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;
+    }
+    .lever-btn:hover { background: rgba(16, 185, 129, 0.2); border-color: var(--color-clean); transform: scale(1.03); }
+    .lever-btn.active-lever { background: var(--color-clean); color: #000; font-weight: 700; border-color: #34d399; }
+
+    .live-code-screen {
+      background: #020609; border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 24px;
+      font-family: var(--font-code); font-size: 0.88rem; line-height: 1.6; color: #e2e8f0;
+      position: relative; min-height: 220px;
+    }
+
+    /* Inspector Quiz Section */
+    .quiz-section { max-width: 1000px; margin: 60px auto; padding: 0 24px; }
+    .quiz-card {
+      background: var(--bg-card); border-radius: 28px; border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 40px; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .quiz-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+      margin-bottom: 28px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 16px;
+    }
+    .quiz-inspector {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .inspector-avatar { width: 64px; height: 64px; animation: bounceSlow 3s infinite; }
+    
+    .question-block {
+      background: rgba(7, 18, 26, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px;
+      padding: 22px; margin-bottom: 20px;
+    }
+    .q-text { font-size: 1.05rem; font-weight: 600; color: #fff; margin-bottom: 14px; }
+    .q-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+    .q-btn {
+      background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px; color: #cbd5e1; font-family: var(--font-fun); font-size: 0.95rem;
+      padding: 10px; cursor: pointer; transition: all 0.2s;
+    }
+    .q-btn:hover:not(:disabled) { background: rgba(16, 185, 129, 0.2); border-color: var(--color-clean); color: #fff; }
+    .q-btn.correct { background: rgba(16, 185, 129, 0.35) !important; border-color: #10b981 !important; color: #6ee7b7 !important; }
+    .q-btn.incorrect { background: rgba(239, 68, 68, 0.35) !important; border-color: #ef4444 !important; color: #fca5a5 !important; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.08); padding: 40px 24px; text-align: center;
+      color: var(--text-muted); font-size: 0.88rem; line-height: 1.8; margin-top: 60px;
+    }
+
+    /* Keyframe Animations */
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.7); }
+    }
+    @keyframes floatAnim {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+    @keyframes bounceSlow {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-10px) scale(1.02); }
+    }
+    @keyframes shakeSubtle {
+      0%, 90%, 100% { transform: rotate(0); }
+      92% { transform: rotate(-3deg); }
+      96% { transform: rotate(3deg); }
+    }
+    @keyframes pulseZen {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.97); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .stage-card { grid-template-columns: 1fr; text-align: center; }
+      .bubble-container::before { display: none; }
+      .hero h1 { font-size: 2.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Bar -->
+  <nav class="top-nav">
+    <div class="brand">
+      <span>🍃</span>
+      <span>Clean Code Animado</span>
+    </div>
+    <div class="nav-links">
+      <button class="btn-nav btn-sound" id="btnSoundToggle" onclick="toggleMute()">
+        <span id="soundIcon">🔊</span>
+        <span id="soundText">Sonido: Activado</span>
+      </button>
+      <a href="../CLEAN CODE/Clean Code y directrices de diseño KISS, DRY y YAGNI.html" class="btn-nav btn-back">
+        <span>📖 Guía Técnica</span>
+      </a>
+      <a href="../../index.html" class="btn-nav btn-back">
+        <span>🏠 Portal UNIBE</span>
+      </a>
+    </div>
+  </nav>
+
+  <!-- Hero Header -->
+  <header class="hero">
+    <div class="hero-pill">✨ Especial Didáctico de Filosofía de Código Limpio</div>
+    <h1>
+      Aprende <span style="color:#10b981;">Clean Code</span>, <span style="color:#06b6d4;">KISS</span>, <span style="color:#8b5cf6;">DRY</span> y <span style="color:#f59e0b;">YAGNI</span>
+    </h1>
+    <p class="hero-subtitle">
+      No basta con escribir código que funcione: ¡debemos escribir código que los seres humanos puedan leer y amar! Descubre las 4 directrices con muñecos, analogías de la vida real y el simulador de refactorización en vivo.
+    </p>
+
+    <!-- Narrator Card -->
+    <div class="narrator-bubble">
+      <div class="narrator-avatar">
+        <!-- SVG Profe Byte with glasses and mortarboard -->
+        <svg viewBox="0 0 100 100" width="100%" height="100%">
+          <circle cx="50" cy="50" r="45" fill="#10b981" opacity="0.15" />
+          <circle cx="50" cy="50" r="40" fill="#0f172a" stroke="#10b981" stroke-width="3" />
+          <!-- Eyes -->
+          <circle cx="38" cy="46" r="6" fill="#38bdf8" />
+          <circle cx="62" cy="46" r="6" fill="#38bdf8" />
+          <circle cx="40" cy="44" r="2" fill="#fff" />
+          <circle cx="64" cy="44" r="2" fill="#fff" />
+          <!-- Glasses -->
+          <rect x="28" y="38" width="20" height="16" rx="4" fill="none" stroke="#fbbf24" stroke-width="2.5" />
+          <rect x="52" y="38" width="20" height="16" rx="4" fill="none" stroke="#fbbf24" stroke-width="2.5" />
+          <line x1="48" y1="46" x2="52" y2="46" stroke="#fbbf24" stroke-width="2.5" />
+          <!-- Big Smile -->
+          <path d="M 36 64 Q 50 76 64 64" fill="none" stroke="#f8fafc" stroke-width="3" stroke-linecap="round" />
+          <!-- Mortarboard Hat -->
+          <polygon points="50,15 82,27 50,39 18,27" fill="#1e293b" stroke="#10b981" stroke-width="2" />
+          <line x1="82" y1="27" x2="84" y2="44" stroke="#fbbf24" stroke-width="2" />
+          <circle cx="84" cy="45" r="2.5" fill="#fbbf24" />
+        </svg>
+      </div>
+      <div class="narrator-text">
+        <h4>¡Hola, soy Profe Byte!</h4>
+        <p>
+          "Un buen programador no es quien escribe 10,000 líneas de código para presumir su intelecto, sino quien resuelve un problema con 10 líneas tan cristalinas que hasta tu abuelita las entendería. ¡Explora cada principio y activa los botones para ver cómo desaparece el caos!"
+        </p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs for the 4 Pillars -->
+  <div class="tabs-container">
+    <button class="tab-btn active" data-target="p1" onclick="switchTab('p1')">
+      <span>🧼</span>
+      <span>01. Clean Code</span>
+    </button>
+    <button class="tab-btn" data-target="p2" onclick="switchTab('p2')">
+      <span>💡</span>
+      <span>02. KISS (Simple)</span>
+    </button>
+    <button class="tab-btn" data-target="p3" onclick="switchTab('p3')">
+      <span>👯</span>
+      <span>03. DRY (No Copies)</span>
+    </button>
+    <button class="tab-btn" data-target="p4" onclick="switchTab('p4')">
+      <span>🎒</span>
+      <span>04. YAGNI (No Especules)</span>
+    </button>
+  </div>
+
+  <!-- Panels Container -->
+  <main class="panel-container">
+
+    <!-- ==========================================
+         PILAR 1: CLEAN CODE
+         ========================================== -->
+    <section class="pillar-panel active" id="p1">
+      <div class="stage-card">
+        <div class="character-box">
+          <div class="character-svg">
+            <!-- Bottle Mystery vs Clean Syrup Bottle -->
+            <svg id="svgP1" viewBox="0 0 200 200" width="100%" height="100%">
+              <g id="p1Chaos">
+                <circle cx="100" cy="100" r="85" fill="#ef4444" opacity="0.1" />
+                <!-- Poison/Mystery potion bottle -->
+                <rect x="80" y="30" width="40" height="25" rx="4" fill="#64748b" />
+                <path d="M 75 55 L 45 150 Q 40 170 100 170 Q 160 170 155 150 L 125 55 Z" fill="#334155" stroke="#ef4444" stroke-width="4" />
+                <circle cx="100" cy="120" r="30" fill="#ef4444" opacity="0.4" />
+                <!-- Question mark label -->
+                <rect x="75" y="95" width="50" height="45" rx="6" fill="#1e293b" stroke="#f87171" stroke-width="2" />
+                <text x="100" y="128" fill="#f87171" font-size="28" font-family="Fredoka" font-weight="700" text-anchor="middle">¿x?</text>
+                <!-- Skull/Danger bubbles -->
+                <circle cx="85" cy="80" r="4" fill="#ef4444" />
+                <circle cx="120" cy="75" r="5" fill="#ef4444" />
+                <circle cx="105" cy="65" r="3" fill="#ef4444" />
+              </g>
+              <g id="p1Zen" style="display:none;">
+                <circle cx="100" cy="100" r="85" fill="#10b981" opacity="0.15" />
+                <!-- Crystal Clean Medicine Bottle -->
+                <rect x="80" y="25" width="40" height="25" rx="4" fill="#38bdf8" />
+                <path d="M 70 50 L 50 150 Q 45 170 100 170 Q 155 170 150 150 L 130 50 Z" fill="#0c4a6e" stroke="#10b981" stroke-width="4" />
+                <!-- Golden Clean Label -->
+                <rect x="65" y="90" width="70" height="50" rx="8" fill="#f8fafc" stroke="#10b981" stroke-width="2" />
+                <text x="100" y="112" fill="#0f172a" font-size="10" font-family="Fredoka" font-weight="700" text-anchor="middle">JARABE</text>
+                <text x="100" y="126" fill="#059669" font-size="9" font-family="Fredoka" font-weight="700" text-anchor="middle">DESCUENTO</text>
+                <!-- Sparkles -->
+                <polygon points="160,50 165,65 180,70 165,75 160,90 155,75 140,70 155,65" fill="#fbbf24" />
+              </g>
+            </svg>
+          </div>
+          <div class="character-name" id="nameP1">El Frasco Misterioso "x"</div>
+          <div class="character-tag" id="tagP1">Antipatrón de Nombres Crípticos</div>
+        </div>
+
+        <div class="bubble-container">
+          <div class="bubble-analogy-title">
+            <span>🧪</span>
+            <span>La Analogía de la Farmacia a Ciegas</span>
+          </div>
+          <p id="descP1">
+            Imagina entrar a una farmacia y ver un frasco etiquetado simplemente como <strong>"x"</strong> con instrucciones que dicen <em>"tomar p con d"</em>. ¿Te tomarías esa medicina? ¡Jamás! Eso es exactamente lo que siente otro programador cuando lee <code>calcular(double p, double d)</code>. Clean Code exige etiquetas claras: <code>precioBase</code> y <code>porcentajeDescuento</code>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Toggle State Button -->
+      <div class="toggle-section">
+        <div class="toggle-title-group">
+          <h3 id="panelTitleP1">💥 El Desastre: Nombres que confunden y precisión en peligro</h3>
+          <p id="panelSubtitleP1">Código con variables mudas de una letra y uso de double para dinero.</p>
+        </div>
+        <button class="switch-btn is-chaos" id="btnToggleP1" onclick="toggleState('p1')">
+          <span>✨ ¡Aplicar Clean Code Zen!</span>
+        </button>
+      </div>
+
+      <!-- Code Box -->
+      <div class="code-grid">
+        <div class="code-box">
+          <div class="code-box-header code-chaos-header" id="headerCodeP1">
+            <span>ProductoService.java — ¿Qué demonios hace este método?</span>
+            <span>Java 21 / Spring Boot</span>
+          </div>
+          <pre id="preP1"><code><span class="kw">public class</span> <span class="type">ProductoService</span> {
+
+    <span class="cm">// ❌ Nadie sabe qué es p, ni qué es d, ni por qué retorna x</span>
+    <span class="kw">public double</span> <span class="fn">calcular</span>(<span class="kw">double</span> p, <span class="kw">double</span> d) {
+
+        <span class="kw">double</span> x = p - (p * d / <span class="num">100</span>);
+
+        <span class="kw">return</span> x;
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="takeaway-box" id="takeawayP1">
+        🚨 <strong>Problema grave:</strong> El código no revela su intención. Además, usar <code>double</code> para finanzas produce errores de coma flotante (p. ej. <code>0.1 + 0.2 = 0.30000000000000004</code>).
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PILAR 2: KISS
+         ========================================== -->
+    <section class="pillar-panel" id="p2">
+      <div class="stage-card">
+        <div class="character-box">
+          <div class="character-svg">
+            <!-- Rube Goldberg Monster vs Simple Wall Switch -->
+            <svg id="svgP2" viewBox="0 0 200 200" width="100%" height="100%">
+              <g id="p2Chaos">
+                <circle cx="100" cy="100" r="85" fill="#06b6d4" opacity="0.1" />
+                <!-- 5 Cogs & Complicated Machinery -->
+                <circle cx="70" cy="70" r="28" fill="#1e293b" stroke="#06b6d4" stroke-width="3" stroke-dasharray="6,4" />
+                <circle cx="130" cy="70" r="24" fill="#1e293b" stroke="#f59e0b" stroke-width="3" stroke-dasharray="6,4" />
+                <circle cx="100" cy="130" r="34" fill="#1e293b" stroke="#ef4444" stroke-width="3" stroke-dasharray="8,4" />
+                <!-- Tangled pipes -->
+                <path d="M 40 40 Q 100 20 160 50 T 100 170" fill="none" stroke="#ef4444" stroke-width="3" />
+                <text x="100" y="135" fill="#fca5a5" font-size="10" font-family="Fira Code" font-weight="700" text-anchor="middle">5 CAPAS!</text>
+              </g>
+              <g id="p2Zen" style="display:none;">
+                <circle cx="100" cy="100" r="85" fill="#10b981" opacity="0.15" />
+                <!-- Sleek Wall Switch with Green Light -->
+                <rect x="60" y="50" width="80" height="100" rx="16" fill="#1e293b" stroke="#10b981" stroke-width="3" />
+                <circle cx="100" cy="80" r="8" fill="#10b981" />
+                <!-- Toggle switch turned ON -->
+                <rect x="85" y="100" width="30" height="35" rx="6" fill="#34d399" />
+                <line x1="100" y1="105" x2="100" y2="125" stroke="#064e3b" stroke-width="3" />
+                <text x="100" y="175" fill="#34d399" font-size="12" font-family="Fredoka" font-weight="700" text-anchor="middle">CLICK! = IVA</text>
+              </g>
+            </svg>
+          </div>
+          <div class="character-name" id="nameP2">La Máquina de Rube Goldberg</div>
+          <div class="character-tag" id="tagP2">Antipatrón de Sobreingeniería</div>
+        </div>
+
+        <div class="bubble-container">
+          <div class="bubble-analogy-title">
+            <span>⚙️</span>
+            <span>La Analogía de Encender una Bombilla</span>
+          </div>
+          <p id="descP2">
+            Imagina que para encender la luz de tu sala construyes un sistema donde cae una canica, gira 6 engranes, despierta a un perico y suelta un resorte... ¡cuando sólo necesitabas presionar un interruptor en la pared! <strong>KISS (Keep It Simple, Stupid)</strong> nos exige eliminar la sobrearquitectura de clases y métodos wrappers inútiles.
+          </p>
+        </div>
+      </div>
+
+      <div class="toggle-section">
+        <div class="toggle-title-group">
+          <h3 id="panelTitleP2">💥 El Desastre: 5 Métodos y 1 Clase de Contexto para multiplicar por 0.15</h3>
+          <p id="panelSubtitleP2">Sobreingeniería cósmica que además introdujo un bug crítico.</p>
+        </div>
+        <button class="switch-btn is-chaos" id="btnToggleP2" onclick="toggleState('p2')">
+          <span>✨ ¡Aplicar Principio KISS!</span>
+        </button>
+      </div>
+
+      <div class="code-grid">
+        <div class="code-box">
+          <div class="code-box-header code-chaos-header" id="headerCodeP2">
+            <span>CalculadoraIVA.java — Laberinto abstracto de llamadas</span>
+            <span>Java 21 / Spring Boot</span>
+          </div>
+          <pre id="preP2"><code><span class="kw">public class</span> <span class="type">CalculadoraIVA</span> {
+
+    <span class="cm">// ❌ 4 métodos delegados inútilmente y un Contexto inflado</span>
+    <span class="kw">public double</span> <span class="fn">calcularIVA</span>(<span class="kw">double</span> precio) {
+        <span class="kw">return</span> <span class="fn">procesarOperacion</span>(<span class="fn">crearContexto</span>(<span class="fn">obtenerConfiguracion</span>(<span class="fn">validarPrecio</span>(precio))));
+    }
+
+    <span class="kw">private double</span> <span class="fn">validarPrecio</span>(<span class="kw">double</span> precio) { <span class="kw">return</span> precio; }
+    <span class="kw">private double</span> <span class="fn">obtenerConfiguracion</span>(<span class="kw">double</span> precio) { <span class="kw">return</span> <span class="num">0.15</span>; }
+    <span class="kw">private</span> <span class="type">Contexto</span> <span class="fn">crearContexto</span>(<span class="kw">double</span> iva) { <span class="kw">return new</span> <span class="type">Contexto</span>(iva); }
+
+    <span class="kw">private double</span> <span class="fn">procesarOperacion</span>(<span class="type">Contexto</span> contexto) {
+        <span class="cm">// ¡ERROR! Retorna 0.15 sin multiplicar por el precio</span>
+        <span class="kw">return</span> contexto.<span class="fn">getIva</span>();
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="takeaway-box" id="takeawayP2">
+        🚨 <strong>Trampa de la complejidad:</strong> En medio de tantas capas y abstracciones, el autor olvidó multiplicar por el precio base. La complejidad oculta defectos.
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PILAR 3: DRY
+         ========================================== -->
+    <section class="pillar-panel" id="p3">
+      <div class="stage-card">
+        <div class="character-box">
+          <div class="character-svg">
+            <!-- Copy-Paste Clones vs Single Source of Truth Core -->
+            <svg id="svgP3" viewBox="0 0 200 200" width="100%" height="100%">
+              <g id="p3Chaos">
+                <circle cx="100" cy="100" r="85" fill="#8b5cf6" opacity="0.1" />
+                <!-- 2 Confused Clones with Scissors & Tape -->
+                <rect x="35" y="60" width="55" height="75" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="3" />
+                <rect x="110" y="60" width="55" height="75" rx="8" fill="#1e293b" stroke="#ef4444" stroke-width="3" />
+                <text x="62" y="105" fill="#fca5a5" font-size="11" font-family="Fira Code" font-weight="700" text-anchor="middle">10%</text>
+                <text x="137" y="105" fill="#fca5a5" font-size="11" font-family="Fira Code" font-weight="700" text-anchor="middle">20%</text>
+                <!-- Copy stamp -->
+                <path d="M 75 40 L 125 40" stroke="#ef4444" stroke-width="3" stroke-dasharray="4,4" />
+                <text x="100" y="35" fill="#ef4444" font-size="11" font-family="Fredoka" font-weight="700" text-anchor="middle">COPY-PASTE!</text>
+              </g>
+              <g id="p3Zen" style="display:none;">
+                <circle cx="100" cy="100" r="85" fill="#10b981" opacity="0.15" />
+                <!-- Glowing Central Core / Hub -->
+                <circle cx="100" cy="100" r="36" fill="#1e1b4b" stroke="#a78bfa" stroke-width="4" />
+                <text x="100" y="105" fill="#c4b5fd" font-size="13" font-family="Fredoka" font-weight="700" text-anchor="middle">DRY HUB</text>
+                <!-- Satellite nodes connected -->
+                <line x1="100" y1="64" x2="100" y2="35" stroke="#34d399" stroke-width="3" />
+                <circle cx="100" cy="30" r="10" fill="#047857" />
+                <line x1="100" y1="136" x2="100" y2="165" stroke="#34d399" stroke-width="3" />
+                <circle cx="100" cy="170" r="10" fill="#047857" />
+              </g>
+            </svg>
+          </div>
+          <div class="character-name" id="nameP3">Los Clones del Copiar y Pegar</div>
+          <div class="character-tag" id="tagP3">Antipatrón de Lógica Duplicada</div>
+        </div>
+
+        <div class="bubble-container">
+          <div class="bubble-analogy-title">
+            <span>👯</span>
+            <span>La Analogía de la Receta de la Abuela</span>
+          </div>
+          <p id="descP3">
+            Si tienes la receta del pastel copiada en tres cuadernos distintos, y la abuela decide cambiar el azúcar por miel... ¡debes buscar los 3 cuadernos! Si olvidas uno, tu pastel sabrá terrible. <strong>DRY (Don't Repeat Yourself)</strong> centraliza la regla en un único lugar sagrado: un servicio especialista de cálculo.
+          </p>
+        </div>
+      </div>
+
+      <div class="toggle-section">
+        <div class="toggle-title-group">
+          <h3 id="panelTitleP3">💥 El Desastre: La fórmula de descuento multiplicada por doquier</h3>
+          <p id="panelSubtitleP3">ClienteService y ClienteVipService replicando la misma lógica matemática.</p>
+        </div>
+        <button class="switch-btn is-chaos" id="btnToggleP3" onclick="toggleState('p3')">
+          <span>✨ ¡Aplicar Principio DRY!</span>
+        </button>
+      </div>
+
+      <div class="code-grid">
+        <div class="code-box">
+          <div class="code-box-header code-chaos-header" id="headerCodeP3">
+            <span>ClienteService.java &amp; ClienteVipService.java — Duplicación abierta</span>
+            <span>Java 21 / Spring Boot</span>
+          </div>
+          <pre id="preP3"><code><span class="cm">// En ClienteService.java</span>
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="type">ClienteService</span> {
+    <span class="kw">public double</span> <span class="fn">calcularDescuento</span>(<span class="kw">double</span> precio) {
+        <span class="kw">return</span> precio - (precio * <span class="num">0.10</span>); <span class="cm">// ❌ Duplicado</span>
+    }
+}
+
+<span class="cm">// En ClienteVipService.java</span>
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="type">ClienteVipService</span> {
+    <span class="kw">public double</span> <span class="fn">calcularDescuento</span>(<span class="kw">double</span> precio) {
+        <span class="kw">return</span> precio - (precio * <span class="num">0.20</span>); <span class="cm">// ❌ Duplicado</span>
+    }
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="takeaway-box" id="takeawayP3">
+        🚨 <strong>Riesgo empresarial:</strong> Si mañana el descuento cambia a aplicarse tras impuestos, tendrás que editar N clases, aumentando la probabilidad de facturar erróneamente.
+      </div>
+    </section>
+
+    <!-- ==========================================
+         PILAR 4: YAGNI
+         ========================================== -->
+    <section class="pillar-panel" id="p4">
+      <div class="stage-card">
+        <div class="character-box">
+          <div class="character-svg">
+            <!-- Overloaded Backpack vs Ultralight Modern Bag -->
+            <svg id="svgP4" viewBox="0 0 200 200" width="100%" height="100%">
+              <g id="p4Chaos">
+                <circle cx="100" cy="100" r="85" fill="#f59e0b" opacity="0.1" />
+                <!-- Exploding giant backpack with satellite dish, parachute and fridge -->
+                <rect x="60" y="80" width="80" height="90" rx="14" fill="#78350f" stroke="#ef4444" stroke-width="3" />
+                <circle cx="100" cy="50" r="24" fill="#334155" stroke="#f59e0b" stroke-width="2" />
+                <!-- Satellite Antenna on top -->
+                <line x1="100" y1="26" x2="100" y2="10" stroke="#f59e0b" stroke-width="3" />
+                <path d="M 85 15 Q 100 0 115 15" fill="none" stroke="#f59e0b" stroke-width="3" />
+                <text x="100" y="130" fill="#fef3c7" font-size="10" font-family="Fredoka" font-weight="700" text-anchor="middle">IA + DRONES</text>
+                <text x="100" y="145" fill="#fca5a5" font-size="8" font-family="Fira Code" text-anchor="middle">(NO PEDIDO)</text>
+              </g>
+              <g id="p4Zen" style="display:none;">
+                <circle cx="100" cy="100" r="85" fill="#10b981" opacity="0.15" />
+                <!-- Sleek Minimalist Backpack -->
+                <rect x="70" y="65" width="60" height="85" rx="16" fill="#064e3b" stroke="#10b981" stroke-width="3" />
+                <line x1="85" y1="85" x2="115" y2="85" stroke="#6ee7b7" stroke-width="3" stroke-linecap="round" />
+                <line x1="85" y1="105" x2="115" y2="105" stroke="#6ee7b7" stroke-width="3" stroke-linecap="round" />
+                <text x="100" y="175" fill="#34d399" font-size="12" font-family="Fredoka" font-weight="700" text-anchor="middle">SOLO LO JUSTO</text>
+              </g>
+            </svg>
+          </div>
+          <div class="character-name" id="nameP4">El Mochilero Exagerado</div>
+          <div class="character-tag" id="tagP4">Antipatrón de Especulación Prematura</div>
+        </div>
+
+        <div class="bubble-container">
+          <div class="bubble-analogy-title">
+            <span>🎒</span>
+            <span>La Analogía de Ir a la Esquina por Pan</span>
+          </div>
+          <p id="descP4">
+            Imagina que vas a la panadería de la esquina a comprar dos panes, ¡pero te pones un traje de buzo espacial, llevas un bote inflable y un botiquín para mordeduras de tiburón por si acaso! <strong>YAGNI (You Aren't Gonna Need It)</strong> te dice: programa hoy solo lo que el negocio te pidió formalmente hoy.
+          </p>
+        </div>
+      </div>
+
+      <div class="toggle-section">
+        <div class="toggle-title-group">
+          <h3 id="panelTitleP4">💥 El Desastre: Entidad Producto cargada de features futuristas fantasmas</h3>
+          <p id="panelSubtitleP4">Predicciones con IA, bodegas en el espacio y criptomonedas no solicitadas.</p>
+        </div>
+        <button class="switch-btn is-chaos" id="btnToggleP4" onclick="toggleState('p4')">
+          <span>✨ ¡Aplicar Principio YAGNI!</span>
+        </button>
+      </div>
+
+      <div class="code-grid">
+        <div class="code-box">
+          <div class="code-box-header code-chaos-header" id="headerCodeP4">
+            <span>Producto.java — Inflada con especulación</span>
+            <span>Java 21 / Spring Boot</span>
+          </div>
+          <pre id="preP4"><code><span class="ann">@Entity</span>
+<span class="kw">public class</span> <span class="type">Producto</span> {
+    <span class="ann">@Id</span> <span class="kw">private Long</span> id;
+    <span class="kw">private String</span> nombre;
+    <span class="kw">private BigDecimal</span> precio;
+    <span class="kw">private Integer</span> stock;
+
+    <span class="cm">// ❌ CÓDIGO FANTASMA QUE EL CLIENTE NUNCA PIDIÓ:</span>
+    <span class="kw">private BigDecimal</span> precioFuturo;
+    <span class="kw">private String</span> prediccionVentasIA;
+    <span class="kw">private String</span> recomendacionClima;
+    <span class="kw">private String</span> bodegaInternacionalMarte;
+}</code></pre>
+        </div>
+      </div>
+
+      <div class="takeaway-box" id="takeawayP4">
+        🚨 <strong>Pérdida de recursos:</strong> Horas perdidas diseñando bases de datos, escribiendo migraciones y creando pruebas para campos que nunca nadie usará en producción.
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================
+       SIMULADOR: LA MÁQUINA DE REFACTORIZAR
+       ========================================== -->
+  <section class="simulator-section">
+    <div class="machine-card">
+      <h2 class="machine-title">
+        <span>🏭</span>
+        <span>Laboratorio Interactivo: La Máquina Refactorizadora</span>
+      </h2>
+      <p class="machine-desc">
+        Activa las palancas de la máquina para aplicar secuencialmente <strong>Clean Code</strong>, <strong>KISS</strong>, <strong>DRY</strong> y <strong>YAGNI</strong> sobre un servicio heredado de nuestra tienda virtual.
+      </p>
+
+      <div class="machine-controls">
+        <button class="lever-btn" id="levClean" onclick="pullLever('clean')">
+          <span>🧼 1. Nombres Claros (Clean Code)</span>
+        </button>
+        <button class="lever-btn" id="levKiss" onclick="pullLever('kiss')">
+          <span>💡 2. Eliminar Capas (KISS)</span>
+        </button>
+        <button class="lever-btn" id="levDry" onclick="pullLever('dry')">
+          <span>👯 3. Centralizar Descuento (DRY)</span>
+        </button>
+        <button class="lever-btn" id="levYagni" onclick="pullLever('yagni')">
+          <span>🎒 4. Expulsar Código Fantasma (YAGNI)</span>
+        </button>
+        <button class="lever-btn" style="background: rgba(239, 68, 68, 0.2); border-color:#ef4444;" onclick="resetMachine()">
+          <span>🔄 Reiniciar Todo</span>
+        </button>
+      </div>
+
+      <!-- Interactive Code Screen -->
+      <div class="live-code-screen" id="liveScreen">
+        <pre><code id="liveCodeText"><span class="cm">// Código Heredado Inicial con Severa Deuda Técnica:</span>
+<span class="ann">@Service</span>
+<span class="kw">public class</span> <span class="type">TiendaService</span> {
+    <span class="kw">public double</span> <span class="fn">calcular</span>(<span class="kw">double</span> p) { <span class="kw">return</span> p - (p * <span class="num">0.10</span>); }
+    <span class="kw">public double</span> <span class="fn">calcularVip</span>(<span class="kw">double</span> p) { <span class="kw">return</span> p - (p * <span class="num">0.20</span>); }
+    <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="kw">double</span> p) { <span class="type">System</span>.out.<span class="fn">println</span>(<span class="str">"Enviando correo: "</span> + p); }
+    <span class="kw">public void</span> <span class="fn">predecirVentasIAFuturas</span>() { <span class="cm">/* 500 líneas especulativas no pedidas */</span> }
+}</code></pre>
+      </div>
+      <div id="machineFeedback" style="margin-top:14px; font-weight:700; color:#34d399; font-size:0.95rem;">
+        ⚙️ Estado: Código heredado sucio. ¡Presiona las palancas superiores para limpiarlo!
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================
+       QUIZ DEL INSPECTOR DE CALIDAD
+       ========================================== -->
+  <section class="quiz-section">
+    <div class="quiz-card">
+      <div class="quiz-header">
+        <div class="quiz-inspector">
+          <div class="inspector-avatar">
+            <svg viewBox="0 0 100 100" width="100%" height="100%">
+              <circle cx="50" cy="50" r="45" fill="#f59e0b" opacity="0.15" />
+              <circle cx="50" cy="50" r="40" fill="#0f172a" stroke="#f59e0b" stroke-width="3" />
+              <!-- Detective Hat -->
+              <path d="M 20 40 Q 50 20 80 40 L 75 30 Q 50 15 25 30 Z" fill="#b45309" />
+              <!-- Eyes with Magnifying Glass -->
+              <circle cx="40" cy="50" r="6" fill="#38bdf8" />
+              <circle cx="62" cy="50" r="6" fill="#38bdf8" />
+              <!-- Magnifying lens over left eye -->
+              <circle cx="40" cy="50" r="14" fill="none" stroke="#fbbf24" stroke-width="3" />
+              <line x1="28" y1="62" x2="16" y2="74" stroke="#fbbf24" stroke-width="4" stroke-linecap="round" />
+              <!-- Grin -->
+              <path d="M 45 68 Q 55 76 65 68" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" />
+            </svg>
+          </div>
+          <div>
+            <h2 style="font-family:var(--font-fun); font-size:1.6rem; color:#fff;">El Inspector de Código</h2>
+            <p style="color:var(--text-muted); font-size:0.9rem;">¿Puedes identificar qué principio se está violando?</p>
+          </div>
+        </div>
+        <div style="font-family:var(--font-fun); font-size:1.1rem; color:#fcd34d;" id="inspectorScore">
+          Aciertos: 0 / 5
+        </div>
+      </div>
+
+      <!-- Q1 -->
+      <div class="question-block" id="qb1">
+        <div class="q-text">1. Un desarrollador crea 15 clases, 8 interfaces y 3 patrones de diseño para realizar una simple suma de dos números enteros.</div>
+        <div class="q-options">
+          <button class="q-btn" onclick="answerQ(1, 'DRY', false, this)">DRY</button>
+          <button class="q-btn" onclick="answerQ(1, 'KISS', true, this)">KISS</button>
+          <button class="q-btn" onclick="answerQ(1, 'YAGNI', false, this)">YAGNI</button>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="question-block" id="qb2">
+        <div class="q-text">2. La fórmula de cálculo del IVA está copiada y pegada textualmente en cinco servicios diferentes.</div>
+        <div class="q-options">
+          <button class="q-btn" onclick="answerQ(2, 'YAGNI', false, this)">YAGNI</button>
+          <button class="q-btn" onclick="answerQ(2, 'KISS', false, this)">KISS</button>
+          <button class="q-btn" onclick="answerQ(2, 'DRY', true, this)">DRY</button>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="question-block" id="qb3">
+        <div class="q-text">3. Una tienda en línea desarrolla inteligencia artificial para predecir ventas, aunque el cliente solo pidió registrar productos.</div>
+        <div class="q-options">
+          <button class="q-btn" onclick="answerQ(3, 'YAGNI', true, this)">YAGNI</button>
+          <button class="q-btn" onclick="answerQ(3, 'DRY', false, this)">DRY</button>
+          <button class="q-btn" onclick="answerQ(3, 'KISS', false, this)">KISS</button>
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="question-block" id="qb4">
+        <div class="q-text">4. Un método se llama x(), utiliza variables a, b y c, y nadie en el equipo entiende qué hace.</div>
+        <div class="q-options">
+          <button class="q-btn" onclick="answerQ(4, 'Clean Code', true, this)">Clean Code</button>
+          <button class="q-btn" onclick="answerQ(4, 'YAGNI', false, this)">YAGNI</button>
+          <button class="q-btn" onclick="answerQ(4, 'DRY', false, this)">DRY</button>
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="question-block" id="qb5">
+        <div class="q-text">5. Dos servicios implementan la misma regla de descuento y cada uno tiene una versión diferente, creando discrepancias de facturación.</div>
+        <div class="q-options">
+          <button class="q-btn" onclick="answerQ(5, 'KISS', false, this)">KISS</button>
+          <button class="q-btn" onclick="answerQ(5, 'DRY', true, this)">DRY</button>
+          <button class="q-btn" onclick="answerQ(5, 'YAGNI', false, this)">YAGNI</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p><strong>Universidad Iberoamericana del Ecuador &middot; UNIBE</strong></p>
+    <p>Diseño y Arquitectura de Software &middot; Filosofía de Código Limpio, KISS, DRY y YAGNI</p>
+    <p style="margin-top: 6px; font-size: 0.78rem;">Laboratorio Didáctico Animado con Spring Boot y Java 21</p>
+  </footer>
+
+  <!-- Audio Synthesizer & Dynamic Scripts -->
+  <script>
+    // Web Audio API Synthesizer
+    let audioCtx = null;
+    let isMuted = false;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function toggleMute() {
+      isMuted = !isMuted;
+      document.getElementById('soundIcon').innerText = isMuted ? '🔇' : '🔊';
+      document.getElementById('soundText').innerText = isMuted ? 'Sonido: Silenciado' : 'Sonido: Activado';
+      const btn = document.getElementById('btnSoundToggle');
+      btn.style.opacity = isMuted ? '0.6' : '1';
+    }
+
+    // Sound: Zen Chime / Harmony
+    function playZenChime() {
+      if (isMuted) return;
+      try {
+        const ctx = getAudioContext();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.08);
+          gain.gain.setValueAtTime(0, ctx.currentTime + idx * 0.08);
+          gain.gain.linearRampToValueAtTime(0.12, ctx.currentTime + idx * 0.08 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + idx * 0.08 + 0.5);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + idx * 0.08);
+          osc.stop(ctx.currentTime + idx * 0.08 + 0.5);
+        });
+      } catch (e) { console.warn(e); }
+    }
+
+    // Sound: Chaos Buzzer
+    function playChaosBuzzer() {
+      if (isMuted) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(70, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.3);
+      } catch (e) { console.warn(e); }
+    }
+
+    // Sound: Pop Bubble
+    function playPopSound() {
+      if (isMuted) return;
+      try {
+        const ctx = getAudioContext();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(400, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(900, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.1, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.08);
+      } catch (e) { console.warn(e); }
+    }
+
+    // Pillar Tab Switching
+    function switchTab(pillarId) {
+      playPopSound();
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.getAttribute('data-target') === pillarId);
+      });
+      document.querySelectorAll('.pillar-panel').forEach(panel => {
+        panel.classList.toggle('active', panel.id === pillarId);
+      });
+    }
+
+    // Data for Chaos vs Zen Toggles
+    const pillarData = {
+      p1: {
+        isZen: false,
+        chaos: {
+          name: 'El Frasco Misterioso "x"',
+          tag: 'Antipatrón de Nombres Crípticos',
+          title: '💥 El Desastre: Nombres que confunden y precisión en peligro',
+          subtitle: 'Código con variables mudas de una letra y uso de double para dinero.',
+          btnText: '✨ ¡Aplicar Clean Code Zen!',
+          header: 'ProductoService.java — ¿Qué demonios hace este método?',
+          takeaway: '🚨 <strong>Problema grave:</strong> El código no revela su intención. Además, usar double para finanzas produce errores de coma flotante.',
+          code: '<span class="kw">public class</span> <span class="type">ProductoService</span> {\n\n    <span class="cm">// ❌ Nadie sabe qué es p, ni qué es d, ni por qué retorna x</span>\n    <span class="kw">public double</span> <span class="fn">calcular</span>(<span class="kw">double</span> p, <span class="kw">double</span> d) {\n        <span class="kw">double</span> x = p - (p * d / <span class="num">100</span>);\n        <span class="kw">return</span> x;\n    }\n}'
+        },
+        zen: {
+          name: 'El Jarabe Médico "calcularPrecioConDescuento"',
+          tag: 'Clean Code: Semántica y Precisión Exacta',
+          title: '✨ ¡Solución Zen! Claridad cristalina y BigDecimal',
+          subtitle: 'Variables autoexplicativas, validación defensiva y precisión financiera.',
+          btnText: '💥 ¡Volver al Desastre!',
+          header: 'ProductoService.java — Código limpio, legible y seguro',
+          takeaway: '✅ <strong>Beneficio Clean Code:</strong> Nombres expresivos (precioBase, porcentajeDescuento) y uso de BigDecimal con RoundingMode.HALF_UP.',
+          code: '<span class="ann">@Service</span>\n<span class="kw">public class</span> <span class="type">ProductoService</span> {\n\n    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="fn">calcularPrecioConDescuento</span>(\n            <span class="type">BigDecimal</span> precioBase,\n            <span class="type">BigDecimal</span> porcentajeDescuento) {\n\n        <span class="kw">if</span> (precioBase.signum() &lt; <span class="num">0</span> || porcentajeDescuento.signum() &lt; <span class="num">0</span>) {\n            <span class="kw">throw new</span> <span class="type">IllegalArgumentException</span>(<span class="str">"Valores no pueden ser negativos"</span>);\n        }\n\n        <span class="type">BigDecimal</span> descuento = precioBase\n                .<span class="fn">multiply</span>(porcentajeDescuento)\n                .<span class="fn">divide</span>(<span class="type">BigDecimal</span>.<span class="fn">valueOf</span>(<span class="num">100</span>), <span class="num">2</span>, <span class="type">RoundingMode</span>.HALF_UP);\n\n        <span class="kw">return</span> precioBase.<span class="fn">subtract</span>(descuento);\n    }\n}'
+        }
+      },
+      p2: {
+        isZen: false,
+        chaos: {
+          name: 'La Máquina de Rube Goldberg',
+          tag: 'Antipatrón de Sobreingeniería',
+          title: '💥 El Desastre: 5 Métodos y 1 Clase de Contexto para multiplicar por 0.15',
+          subtitle: 'Sobreingeniería cósmica que además introdujo un bug crítico.',
+          btnText: '✨ ¡Aplicar Principio KISS!',
+          header: 'CalculadoraIVA.java — Laberinto abstracto de llamadas',
+          takeaway: '🚨 <strong>Trampa de la complejidad:</strong> En medio de tantas capas y abstracciones, el autor olvidó multiplicar por el precio base.',
+          code: '<span class="kw">public class</span> <span class="type">CalculadoraIVA</span> {\n    <span class="kw">public double</span> <span class="fn">calcularIVA</span>(<span class="kw">double</span> precio) {\n        <span class="kw">return</span> <span class="fn">procesarOperacion</span>(<span class="fn">crearContexto</span>(<span class="fn">obtenerConfiguracion</span>(<span class="fn">validarPrecio</span>(precio))));\n    }\n    <span class="kw">private double</span> <span class="fn">validarPrecio</span>(<span class="kw">double</span> precio) { <span class="kw">return</span> precio; }\n    <span class="kw">private double</span> <span class="fn">obtenerConfiguracion</span>(<span class="kw">double</span> precio) { <span class="kw">return</span> <span class="num">0.15</span>; }\n    <span class="kw">private</span> <span class="type">Contexto</span> <span class="fn">crearContexto</span>(<span class="kw">double</span> iva) { <span class="kw">return new</span> <span class="type">Contexto</span>(iva); }\n    <span class="kw">private double</span> <span class="fn">procesarOperacion</span>(<span class="type">Contexto</span> contexto) { <span class="kw">return</span> contexto.<span class="fn">getIva</span>(); }\n}'
+        },
+        zen: {
+          name: 'El Interruptor Elegante',
+          tag: 'KISS: Simplicidad y Función Directa',
+          title: '✨ ¡Solución Zen! Solución directa en 3 líneas de código',
+          subtitle: 'Multiplicación directa del precio por la constante de IVA sin capas innecesarias.',
+          btnText: '💥 ¡Volver al Desastre!',
+          header: 'CalculadoraIVA.java — Directo, claro y comprobable',
+          takeaway: '✅ <strong>Beneficio KISS:</strong> La solución más sencilla es la más rápida de programar, la más fácil de testear y la menos propensa a bugs.',
+          code: '<span class="ann">@Service</span>\n<span class="kw">public class</span> <span class="type">CalculadoraIVA</span> {\n\n    <span class="kw">private static final</span> <span class="type">BigDecimal</span> TASA_IVA = <span class="kw">new</span> <span class="type">BigDecimal</span>(<span class="str">"0.15"</span>);\n\n    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="fn">calcularIVA</span>(<span class="type">BigDecimal</span> precio) {\n        <span class="kw">if</span> (precio == <span class="kw">null</span> || precio.<span class="fn">signum</span>() &lt; <span class="num">0</span>) {\n            <span class="kw">throw new</span> <span class="type">IllegalArgumentException</span>(<span class="str">"Precio inválido"</span>);\n        }\n        <span class="kw">return</span> precio.<span class="fn">multiply</span>(TASA_IVA);\n    }\n}'
+        }
+      },
+      p3: {
+        isZen: false,
+        chaos: {
+          name: 'Los Clones del Copiar y Pegar',
+          tag: 'Antipatrón de Lógica Duplicada',
+          title: '💥 El Desastre: La fórmula de descuento multiplicada por doquier',
+          subtitle: 'ClienteService y ClienteVipService replicando la misma lógica matemática.',
+          btnText: '✨ ¡Aplicar Principio DRY!',
+          header: 'ClienteService.java & ClienteVipService.java — Duplicación abierta',
+          takeaway: '🚨 <strong>Riesgo empresarial:</strong> Si la fórmula de descuento cambia, debes recordar editar múltiples clases y corres el riesgo de cobrar mal.',
+          code: '<span class="cm">// En ClienteService.java</span>\n<span class="kw">public double</span> <span class="fn">calcularDescuento</span>(<span class="kw">double</span> p) {\n    <span class="kw">return</span> p - (p * <span class="num">0.10</span>);\n}\n\n<span class="cm">// En ClienteVipService.java</span>\n<span class="kw">public double</span> <span class="fn">calcularDescuento</span>(<span class="kw">double</span> p) {\n    <span class="kw">return</span> p - (p * <span class="num">0.20</span>);\n}'
+        },
+        zen: {
+          name: 'El Núcleo Central de Verdad',
+          tag: 'DRY: Fuente Única de Conocimiento',
+          title: '✨ ¡Solución Zen! Centralizado en CalculadoraDescuento',
+          subtitle: 'La fórmula existe en un solo servicio; los clientes solo inyectan su tasa.',
+          btnText: '💥 ¡Volver al Desastre!',
+          header: 'CalculadoraDescuento.java + Inyección Spring Boot',
+          takeaway: '✅ <strong>Beneficio DRY:</strong> Cualquier cambio en la política de descuento se realiza en un único archivo y afecta a toda la aplicación.',
+          code: '<span class="ann">@Service</span>\n<span class="kw">public class</span> <span class="type">CalculadoraDescuento</span> {\n    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="fn">calcular</span>(<span class="type">BigDecimal</span> precio, <span class="type">BigDecimal</span> tasa) {\n        <span class="type">BigDecimal</span> descuento = precio.<span class="fn">multiply</span>(tasa);\n        <span class="kw">return</span> precio.<span class="fn">subtract</span>(descuento);\n    }\n}\n\n<span class="ann">@Service</span> <span class="ann">@RequiredArgsConstructor</span>\n<span class="kw">public class</span> <span class="type">ClienteService</span> {\n    <span class="kw">private final</span> <span class="type">CalculadoraDescuento</span> calculadora;\n    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="fn">calcularDescuento</span>(<span class="type">BigDecimal</span> p) {\n        <span class="kw">return</span> calculadora.<span class="fn">calcular</span>(p, <span class="kw">new</span> <span class="type">BigDecimal</span>(<span class="str">"0.10"</span>));\n    }\n}'
+        }
+      },
+      p4: {
+        isZen: false,
+        chaos: {
+          name: 'El Mochilero Exagerado',
+          tag: 'Antipatrón de Especulación Prematura',
+          title: '💥 El Desastre: Entidad Producto cargada de features futuristas fantasmas',
+          subtitle: 'Predicciones con IA, bodegas en el espacio y criptomonedas no solicitadas.',
+          btnText: '✨ ¡Aplicar Principio YAGNI!',
+          header: 'Producto.java — Inflada con especulación',
+          takeaway: '🚨 <strong>Pérdida de recursos:</strong> Horas perdidas diseñando bases de datos y migraciones para campos que nunca nadie usará.',
+          code: '<span class="ann">@Entity</span>\n<span class="kw">public class</span> <span class="type">Producto</span> {\n    <span class="ann">@Id</span> <span class="kw">private Long</span> id;\n    <span class="kw">private String</span> nombre;\n    <span class="kw">private BigDecimal</span> precio;\n    <span class="kw">private Integer</span> stock;\n    <span class="cm">// ❌ FANTASMAS:</span>\n    <span class="kw">private BigDecimal</span> precioFuturo;\n    <span class="kw">private String</span> prediccionVentasIA;\n    <span class="kw">private String</span> bodegaInternacionalMarte;\n}'
+        },
+        zen: {
+          name: 'El Mochilero Ágil y Ligero',
+          tag: 'YAGNI: Just-In-Time Value',
+          title: '✨ ¡Solución Zen! Producto limpio y enfocado al valor real',
+          subtitle: 'Únicamente los 4 campos solicitados por el negocio hoy: id, nombre, precio y stock.',
+          btnText: '💥 ¡Volver al Desastre!',
+          header: 'Producto.java — Mínimo Producto Viable (MVP)',
+          takeaway: '✅ <strong>Beneficio YAGNI:</strong> Menos código que mantener, base de datos óptima y libertad para diseñar IA cuando realmente se requiera.',
+          code: '<span class="ann">@Entity</span>\n<span class="ann">@Getter</span> <span class="ann">@Setter</span> <span class="ann">@NoArgsConstructor</span>\n<span class="kw">public class</span> <span class="type">Producto</span> {\n    <span class="ann">@Id</span> <span class="ann">@GeneratedValue</span>(strategy = <span class="type">GenerationType</span>.IDENTITY)\n    <span class="kw">private Long</span> id;\n    <span class="kw">private String</span> nombre;\n    <span class="kw">private BigDecimal</span> precio;\n    <span class="kw">private Integer</span> stock;\n}'
+        }
+      }
+    };
+
+    function toggleState(pillarId) {
+      const p = pillarData[pillarId];
+      p.isZen = !p.isZen;
+      const data = p.isZen ? p.zen : p.chaos;
+
+      if (p.isZen) {
+        playZenChime();
+      } else {
+        playChaosBuzzer();
+      }
+
+      // Toggle SVGs
+      const chaosSvg = document.getElementById(pillarId + 'Chaos');
+      const zenSvg = document.getElementById(pillarId + 'Zen');
+      if (chaosSvg && zenSvg) {
+        chaosSvg.style.display = p.isZen ? 'none' : 'block';
+        zenSvg.style.display = p.isZen ? 'block' : 'none';
+      }
+
+      // Update text & headers
+      document.getElementById('name' + pillarId.toUpperCase()).innerText = data.name;
+      document.getElementById('tag' + pillarId.toUpperCase()).innerText = data.tag;
+      document.getElementById('panelTitle' + pillarId.toUpperCase()).innerText = data.title;
+      document.getElementById('panelSubtitle' + pillarId.toUpperCase()).innerText = data.subtitle;
+      document.getElementById('takeaway' + pillarId.toUpperCase()).innerHTML = data.takeaway;
+
+      const btn = document.getElementById('btnToggle' + pillarId.toUpperCase());
+      btn.className = 'switch-btn ' + (p.isZen ? 'is-zen' : 'is-chaos');
+      btn.querySelector('span').innerText = data.btnText;
+
+      const header = document.getElementById('headerCode' + pillarId.toUpperCase());
+      header.className = 'code-box-header ' + (p.isZen ? 'code-zen-header' : 'code-chaos-header');
+      header.querySelector('span:first-child').innerText = data.header;
+
+      document.getElementById('pre' + pillarId.toUpperCase()).innerHTML = '<code>' + data.code + '</code>';
+    }
+
+    // Machine Simulator Logic
+    const machineState = { clean: false, kiss: false, dry: false, yagni: false };
+
+    function pullLever(leverType) {
+      playPopSound();
+      machineState[leverType] = !machineState[leverType];
+      const btn = document.getElementById('lev' + leverType.charAt(0).toUpperCase() + leverType.slice(1));
+      btn.classList.toggle('active-lever', machineState[leverType]);
+      renderMachineCode();
+    }
+
+    function resetMachine() {
+      playChaosBuzzer();
+      machineState.clean = false;
+      machineState.kiss = false;
+      machineState.dry = false;
+      machineState.yagni = false;
+      ['Clean', 'Kiss', 'Dry', 'Yagni'].forEach(t => {
+        document.getElementById('lev' + t).classList.remove('active-lever');
+      });
+      renderMachineCode();
+    }
+
+    function renderMachineCode() {
+      const screen = document.getElementById('liveCodeText');
+      const feedback = document.getElementById('machineFeedback');
+
+      let code = '';
+      if (!machineState.clean && !machineState.kiss && !machineState.dry && !machineState.yagni) {
+        code = '<span class="cm">// Código Heredado Inicial con Severa Deuda Técnica:</span>\n<span class="ann">@Service</span>\n<span class="kw">public class</span> <span class="type">TiendaService</span> {\n    <span class="kw">public double</span> <span class="fn">calcular</span>(<span class="kw">double</span> p) { <span class="kw">return</span> p - (p * <span class="num">0.10</span>); }\n    <span class="kw">public double</span> <span class="fn">calcularVip</span>(<span class="kw">double</span> p) { <span class="kw">return</span> p - (p * <span class="num">0.20</span>); }\n    <span class="kw">public void</span> <span class="fn">enviar</span>(<span class="kw">double</span> p) { <span class="type">System</span>.out.<span class="fn">println</span>(<span class="str">"Enviando correo: "</span> + p); }\n    <span class="kw">public void</span> <span class="fn">predecirVentasIAFuturas</span>() { <span class="cm">/* 500 líneas especulativas no pedidas */</span> }\n}';
+        feedback.innerText = '⚙️ Estado: Código heredado sucio. ¡Presiona las palancas superiores para limpiarlo!';
+        feedback.style.color = '#ef4444';
+      } else {
+        const parts = [];
+        if (machineState.dry) parts.push('DRY (CalculadoraDescuento centralizada)');
+        if (machineState.clean) parts.push('Clean Code (BigDecimal + Nombres Claros)');
+        if (machineState.kiss) parts.push('KISS (Métodos concisos)');
+        if (machineState.yagni) parts.push('YAGNI (Cero métodos de IA especulativa)');
+
+        feedback.innerHTML = '✨ Mejoras aplicadas: ' + parts.join(', ');
+        feedback.style.color = '#34d399';
+
+        code = '<span class="ann">@Service</span>\n<span class="ann">@RequiredArgsConstructor</span>\n<span class="kw">public class</span> <span class="type">TiendaService</span> {\n';
+        if (machineState.dry) {
+          code += '    <span class="kw">private final</span> <span class="type">CalculadoraDescuentoService</span> calculadoraDescuento;\n';
+        }
+        if (machineState.clean) {
+          code += '    <span class="kw">public</span> <span class="type">BigDecimal</span> <span class="fn">calcularPrecioRegular</span>(<span class="type">BigDecimal</span> precioBase) {\n';
+          code += machineState.dry ? '        <span class="kw">return</span> calculadoraDescuento.<span class="fn">calcular</span>(precioBase, <span class="kw">new</span> <span class="type">BigDecimal</span>(<span class="str">"0.10"</span>));\n' : '        <span class="kw">return</span> precioBase.<span class="fn">subtract</span>(precioBase.<span class="fn">multiply</span>(<span class="kw">new</span> <span class="type">BigDecimal</span>(<span class="str">"0.10"</span>)));\n';
+          code += '    }\n';
+        } else {
+          code += '    <span class="kw">public double</span> <span class="fn">calcular</span>(<span class="kw">double</span> p) { <span class="kw">return</span> p - (p * <span class="num">0.10</span>); }\n';
+        }
+        if (!machineState.yagni) {
+          code += '    <span class="cm">// ⚠️ Código YAGNI especulativo sin remover:</span>\n    <span class="kw">public void</span> <span class="fn">predecirVentasIAFuturas</span>() { ... }\n';
+        }
+        code += '}';
+      }
+
+      screen.innerHTML = code;
+    }
+
+    // Inspector Quiz Logic
+    let quizScore = 0;
+    const answeredQs = {};
+
+    function answerQ(qNum, selected, isCorrect, btn) {
+      if (answeredQs[qNum]) return;
+      answeredQs[qNum] = true;
+
+      const block = document.getElementById('qb' + qNum);
+      const buttons = block.querySelectorAll('.q-btn');
+      buttons.forEach(b => b.disabled = true);
+
+      if (isCorrect) {
+        btn.classList.add('correct');
+        quizScore++;
+        playZenChime();
+      } else {
+        btn.classList.add('incorrect');
+        playChaosBuzzer();
+        // highlight correct
+        buttons.forEach(b => {
+          if ((qNum === 1 && b.innerText === 'KISS') ||
+              (qNum === 2 && b.innerText === 'DRY') ||
+              (qNum === 3 && b.innerText === 'YAGNI') ||
+              (qNum === 4 && b.innerText === 'Clean Code') ||
+              (qNum === 5 && b.innerText === 'DRY')) {
+            b.classList.add('correct');
+          }
+        });
+      }
+
+      document.getElementById('inspectorScore').innerText = 'Aciertos: ' + quizScore + ' / 5';
+    }
+  </script>
+</body>
+</html>
