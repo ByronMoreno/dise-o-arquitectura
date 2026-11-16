@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hub y Menú Central de la Clase 4: Principios SOLID, Patrones GRASP, Filosofía Clean Code (KISS, DRY, YAGNI), Trilogía Animada y Proyecto Spring Boot en Java 21.">
+  <title>Menú Central &amp; Hub de Navegación &middot; Clase 4 | UNIBE</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600&family=Outfit:wght@300;400;500;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #070c14;
+      --bg-surface: #0d1522;
+      --bg-card: rgba(15, 23, 42, 0.75);
+      --bg-card-hover: rgba(22, 34, 60, 0.95);
+      
+      --border-glow: rgba(56, 189, 248, 0.25);
+      --border-light: rgba(255, 255, 255, 0.08);
+      
+      --color-primary: #38bdf8;
+      --color-solid: #ec4899;
+      --color-grasp: #38bdf8;
+      --color-clean: #10b981;
+      --color-spring: #f59e0b;
+      --color-theory: #818cf8;
+      
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --text-bright: #ffffff;
+      
+      --font-sans: 'Outfit', sans-serif;
+      --font-fun: 'Fredoka', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; scroll-behavior:smooth; }
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      overflow-x: hidden;
+      background-image: 
+        radial-gradient(circle at 10% 10%, rgba(56, 189, 248, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 90% 20%, rgba(236, 72, 153, 0.09) 0%, transparent 45%),
+        radial-gradient(circle at 50% 90%, rgba(16, 185, 129, 0.09) 0%, transparent 50%);
+    }
+
+    /* Ambient Glows */
+    .bg-glow-1 { position: fixed; top: -15%; left: -10%; width: 55vw; height: 55vw; background: radial-gradient(circle, rgba(56, 189, 248, 0.08) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+    .bg-glow-2 { position: fixed; bottom: -15%; right: -10%; width: 50vw; height: 50vw; background: radial-gradient(circle, rgba(236, 72, 153, 0.07) 0%, transparent 70%); z-index: -2; pointer-events: none; }
+
+    /* Top Bar */
+    .top-nav {
+      position: sticky; top: 0; z-index: 1000;
+      background: rgba(7, 12, 20, 0.92); backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 14px 28px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .brand {
+      display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 1.25rem;
+      background: linear-gradient(135deg, #38bdf8, #818cf8, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .btn-nav-portal {
+      font-size: 0.85rem; font-weight: 700; padding: 8px 18px; border-radius: 20px; text-decoration: none;
+      background: rgba(255, 255, 255, 0.08); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-nav-portal:hover { background: rgba(255, 255, 255, 0.16); color: #fff; transform: translateY(-1px); }
+
+    /* Container */
+    .main-container {
+      max-width: 1240px; margin: 0 auto; padding: 40px 24px 80px;
+    }
+
+    /* Hero Banner */
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.85));
+      border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 24px; padding: 46px 40px;
+      position: relative; overflow: hidden; box-shadow: 0 20px 45px rgba(0,0,0,0.45);
+      margin-bottom: 40px;
+    }
+    .hero-badge-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .hero-pill {
+      font-size: 0.76rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;
+      padding: 5px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .pill-unibe { background: rgba(56, 189, 248, 0.18); color: #93c5fd; border: 1px solid rgba(56, 189, 248, 0.35); }
+    .pill-unit { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.35); }
+    .pill-java { background: rgba(245, 158, 11, 0.18); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.35); }
+
+    .hero-title {
+      font-size: 2.8rem; font-weight: 900; letter-spacing: -1px; line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 30%, #93c5fd 75%, #34d399 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 14px;
+    }
+    .hero-desc {
+      font-size: 1.12rem; color: #cbd5e1; line-height: 1.7; max-width: 900px; margin-bottom: 24px;
+    }
+
+    /* Stats Quick Bar */
+    .stats-bar {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px;
+    }
+    .stat-pill {
+      background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-light); border-radius: 12px;
+      padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .stat-icon { font-size: 1.5rem; }
+    .stat-num { font-size: 1.25rem; font-weight: 800; color: #fff; font-family: var(--font-mono); }
+    .stat-label { font-size: 0.78rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+
+    /* Category Filter Buttons */
+    .filter-bar {
+      display: flex; flex-wrap: wrap; gap: 10px; margin: 36px 0 24px;
+    }
+    .filter-btn {
+      font-family: var(--font-sans); font-size: 0.9rem; font-weight: 600;
+      padding: 8px 18px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.04); color: var(--text-muted); cursor: pointer;
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .filter-btn:hover { background: rgba(255, 255, 255, 0.1); color: #fff; }
+    .filter-btn.active {
+      background: rgba(56, 189, 248, 0.2); border-color: var(--color-primary); color: #fff; font-weight: 700;
+      box-shadow: 0 4px 15px rgba(56, 189, 248, 0.25);
+    }
+
+    /* Section Category Headings */
+    .category-section {
+      margin-bottom: 46px;
+    }
+    .category-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 18px; border-bottom: 1px solid var(--border-light);
+      padding-bottom: 12px;
+    }
+    .category-title {
+      font-size: 1.45rem; font-weight: 800; color: var(--text-bright); display: flex; align-items: center; gap: 10px;
+    }
+    .category-tag {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 3px 10px; border-radius: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* Cards Grid */
+    .cards-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;
+    }
+    .menu-card {
+      background: var(--bg-card); border: 1px solid var(--border-light); border-radius: 18px;
+      padding: 26px; display: flex; flex-direction: column; justify-content: space-between;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: relative; overflow: hidden;
+    }
+    .menu-card:hover {
+      background: var(--bg-card-hover); transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgba(0,0,0,0.45); border-color: rgba(255, 255, 255, 0.2);
+    }
+    .card-top { margin-bottom: 18px; }
+    .card-badge-row {
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
+    }
+    .card-type-pill {
+      font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+      padding: 3px 10px; border-radius: 6px; font-family: var(--font-mono);
+    }
+    .card-icon-big { font-size: 2rem; }
+    .card-title {
+      font-size: 1.25rem; font-weight: 800; color: #fff; margin-bottom: 8px; line-height: 1.3;
+    }
+    .card-desc {
+      font-size: 0.92rem; color: var(--text-muted); line-height: 1.6;
+    }
+
+    .card-btn {
+      display: flex; justify-content: space-between; align-items: center; width: 100%;
+      padding: 12px 18px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 0.92rem;
+      transition: all 0.2s; margin-top: auto;
+    }
+    .card-btn:hover { filter: brightness(1.12); transform: scale(1.02); }
+
+    /* Category Specific Colors */
+    .card-solid { border-left: 4px solid var(--color-solid); }
+    .card-solid .card-type-pill { background: rgba(236, 72, 153, 0.15); color: #f472b6; }
+    .card-solid .card-btn { background: rgba(236, 72, 153, 0.18); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.35); }
+    .card-solid .card-btn:hover { background: #ec4899; color: #fff; }
+
+    .card-grasp { border-left: 4px solid var(--color-grasp); }
+    .card-grasp .card-type-pill { background: rgba(56, 189, 248, 0.15); color: #38bdf8; }
+    .card-grasp .card-btn { background: rgba(56, 189, 248, 0.18); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35); }
+    .card-grasp .card-btn:hover { background: #38bdf8; color: #040810; }
+
+    .card-clean { border-left: 4px solid var(--color-clean); }
+    .card-clean .card-type-pill { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+    .card-clean .card-btn { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35); }
+    .card-clean .card-btn:hover { background: #10b981; color: #fff; }
+
+    .card-spring { border-left: 4px solid var(--color-spring); }
+    .card-spring .card-type-pill { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+    .card-spring .card-btn { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); }
+    .card-spring .card-btn:hover { background: #f59e0b; color: #000; }
+
+    .card-theory { border-left: 4px solid var(--color-theory); }
+    .card-theory .card-type-pill { background: rgba(129, 140, 248, 0.15); color: #a5b4fc; }
+    .card-theory .card-btn { background: rgba(129, 140, 248, 0.18); color: #a5b4fc; border: 1px solid rgba(129, 140, 248, 0.35); }
+    .card-theory .card-btn:hover { background: #818cf8; color: #fff; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border-light); padding: 36px 0 20px; text-align: center;
+      color: var(--text-muted); font-size: 0.88rem; line-height: 1.8;
+    }
+
+    @media (max-width: 768px) {
+      .hero-title { font-size: 2.1rem; }
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-glow-1"></div>
+  <div class="bg-glow-2"></div>
+
+  <!-- Navigation -->
+  <nav class="top-nav">
+    <div class="brand">
+      <span>🧭</span>
+      <span>Clase 4 &middot; Hub Central</span>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <a href="../index.html" class="btn-nav-portal">
+        <span>🏠 Portal Principal UNIBE</span>
+      </a>
+    </div>
+  </nav>
+
+  <main class="main-container">
+
+    <!-- Hero Header -->
+    <header class="hero-banner">
+      <div class="hero-badge-group">
+        <span class="hero-pill pill-unibe">Universidad Iberoamericana del Ecuador</span>
+        <span class="hero-pill pill-unit">Unidad 2 &middot; Calidad y Arquitectura de Software</span>
+        <span class="hero-pill pill-java">Java 21 &middot; Spring Boot 3.5 &middot; Gradle</span>
+      </div>
+      <h1 class="hero-title">Hub y Menú Central &middot; Clase 4</h1>
+      <p class="hero-desc">
+        Bienvenido al centro de navegación integral de la <strong>Clase 4</strong>. Aquí encontrarás las guías técnicas empresariales con Spring Boot, las aplicaciones interactivas 100% animadas con personajes y sonido, el repositorio de código de ejemplo (Problem vs. Solution) y los laboratorios de refactorización de deuda técnica.
+      </p>
+
+      <div class="stats-bar">
+        <div class="stat-pill">
+          <span class="stat-icon">🎨</span>
+          <div>
+            <div class="stat-num">3</div>
+            <div class="stat-label">Módulos Animados</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-icon">📘</span>
+          <div>
+            <div class="stat-num">3</div>
+            <div class="stat-label">Guías Empresariales</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-icon">☕</span>
+          <div>
+            <div class="stat-num">1</div>
+            <div class="stat-label">Proyecto Spring Boot</div>
+          </div>
+        </div>
+        <div class="stat-pill">
+          <span class="stat-icon">🧪</span>
+          <div>
+            <div class="stat-num">3</div>
+            <div class="stat-label">Laboratorios / Tests</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Filter Buttons -->
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterCards('all', this)">✨ Todos los Módulos (10)</button>
+      <button class="filter-btn" onclick="filterCards('animado', this)">🎭 Versiones Animadas (3)</button>
+      <button class="filter-btn" onclick="filterCards('guias', this)">📘 Guías Técnicas Spring Boot (3)</button>
+      <button class="filter-btn" onclick="filterCards('codigo', this)">☕ Código y Proyecto (1)</button>
+      <button class="filter-btn" onclick="filterCards('teoria', this)">📖 Clases Teóricas y Labs (3)</button>
+    </div>
+
+    <!-- 1. CATEGORÍA: TRILOGÍA ANIMADA -->
+    <section class="category-section" data-cat="animado">
+      <div class="category-header">
+        <h2 class="category-title">
+          <span>🎭</span>
+          <span>Trilogía Animada &amp; Didáctica (Muñecos, Metáforas y Sonidos)</span>
+        </h2>
+        <span class="category-tag" style="background:rgba(236,72,153,0.15); color:#f472b6;">Interactivo 100%</span>
+      </div>
+
+      <div class="cards-grid">
+        <!-- SOLID Animado -->
+        <article class="menu-card card-solid">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Animación &middot; SOLID</span>
+              <span class="card-icon-big">🎨</span>
+            </div>
+            <h3 class="card-title">SOLID Animado con Muñecos</h3>
+            <p class="card-desc">
+              Explicación súper didáctica de los 5 principios SOLID (SRP, OCP, LSP, ISP, DIP) con avatares simpáticos, comparador interactivo de Caos vs. Zen y efectos de sonido nativos.
+            </p>
+          </div>
+          <a href="SOLID ANIMADO/index.html" class="card-btn">
+            <span>Explorar SOLID Animado</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+
+        <!-- GRASP Animado -->
+        <article class="menu-card card-grasp">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Animación &middot; GRASP</span>
+              <span class="card-icon-big">🎭</span>
+            </div>
+            <h3 class="card-title">GRASP Animado y Creativo</h3>
+            <p class="card-desc">
+              Aprende los 9 patrones de asignación de responsabilidades de Craig Larman con Don Sabiondo, la Fábrica de Galletas, el Camaleón y el Escudo Deflector.
+            </p>
+          </div>
+          <a href="GRASP ANIMADO/index.html" class="card-btn">
+            <span>Explorar GRASP Animado</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+
+        <!-- Clean Code Animado -->
+        <article class="menu-card card-clean">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Animación &middot; Clean Code</span>
+              <span class="card-icon-big">🧼</span>
+            </div>
+            <h3 class="card-title">Clean Code Animado: KISS, DRY y YAGNI</h3>
+            <p class="card-desc">
+              Descubre la filosofía de código limpio con el Frasco Misterioso "x", la Máquina de Rube Goldberg, los Clones del Copy-Paste y el Simulador de la Máquina Refactorizadora en vivo.
+            </p>
+          </div>
+          <a href="CLEAN CODE ANIMADA/index.html" class="card-btn">
+            <span>Explorar Clean Code Animado</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <!-- 2. CATEGORÍA: GUÍAS TÉCNICAS SPRING BOOT -->
+    <section class="category-section" data-cat="guias">
+      <div class="category-header">
+        <h2 class="category-title">
+          <span>📘</span>
+          <span>Guías Prácticas Empresariales (Java 21 &amp; Spring Boot 3.5)</span>
+        </h2>
+        <span class="category-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8;">Enterprise Java</span>
+      </div>
+
+      <div class="cards-grid">
+        <!-- Guía SOLID -->
+        <article class="menu-card card-solid">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Guía Paso a Paso</span>
+              <span class="card-icon-big">🧱</span>
+            </div>
+            <h3 class="card-title">Principios SOLID con Spring Boot</h3>
+            <p class="card-desc">
+              Manual técnico completo con la tienda virtual empresarial. Explicación problema &rarr; solución para SRP, OCP, LSP, ISP y DIP con inyección de dependencias y pruebas interactivas.
+            </p>
+          </div>
+          <a href="SOLID/Principios SOLID con Java y Spring Boot.html" class="card-btn">
+            <span>Ver Guía Técnica SOLID</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+
+        <!-- Guía GRASP -->
+        <article class="menu-card card-grasp">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Guía Paso a Paso</span>
+              <span class="card-icon-big">🎯</span>
+            </div>
+            <h3 class="card-title">9 Principios GRASP con Java 21</h3>
+            <p class="card-desc">
+              Guía técnica exhaustiva de asignación de responsabilidades: Information Expert, Creator, Controller, Low Coupling, High Cohesion, Polymorphism, Pure Fabrication, Indirection y Protected Variations.
+            </p>
+          </div>
+          <a href="GRASP/Principios GRASP paso a paso con Java 21 y Spring Boot.html" class="card-btn">
+            <span>Ver Guía Técnica GRASP</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+
+        <!-- Guía Clean Code -->
+        <article class="menu-card card-clean">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Guía Paso a Paso</span>
+              <span class="card-icon-big">✨</span>
+            </div>
+            <h3 class="card-title">Clean Code: KISS, DRY y YAGNI</h3>
+            <p class="card-desc">
+              Directrices de diseño, eliminación de sobreingeniería (KISS), no-duplicación de políticas comerciales (DRY), eliminación de features especulativas (YAGNI) y taller de refactorización de TiendaService.
+            </p>
+          </div>
+          <a href="CLEAN CODE/Clean Code y directrices de diseño KISS, DRY y YAGNI.html" class="card-btn">
+            <span>Ver Guía Técnica Clean Code</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <!-- 3. CATEGORÍA: CÓDIGO EJECUTABLE -->
+    <section class="category-section" data-cat="codigo">
+      <div class="category-header">
+        <h2 class="category-title">
+          <span>☕</span>
+          <span>Proyecto Práctico Spring Boot &amp; Gradle</span>
+        </h2>
+        <span class="category-tag" style="background:rgba(245,158,11,0.15); color:#fbbf24;">Código Fuente</span>
+      </div>
+
+      <div class="cards-grid">
+        <article class="menu-card card-spring" style="grid-column: 1 / -1;">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Repositorio Ejecutable &middot; Gradle</span>
+              <span class="card-icon-big">🚀</span>
+            </div>
+            <h3 class="card-title">Proyecto Spring Boot: Estructura Problem vs. Solution</h3>
+            <p class="card-desc">
+              Proyecto Gradle completo en Java 21 con arquitectura en espejo inspirada en el estándar de la industria. Contiene paquetes separados <code>_0_s</code>, <code>_1_o</code>, <code>_2_l</code>, <code>_3_i</code> y <code>_4_d</code>, cada uno con su subpaquete <code>problem</code> y <code>solution</code> testeable.
+            </p>
+          </div>
+          <a href="EJEMPLO/README.md" class="card-btn">
+            <span>Ver Documentación del Proyecto (README.md)</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+    <!-- 4. CATEGORÍA: TEORÍA Y TALLERES DE CÁTEDRA -->
+    <section class="category-section" data-cat="teoria">
+      <div class="category-header">
+        <h2 class="category-title">
+          <span>📖</span>
+          <span>Clases Teóricas y Laboratorios de Cátedra</span>
+        </h2>
+        <span class="category-tag" style="background:rgba(129,140,248,0.15); color:#a5b4fc;">Syllabus Oficial</span>
+      </div>
+
+      <div class="cards-grid">
+        <!-- Semana 4.0 Teórica -->
+        <article class="menu-card card-theory">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Clase Teórica 4.0</span>
+              <span class="card-icon-big">📚</span>
+            </div>
+            <h3 class="card-title">Semana 4.0: Principios SOLID, GRASP y Clean Code</h3>
+            <p class="card-desc">
+              Fundamentos teóricos de diseño orientado a objetos, acoplamiento, cohesión, catálogo de Code Smells y el cuadrante de deuda técnica de Martin Fowler (RDA7).
+            </p>
+          </div>
+          <a href="Semana 4.0 - Principios SOLID, GRASP y Clean Code.html" class="card-btn">
+            <span>Abrir Clase Teórica 4.0</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+
+        <!-- Semana 4.1 Taller Práctico -->
+        <article class="menu-card card-theory">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Taller Práctico 4.1</span>
+              <span class="card-icon-big">📝</span>
+            </div>
+            <h3 class="card-title">Semana 4.1: Laboratorio de Refactorización y Code Smells</h3>
+            <p class="card-desc">
+              Taller práctico guiado para detectar olores de código, calcular deuda técnica y aplicar técnicas de refactorización sistemática como Extract Method y Replace Conditional with Polymorphism.
+            </p>
+          </div>
+          <a href="Semana 4.1 - Laboratorio de Refactorización y Code Smells.html" class="card-btn">
+            <span>Abrir Laboratorio Práctico 4.1</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+
+        <!-- Clase 4.0 Seguridad y Errores -->
+        <article class="menu-card card-theory">
+          <div class="card-top">
+            <div class="card-badge-row">
+              <span class="card-type-pill">Módulo Especial</span>
+              <span class="card-icon-big">🛡️</span>
+            </div>
+            <h3 class="card-title">Clase 4.0: Manejo de Seguridad y Errores</h3>
+            <p class="card-desc">
+              Estrategias defensivas en arquitectura de software: validación de entradas, gestión global de excepciones con ControllerAdvice y blindaje de endpoints.
+            </p>
+          </div>
+          <a href="Clase 4.0 - Seguridad y Errores.html" class="card-btn">
+            <span>Abrir Módulo de Seguridad</span>
+            <span>&rarr;</span>
+          </a>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <footer>
+    <p><strong>Universidad Iberoamericana del Ecuador &middot; UNIBE</strong></p>
+    <p>Facultad de Ciencias y Tecnologías &middot; Carrera de Ingeniería de Software</p>
+    <p style="margin-top: 6px; font-size: 0.8rem;">Diseño y Arquitectura de Software &middot; Hub y Menú Central de Recursos de la Clase 4</p>
+  </footer>
+
+  <script>
+    function filterCards(category, btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      const sections = document.querySelectorAll('.category-section');
+      sections.forEach(sec => {
+        if (category === 'all' || sec.getAttribute('data-cat') === category) {
+          sec.style.display = 'block';
+        } else {
+          sec.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html>
